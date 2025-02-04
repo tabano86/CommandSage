@@ -107,6 +107,9 @@ local bindingManagerFrame = CreateFrame("Frame", "CommandSageBindingManagerFrame
 
 -- Function to disable all keybindings
 local function DisableAllBindings()
+    if not CommandSage_Config.Get("preferences", "overrideHotkeysWhileTyping") then
+        return
+    end
     for i = 1, GetNumBindings() do
         local command, key1, key2 = GetBinding(i)
         if key1 then SetOverrideBinding(bindingManagerFrame, true, key1, nil) end
@@ -128,7 +131,5 @@ end)
 chatBox:HookScript("OnEditFocusLost", function(self)
     RestoreAllBindings()
 end)
-
--- =============================================================================
 
 f:SetScript("OnEvent", OnEvent)

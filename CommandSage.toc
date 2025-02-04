@@ -2,7 +2,7 @@
 ## Title: CommandSage
 ## Notes: Next-Gen slash command auto-completion for WoW Classic
 ## Author: <Your Name>
-## Version: 2.0
+## Version: 2.1
 ## SavedVariables: CommandSageDB
 
 # Core
@@ -30,3 +30,5 @@ Modules\CommandSage_MultiModal.lua
 Modules\CommandSage_AROverlays.lua
 Modules\CommandSage_AutoComplete.lua
 Modules\CommandSage_Terminal.lua
+Modules\CommandSage_ShellContext.lua
+Modules\CommandSage_Licensing.lua

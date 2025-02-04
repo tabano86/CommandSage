@@ -69,8 +69,6 @@ end
 
 local function ScanMacros()
     -- Stubs for reading macros, or actual usage with WoW API
-    -- local global, char = GetNumMacros()
-    -- ...
 end
 
 local function ScanAce()
@@ -99,9 +97,9 @@ function CommandSage_Discovery:ScanAllCommands()
     if CommandSage_Config.Get("preferences", "blizzAllFallback") then
         ScanBuiltIn()
     end
-    ScanMacros()     -- only if macroInclusion
-    ScanAce()        -- no changes, stub
-    ForceFallbacks() -- forced plus user fallback
+    ScanMacros()
+    ScanAce()
+    ForceFallbacks()
     for slash, data in pairs(discoveredCommands) do
         CommandSage_Trie:InsertCommand(slash, data)
     end
@@ -112,7 +110,7 @@ function CommandSage_Discovery:GetDiscoveredCommands()
     return discoveredCommands
 end
 
--- We'll do a background timer to re-scan every 3 minutes or so
+-- We'll do a background timer to re-scan every 3 minutes
 local bgFrame = CreateFrame("Frame")
 bgFrame.elapsed = 0
 bgFrame:SetScript("OnUpdate", function(self, e)
@@ -120,6 +118,5 @@ bgFrame:SetScript("OnUpdate", function(self, e)
     if self.elapsed > 180 then
         self.elapsed = 0
         CommandSage_Discovery:ScanAllCommands()
-        -- silent re-scan
     end
 end)

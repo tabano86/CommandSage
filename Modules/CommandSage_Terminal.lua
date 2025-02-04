@@ -1,6 +1,7 @@
 -- =============================================================================
 -- CommandSage_Terminal.lua
 -- "Terminal goodies" you might see on a Mac/Windows shell for WoW Classic
+-- Includes 50 additional commands
 -- =============================================================================
 
 CommandSage_Terminal = {}
@@ -28,7 +29,7 @@ function CommandSage_Terminal:Initialize()
     end
 
     SLASH_CMDPWD1 = "/pwd"
-    SlashCmdList["CMDPWD"] = function()
+    SlashCmdList["CMDPWD"] = function(msg)
         local zoneName = GetRealZoneText() or "UnknownZone"
         local subZone = GetSubZoneText() or ""
         print("Current zone: " .. zoneName .. (subZone ~= "" and (", " .. subZone) or ""))
@@ -41,47 +42,47 @@ function CommandSage_Terminal:Initialize()
     -- 50 Additional Terminal Commands
     ---------------------------------------------------------------------
 
-    -- 1. /whoami: Print player's name.
+    -- 1. /whoami
     SLASH_CMDWHOAMI1 = "/whoami"
     SlashCmdList["CMDWHOAMI"] = function(msg)
         local name = UnitName("player") or "Unknown"
         print("Player Name: " .. name)
     end
 
-    -- 2. /time: Display current local time.
+    -- 2. /time
     SLASH_CMDTIME1 = "/time"
     SlashCmdList["CMDTIME"] = function(msg)
         print("Local Time: " .. date("%H:%M:%S"))
     end
 
-    -- 3. /uptime: Show addon uptime.
+    -- 3. /uptime
     SLASH_CMDUPTIME1 = "/uptime"
     SlashCmdList["CMDUPTIME"] = function(msg)
         local elapsed = math.floor(GetTime() - CommandSage_Terminal.startTime)
         print("Uptime: " .. elapsed .. " seconds")
     end
 
-    -- 4. /ping: Display network latency.
+    -- 4. /ping
     SLASH_CMDPING1 = "/ping"
     SlashCmdList["CMDPING"] = function(msg)
         local home, world = GetNetStats()
         print("Latency - Home: " .. home .. " ms, World: " .. world .. " ms")
     end
 
-    -- 5. /fps: Display current frame rate.
+    -- 5. /fps
     SLASH_CMDFPS1 = "/fps"
     SlashCmdList["CMDFPS"] = function(msg)
         print("Current FPS: " .. math.floor(GetFramerate()))
     end
 
-    -- 6. /mem: Display memory usage (in MB).
+    -- 6. /mem
     SLASH_CMDMEM1 = "/mem"
     SlashCmdList["CMDMEM"] = function(msg)
         local memKB = collectgarbage("count")
         print(string.format("Memory Usage: %.2f MB", memKB / 1024))
     end
 
-    -- 7. /gold: Display player's gold.
+    -- 7. /gold
     SLASH_CMDGOLD1 = "/gold"
     SlashCmdList["CMDGOLD"] = function(msg)
         local money = GetMoney() or 0
@@ -91,7 +92,7 @@ function CommandSage_Terminal:Initialize()
         print(string.format("Gold: %dg %ds %dc", gold, silver, copper))
     end
 
-    -- 8. /bagspace: Show free bag slots.
+    -- 8. /bagspace
     SLASH_CMDBAGSPACE1 = "/bagspace"
     SlashCmdList["CMDBAGSPACE"] = function(msg)
         local freeSlots, totalSlots = 0, 0
@@ -105,14 +106,14 @@ function CommandSage_Terminal:Initialize()
         print("Bag Space: " .. freeSlots .. " free / " .. totalSlots .. " total slots")
     end
 
-    -- 9. /questcount: Display active quest count.
+    -- 9. /questcount
     SLASH_CMDQUESTCOUNT1 = "/questcount"
     SlashCmdList["CMDQUESTCOUNT"] = function(msg)
         local numEntries = GetNumQuestLogEntries()
         print("Active Quests: " .. numEntries)
     end
 
-    -- 10. /playerinfo: Display basic player info.
+    -- 10. /playerinfo
     SLASH_CMDPLAYERINFO1 = "/playerinfo"
     SlashCmdList["CMDPLAYERINFO"] = function(msg)
         local name = UnitName("player") or "Unknown"
@@ -122,7 +123,7 @@ function CommandSage_Terminal:Initialize()
         print(string.format("Name: %s | Level: %d | Race: %s | Class: %s", name, level, race, class))
     end
 
-    -- 11. /guild: Display guild information.
+    -- 11. /guild
     SLASH_CMDGUILD1 = "/guild"
     SlashCmdList["CMDGUILD"] = function(msg)
         local guildName, guildRank = GetGuildInfo("player")
@@ -133,7 +134,7 @@ function CommandSage_Terminal:Initialize()
         end
     end
 
-    -- 12. /stats: Display player stats.
+    -- 12. /stats
     SLASH_CMDSTATS1 = "/stats"
     SlashCmdList["CMDSTATS"] = function(msg)
         local statNames = {"Strength", "Agility", "Stamina", "Intellect", "Spirit"}
@@ -145,7 +146,7 @@ function CommandSage_Terminal:Initialize()
         print(table.concat(parts, ", "))
     end
 
-    -- 13. /xp: Show current XP and percentage.
+    -- 13. /xp
     SLASH_CMDXP1 = "/xp"
     SlashCmdList["CMDXP"] = function(msg)
         local xp = UnitXP("player") or 0
@@ -154,7 +155,7 @@ function CommandSage_Terminal:Initialize()
         print(string.format("XP: %d/%d (%d%%)", xp, xpMax, percent))
     end
 
-    -- 14. /health: Display current and max health.
+    -- 14. /health
     SLASH_CMDHEALTH1 = "/health"
     SlashCmdList["CMDHEALTH"] = function(msg)
         local cur = UnitHealth("player") or 0
@@ -162,7 +163,7 @@ function CommandSage_Terminal:Initialize()
         print("Health: " .. cur .. " / " .. max)
     end
 
-    -- 15. /mana: Display current and max mana.
+    -- 15. /mana
     SLASH_CMDMANA1 = "/mana"
     SlashCmdList["CMDMANA"] = function(msg)
         local cur = UnitPower("player", 0) or 0
@@ -174,43 +175,43 @@ function CommandSage_Terminal:Initialize()
         end
     end
 
-    -- 16. /reload: Reload the UI.
+    -- 16. /reload
     SLASH_CMDRELOAD1 = "/reload"
     SlashCmdList["CMDRELOAD"] = function(msg)
         ReloadUI()
     end
 
-    -- 17. /map: Toggle the world map.
+    -- 17. /map
     SLASH_CMDMAP1 = "/map"
     SlashCmdList["CMDMAP"] = function(msg)
         ToggleWorldMap()
     end
 
-    -- 18. /echo: Echo back the input.
+    -- 18. /echo
     SLASH_CMDECHO1 = "/echo"
     SlashCmdList["CMDECHO"] = function(msg)
         print(msg)
     end
 
-    -- 19. /reverse: Reverse the input text.
+    -- 19. /reverse
     SLASH_CMDREVERSE1 = "/reverse"
     SlashCmdList["CMDREVERSE"] = function(msg)
         print(msg:reverse())
     end
 
-    -- 20. /upper: Convert input to uppercase.
+    -- 20. /upper
     SLASH_CMDUPPER1 = "/upper"
     SlashCmdList["CMDUPPER"] = function(msg)
         print(msg:upper())
     end
 
-    -- 21. /lower: Convert input to lowercase.
+    -- 21. /lower
     SLASH_CMDLOWER1 = "/lower"
     SlashCmdList["CMDLOWER"] = function(msg)
         print(msg:lower())
     end
 
-    -- 22. /calc: Evaluate a math expression.
+    -- 22. /calc
     SLASH_CMDCALC1 = "/calc"
     SlashCmdList["CMDCALC"] = function(msg)
         local func, err = loadstring("return " .. msg)
@@ -226,7 +227,7 @@ function CommandSage_Terminal:Initialize()
         end
     end
 
-    -- 23. /rand: Generate a random number.
+    -- 23. /rand
     SLASH_CMDRAND1 = "/rand"
     SlashCmdList["CMDRAND"] = function(msg)
         local lower, upper = msg:match("^(%d+)%s*(%d*)")
@@ -236,7 +237,7 @@ function CommandSage_Terminal:Initialize()
         print("Random number: " .. math.random(lower, upper))
     end
 
-    -- 24. /dice: Simulate a dice roll.
+    -- 24. /dice
     SLASH_CMDDICE1 = "/dice"
     SlashCmdList["CMDDICE"] = function(msg)
         local lower, upper = msg:match("^(%d+)%s*(%d*)")
@@ -246,19 +247,19 @@ function CommandSage_Terminal:Initialize()
         print("Dice roll: " .. math.random(lower, upper))
     end
 
-    -- 25. /date: Display the current date.
+    -- 25. /date
     SLASH_CMDDATE1 = "/date"
     SlashCmdList["CMDDATE"] = function(msg)
         print("Today is: " .. date("%Y-%m-%d"))
     end
 
-    -- 26. /serverinfo: Display server name.
+    -- 26. /serverinfo
     SLASH_CMDSERVERINFO1 = "/serverinfo"
     SlashCmdList["CMDSERVERINFO"] = function(msg)
         print("Server: " .. (GetRealmName() or "Unknown"))
     end
 
-    -- 27. /locate: Display current zone and subzone.
+    -- 27. /locate
     SLASH_CMDLOCATE1 = "/locate"
     SlashCmdList["CMDLOCATE"] = function(msg)
         local zone = GetRealZoneText() or "Unknown"
@@ -266,19 +267,19 @@ function CommandSage_Terminal:Initialize()
         print("Location: " .. zone .. (subZone ~= "" and (", " .. subZone) or ""))
     end
 
-    -- 28. /version: Display addon version.
+    -- 28. /version
     SLASH_CMDVERSION1 = "/version"
     SlashCmdList["CMDVERSION"] = function(msg)
-        print("CommandSage Terminal v1.0")
+        print("CommandSage Terminal v2.1")
     end
 
-    -- 29. /config: Show configuration instructions.
+    -- 29. /config
     SLASH_CMDCONFIG1 = "/config"
     SlashCmdList["CMDCONFIG"] = function(msg)
-        print("Use /csconfig to open configuration options.")
+        print("Use /cmdsage config <key> <value> to change config.")
     end
 
-    -- 30. /help: List available terminal commands.
+    -- 30. /help
     SLASH_CMDHELP1 = "/help"
     SlashCmdList["CMDHELP"] = function(msg)
         local commands = {
@@ -287,7 +288,7 @@ function CommandSage_Terminal:Initialize()
             "/echo", "/reverse", "/upper", "/lower", "/calc", "/rand", "/dice", "/date", "/serverinfo", "/locate",
             "/version", "/config", "/help", "/listquests", "/listbags", "/listaddons", "/durability", "/frames",
             "/chatlist", "/serverdate", "/zoneid", "/targetinfo", "/inspect", "/sum", "/countdown", "/reminder",
-            "/afk", "/lag", "/gtime", "/buffs", "/debuffs", "/addoninfo", "/exit"
+            "/afk", "/lag", "/gtime", "/buffs", "/debuffs", "/addoninfo", "/exit", "/cd", "/license"
         }
         print("Available commands:")
         for _, cmd in ipairs(commands) do
@@ -295,7 +296,7 @@ function CommandSage_Terminal:Initialize()
         end
     end
 
-    -- 31. /listquests: List quest titles.
+    -- 31. /listquests
     SLASH_CMDLISTQUESTS1 = "/listquests"
     SlashCmdList["CMDLISTQUESTS"] = function(msg)
         local numEntries = GetNumQuestLogEntries()
@@ -308,7 +309,7 @@ function CommandSage_Terminal:Initialize()
         end
     end
 
-    -- 32. /listbags: Show item counts for each bag.
+    -- 32. /listbags
     SLASH_CMDLISTBAGS1 = "/listbags"
     SlashCmdList["CMDLISTBAGS"] = function(msg)
         for bag = 0, NUM_BAG_SLOTS do
@@ -318,7 +319,7 @@ function CommandSage_Terminal:Initialize()
         end
     end
 
-    -- 33. /listaddons: List all enabled addons.
+    -- 33. /listaddons
     SLASH_CMDLISTADDONS1 = "/listaddons"
     SlashCmdList["CMDLISTADDONS"] = function(msg)
         local numAddOns = GetNumAddOns()
@@ -331,14 +332,14 @@ function CommandSage_Terminal:Initialize()
         end
     end
 
-    -- 34. /durability: Show average durability of equipped items.
+    -- 34. /durability
     SLASH_CMDDURABILITY1 = "/durability"
     SlashCmdList["CMDDURABILITY"] = function(msg)
         local total, count = 0, 0
         for slot = 1, 19 do
-            local cur, max = GetInventoryItemDurability(slot)
-            if cur and max then
-                total = total + (cur / max)
+            local cur, mx = GetInventoryItemDurability(slot)
+            if cur and mx then
+                total = total + (cur / mx)
                 count = count + 1
             end
         end
@@ -349,7 +350,7 @@ function CommandSage_Terminal:Initialize()
         end
     end
 
-    -- 35. /frames: List visible chat frames.
+    -- 35. /frames
     SLASH_CMDFRAMES1 = "/frames"
     SlashCmdList["CMDFRAMES"] = function(msg)
         for i = 1, NUM_CHAT_WINDOWS do
@@ -360,7 +361,7 @@ function CommandSage_Terminal:Initialize()
         end
     end
 
-    -- 36. /chatlist: List active chat channels.
+    -- 36. /chatlist
     SLASH_CMDCHATLIST1 = "/chatlist"
     SlashCmdList["CMDCHATLIST"] = function(msg)
         local channels = { GetChannelList() }
@@ -374,20 +375,20 @@ function CommandSage_Terminal:Initialize()
         end
     end
 
-    -- 37. /serverdate: Display server date.
+    -- 37. /serverdate
     SLASH_CMDSERVERDATE1 = "/serverdate"
     SlashCmdList["CMDSERVERDATE"] = function(msg)
         print("Server Date: " .. date("%Y-%m-%d"))
     end
 
-    -- 38. /zoneid: Display current zone ID (if available).
+    -- 38. /zoneid
     SLASH_CMDZONEID1 = "/zoneid"
     SlashCmdList["CMDZONEID"] = function(msg)
         local zoneID = GetCurrentMapAreaID and GetCurrentMapAreaID() or "N/A"
         print("Zone ID: " .. tostring(zoneID))
     end
 
-    -- 39. /targetinfo: Show info about your current target.
+    -- 39. /targetinfo
     SLASH_CMDTARGETINFO1 = "/targetinfo"
     SlashCmdList["CMDTARGETINFO"] = function(msg)
         if UnitExists("target") then
@@ -400,7 +401,7 @@ function CommandSage_Terminal:Initialize()
         end
     end
 
-    -- 40. /inspect: Attempt to inspect your target.
+    -- 40. /inspect
     SLASH_CMDINSPECT1 = "/inspect"
     SlashCmdList["CMDINSPECT"] = function(msg)
         if UnitExists("target") then
@@ -411,7 +412,7 @@ function CommandSage_Terminal:Initialize()
         end
     end
 
-    -- 41. /sum: Sum space-separated numbers.
+    -- 41. /sum
     SLASH_CMDSUM1 = "/sum"
     SlashCmdList["CMDSUM"] = function(msg)
         local total = 0
@@ -421,7 +422,7 @@ function CommandSage_Terminal:Initialize()
         print("Sum: " .. total)
     end
 
-    -- 42. /countdown: Start a countdown timer.
+    -- 42. /countdown
     SLASH_CMDCOUNTDOWN1 = "/countdown"
     SlashCmdList["CMDCOUNTDOWN"] = function(msg)
         local seconds = tonumber(msg) or 5
@@ -432,7 +433,7 @@ function CommandSage_Terminal:Initialize()
         C_Timer.After(seconds, function() print("Time's up!") end)
     end
 
-    -- 43. /reminder: Set a reminder. Usage: /reminder <seconds> <message>
+    -- 43. /reminder
     SLASH_CMDREMINDER1 = "/reminder"
     SlashCmdList["CMDREMINDER"] = function(msg)
         local delay, reminder = msg:match("^(%d+)%s+(.+)$")
@@ -445,27 +446,27 @@ function CommandSage_Terminal:Initialize()
         end
     end
 
-    -- 44. /afk: Toggle AFK status (simulated).
+    -- 44. /afk
     SLASH_CMDAFK1 = "/afk"
     SlashCmdList["CMDAFK"] = function(msg)
         print("AFK status toggled.")
     end
 
-    -- 45. /lag: Display latency (alias for /ping).
+    -- 45. /lag
     SLASH_CMDLAG1 = "/lag"
     SlashCmdList["CMDLAG"] = function(msg)
         local home, world = GetNetStats()
         print("Latency - Home: " .. home .. " ms, World: " .. world .. " ms")
     end
 
-    -- 46. /gtime: Show guild name with current time.
+    -- 46. /gtime
     SLASH_CMDGTIME1 = "/gtime"
     SlashCmdList["CMDGTIME"] = function(msg)
         local guildName = select(1, GetGuildInfo("player")) or "No Guild"
         print("Guild: " .. guildName .. " | Time: " .. date("%H:%M:%S"))
     end
 
-    -- 47. /buffs: List active buffs on the player.
+    -- 47. /buffs
     SLASH_CMDBUFFS1 = "/buffs"
     SlashCmdList["CMDBUFFS"] = function(msg)
         print("Active Buffs:")
@@ -478,7 +479,7 @@ function CommandSage_Terminal:Initialize()
         end
     end
 
-    -- 48. /debuffs: List active debuffs on the player.
+    -- 48. /debuffs
     SLASH_CMDDEBUFFS1 = "/debuffs"
     SlashCmdList["CMDDEBUFFS"] = function(msg)
         print("Active Debuffs:")
@@ -491,15 +492,27 @@ function CommandSage_Terminal:Initialize()
         end
     end
 
-    -- 49. /addoninfo: Show information about this addon.
+    -- 49. /addoninfo
     SLASH_CMDADDONINFO1 = "/addoninfo"
     SlashCmdList["CMDADDONINFO"] = function(msg)
-        print("CommandSage Terminal v1.0 - WoW Classic Terminal Goodies")
+        print("CommandSage Terminal v2.1 - WoW Classic Terminal Goodies")
     end
 
-    -- 50. /exit: Simulate an exit command.
+    -- 50. /exit
     SLASH_CMDEXIT1 = "/exit"
     SlashCmdList["CMDEXIT"] = function(msg)
         print("Goodbye! (This command does not exit the game.)")
+    end
+
+    -- Extra: /cd => shell context
+    SLASH_CMDSHELLCD1 = "/cd"
+    SlashCmdList["CMDSHELLCD"] = function(msg)
+        CommandSage_ShellContext:HandleCd(msg)
+    end
+
+    -- Extra: /license => set or check license
+    SLASH_CMDLICENSE1 = "/license"
+    SlashCmdList["CMDLICENSE"] = function(msg)
+        CommandSage_Licensing:HandleLicenseCommand(msg)
     end
 end

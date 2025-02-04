@@ -25,7 +25,14 @@ end
 function CommandSage_DeveloperAPI:DebugDump()
     print("== CommandSage Debug Info ==")
     local discovered = CommandSage_Discovery:GetDiscoveredCommands()
-    print("Discovered commands:", discovered and #discovered or 0)
+    local cmdCount = 0
+    if discovered then
+        for _ in pairs(discovered) do
+            cmdCount = cmdCount + 1
+        end
+    end
+    print("Discovered commands:", cmdCount)
+
     local usageData = CommandSageDB.usageData
     local usageCount = 0
     if usageData then
@@ -34,6 +41,7 @@ function CommandSage_DeveloperAPI:DebugDump()
         end
     end
     print("Usage data entries:", usageCount)
+
     local hist = CommandSageDB.commandHistory
     print("History entries:", hist and #hist or 0)
 end

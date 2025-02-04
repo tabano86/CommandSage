@@ -24,7 +24,7 @@ function CommandSage_Config:InitializeDefaults()
             animateAutoType          = true,
             showTutorialOnStartup    = true,
             usageAnalytics           = true,
-            contextAwareness         = true,  -- e.g. in-combat vs not
+            contextAwareness         = true,   -- e.g. in-combat vs not
             voiceCommandEnabled      = false,
             fallbackEnabled          = false,
             autoTypeDelay            = 0.03,
@@ -34,19 +34,27 @@ function CommandSage_Config:InitializeDefaults()
             typeAheadPrediction      = true,
             suggestionMode           = "fuzzy",  -- or "strict"
 
-            -- Preferences added in a previous update:
+            -- Preferences from previous updates:
             overrideHotkeysWhileTyping = true,
             favoritesSortingEnabled    = true,
 
-            -- NEW: Additional user config options
-            autocompleteOpenDirection      = "down",  -- "up" or "down"
-            maxSuggestionsOverride         = nil,      -- user can override the default
+            -- New config options from last release:
+            autocompleteOpenDirection      = "down", -- "up" or "down"
+            maxSuggestionsOverride         = nil,
             showParamSuggestionsInColor    = true,
-            paramSuggestionsColor          = { 1.0, 0.8, 0.0 }, -- a golden color
+            paramSuggestionsColor          = { 1.0, 0.8, 0.0 }, -- gold
             showDescriptionsInAutocomplete = true,
-            terminalNavigationEnabled      = true, -- up/down/tab mimics typical shell
-            advancedStyling               = true,  -- "prettier" UI if true
-            enableTerminalGoodies          = true,  -- e.g. /cls, /lsmacros, etc.
+            terminalNavigationEnabled      = true,  -- up/down/tab in shell style
+            advancedStyling               = true,
+            enableTerminalGoodies          = true,
+
+            -- =====================================
+            -- NEW Preferences (Enhancements)
+            -- =====================================
+            advancedKeybinds         = true,   -- Shift+Up/Down, Ctrl+C, etc.
+            partialFuzzyFallback     = true,   -- fallback to searching entire list if prefix fails
+            shellContextEnabled      = false,  -- if true, allows '/cd' shell navigation
+            monetizationEnabled      = false,  -- if you want to gate "pro" features
         }
         CommandSageDB.config.preferences = prefs
     end

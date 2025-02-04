@@ -2,6 +2,7 @@
 -- CommandSage_Trie.lua
 -- Optimized Trie for storing slash commands
 -- Includes RemoveCommand() so we can unregister
+-- Now includes AllCommands() for partial fallback
 -- =============================================================================
 
 CommandSage_Trie = {}
@@ -59,6 +60,13 @@ function CommandSage_Trie:FindPrefix(prefix)
     end
     local results = {}
     gatherAll(node, prefix, results)
+    return results
+end
+
+-- New: return all commands in the trie
+function CommandSage_Trie:AllCommands()
+    local results = {}
+    gatherAll(root, "", results)
     return results
 end
 
