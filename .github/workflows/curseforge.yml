@@ -15,6 +15,16 @@ jobs:
       - name: Install zip
         run: sudo apt-get install -y zip
 
+      - name: Setup Lua + Luarocks
+        run: |
+          sudo apt-get update
+          sudo apt-get install lua5.1 luarocks
+          luarocks install busted
+      - name: Run Tests
+        run: |
+          cd tests
+          busted test_all.lua
+
       - name: Extract Addon Version
         id: extract_version
         run: |
