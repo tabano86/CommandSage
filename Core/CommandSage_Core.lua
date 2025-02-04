@@ -60,6 +60,31 @@ function CommandSage:RegisterSlashCommands()
             else
                 print("Usage: /cmdsage config <key> <value>")
             end
+        elseif cmd == "alias" then
+            -- e.g. /cmdsage alias /greet /say Hello all
+            if not CommandSage_Config.Get("preferences","userAliasesEnabled") then
+                print("User aliases disabled in config.")
+                return
+            end
+            local aliasKey = args[2]
+            local realCmd = table.concat(args, " ", 3)
+            if aliasKey and realCmd then
+                if not CommandSageDB.aliases then
+                    CommandSageDB.aliases = {}
+                end
+                CommandSageDB.aliases[aliasKey:lower()] = realCmd
+                print("Alias set:", aliasKey, "->", realCmd)
+            else
+                print("Usage: /cmdsage alias <alias> <real command>")
+            end
+        elseif cmd == "addfallback" then
+            -- e.g. /cmdsage addfallback /mycmd
+            if not CommandSage_Config.Get("preferences","userCustomFallbackEnabled") then
+                print("User custom fallback disabled in config.")
+                return
+            end
+            local fallbackCmd = args[2]
+            if fallbackCmd then
         elseif cmd == "mode" then
             -- e.g. /cmdsage mode strict|fuzzy
             local modeVal = args[2]

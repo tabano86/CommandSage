@@ -7,8 +7,9 @@ CommandSage_Discovery = {}
 
 local discoveredCommands = {}
 local forcedFallback = {
-    "/cmdsage", "/cmdsagehistory", "/help", "/?", "/reload", "/console",
-    "/dance", "/macro", "/ghelp", "/yell", "/say", "/emote"
+    "/cmdsage","/cmdsagehistory","/help","/?","/reload","/console",
+    "/dance","/macro","/ghelp","/yell","/say","/emote","/combatlog","/afk","/dnd",
+    "/camp","/logout","/played","/time","/script"
 }
 
 local function ForceFallbacks()
@@ -21,6 +22,22 @@ local function ForceFallbacks()
                 source = "Fallback",
                 description = "Auto-injected fallback command"
             }
+        end
+    end
+    -- If userCustomFallbackEnabled, also add user custom fallback
+    if CommandSage_Config.Get("preferences","userCustomFallbackEnabled") then
+        if CommandSageDB.customFallbacks then
+            for _, cb in ipairs(CommandSageDB.customFallbacks) do
+                local cbLower = cb:lower()
+                if not discoveredCommands[cbLower] then
+                    discoveredCommands[cbLower] = {
+                        slash = cbLower,
+                        callback = function(msg) print("User fallback for "..cb.." with:",msg or "") end,
+                        source = "UserFallback",
+                        description = "User-added fallback"
+                    }
+                end
+            end
         end
     end
 end
@@ -52,14 +69,35 @@ end
 
 local function ScanAce()
     -- If Ace is loaded, we can introspect AceConsole or similar
+    if not CommandSage_Config.Get("preferences","macroInclusion") then
+        return
+    end
+
+    local global, char = GetNumMacros()
+    for i=1, global do
+        local name, icon, body = GetMacroInfo(i)
+        if name then
+            local slash = "/"..name:lower()
+            discoveredCommands[slash] = {
+                slash = slash,
+                callback = function(msg)
+                    print("In-game macro: ", name, "body:", body)
+                end,
+                source = "Macro",
+                description = "Macro: "..name
+            }
+        end
+    end
 end
 
 function CommandSage_Discovery:ScanAllCommands()
     wipe(discoveredCommands)
-    ScanBuiltIn()
-    ScanMacros()
-    ScanAce()
-    ForceFallbacks()
+    if CommandSage_Config.Get("preferences","blizzAllFallback") then
+        ScanBuiltIn()
+    end
+    ScanMacros()     -- only if macroInclusion
+    ScanAce()        -- no changes, stub
+    ForceFallbacks() -- forced plus user fallback
     for slash, data in pairs(discoveredCommands) do
         CommandSage_Trie:InsertCommand(slash, data)
     end
