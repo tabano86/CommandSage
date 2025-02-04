@@ -28,3 +28,4 @@ Modules\CommandSage_UIAccessibility.lua
 Modules\CommandSage_Analytics.lua
 Modules\CommandSage_MultiModal.lua
 Modules\CommandSage_AROverlays.lua
+Modules\CommandSage_AutoComplete.lua
