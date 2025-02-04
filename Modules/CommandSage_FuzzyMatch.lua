@@ -7,25 +7,29 @@ CommandSage_FuzzyMatch = {}
 
 local function Levenshtein(a, b)
     local la, lb = #a, #b
-    if la == 0 then return lb end
-    if lb == 0 then return la end
+    if la == 0 then
+        return lb
+    end
+    if lb == 0 then
+        return la
+    end
 
     local matrix = {}
-    for i=0,la do
+    for i = 0, la do
         matrix[i] = {}
         matrix[i][0] = i
     end
-    for j=0,lb do
+    for j = 0, lb do
         matrix[0][j] = j
     end
 
-    for i=1,la do
-        for j=1,lb do
-            local cost = (a:sub(i,i) == b:sub(j,j)) and 0 or 1
+    for i = 1, la do
+        for j = 1, lb do
+            local cost = (a:sub(i, i) == b:sub(j, j)) and 0 or 1
             matrix[i][j] = math.min(
-                    matrix[i-1][j] + 1,
-                    matrix[i][j-1] + 1,
-                    matrix[i-1][j-1] + cost
+                    matrix[i - 1][j] + 1,
+                    matrix[i][j - 1] + 1,
+                    matrix[i - 1][j - 1] + cost
             )
         end
     end
@@ -41,7 +45,7 @@ local function getContextBonus()
 end
 
 function CommandSage_FuzzyMatch:GetSuggestions(input, possibleCommands)
-    local tolerance = CommandSage_Config.Get("preferences","fuzzyMatchTolerance") or 2
+    local tolerance = CommandSage_Config.Get("preferences", "fuzzyMatchTolerance") or 2
     local results = {}
     for _, cmdObj in ipairs(possibleCommands) do
         local slash = cmdObj.slash
@@ -51,10 +55,12 @@ function CommandSage_FuzzyMatch:GetSuggestions(input, possibleCommands)
             local usageScore = CommandSage_AdaptiveLearning:GetUsageScore(slash)
             local cBonus = getContextBonus()
             local rank = -dist + usageScore * 0.7 + cBonus
-            table.insert(results, { slash=slash, data=cmdObj.data, rank=rank, distance=dist })
+            table.insert(results, { slash = slash, data = cmdObj.data, rank = rank, distance = dist })
         end
     end
-    table.sort(results, function(a,b) return a.rank > b.rank end)
+    table.sort(results, function(a, b)
+        return a.rank > b.rank
+    end)
     return results
 end
 
@@ -71,7 +77,7 @@ function CommandSage_FuzzyMatch:SuggestCorrections(input)
             bestCmd = slash
         end
     end
-    if bestDist <= (CommandSage_Config.Get("preferences","fuzzyMatchTolerance") or 2)+1 then
+    if bestDist <= (CommandSage_Config.Get("preferences", "fuzzyMatchTolerance") or 2) + 1 then
         return bestCmd, bestDist
     end
     return nil, bestDist

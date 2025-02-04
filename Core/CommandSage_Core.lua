@@ -62,7 +62,7 @@ function CommandSage:RegisterSlashCommands()
             end
         elseif cmd == "alias" then
             -- e.g. /cmdsage alias /greet /say Hello all
-            if not CommandSage_Config.Get("preferences","userAliasesEnabled") then
+            if not CommandSage_Config.Get("preferences", "userAliasesEnabled") then
                 print("User aliases disabled in config.")
                 return
             end
@@ -79,31 +79,31 @@ function CommandSage:RegisterSlashCommands()
             end
         elseif cmd == "addfallback" then
             -- e.g. /cmdsage addfallback /mycmd
-            if not CommandSage_Config.Get("preferences","userCustomFallbackEnabled") then
+            if not CommandSage_Config.Get("preferences", "userCustomFallbackEnabled") then
                 print("User custom fallback disabled in config.")
                 return
             end
             local fallbackCmd = args[2]
             if fallbackCmd then
-        elseif cmd == "mode" then
-            -- e.g. /cmdsage mode strict|fuzzy
-            local modeVal = args[2]
-            if modeVal == "fuzzy" or modeVal == "strict" then
-                CommandSage_Config.Set("preferences", "suggestionMode", modeVal)
-                print("Suggestion mode =", modeVal)
+            elseif cmd == "mode" then
+                -- e.g. /cmdsage mode strict|fuzzy
+                local modeVal = args[2]
+                if modeVal == "fuzzy" or modeVal == "strict" then
+                    CommandSage_Config.Set("preferences", "suggestionMode", modeVal)
+                    print("Suggestion mode =", modeVal)
+                else
+                    print("Usage: /cmdsage mode <fuzzy|strict>")
+                end
             else
-                print("Usage: /cmdsage mode <fuzzy|strict>")
+                print("|cff00ff00CommandSage Usage:|r")
+                print(" /cmdsage tutorial - Show tutorial")
+                print(" /cmdsage scan - Re-scan commands")
+                print(" /cmdsage fallback - On, nofallback - Off")
+                print(" /cmdsage debug - Show debug info")
+                print(" /cmdsage config <key> <val> - Set a config param")
+                print(" /cmdsage mode <fuzzy|strict> - Switch suggestion mode")
             end
-        else
-            print("|cff00ff00CommandSage Usage:|r")
-            print(" /cmdsage tutorial - Show tutorial")
-            print(" /cmdsage scan - Re-scan commands")
-            print(" /cmdsage fallback - On, nofallback - Off")
-            print(" /cmdsage debug - Show debug info")
-            print(" /cmdsage config <key> <val> - Set a config param")
-            print(" /cmdsage mode <fuzzy|strict> - Switch suggestion mode")
         end
     end
 end
-
 f:SetScript("OnEvent", OnEvent)

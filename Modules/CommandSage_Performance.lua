@@ -25,9 +25,9 @@ function CommandSage_Performance:ShowDashboard()
         perfFrame.statsText = fs
     end
 
-    local text = "Trie Nodes: "..self:CountTrieNodes().."\n"
+    local text = "Trie Nodes: " .. self:CountTrieNodes() .. "\n"
     local discovered = CommandSage_Discovery:GetDiscoveredCommands()
-    text = text.."Discovered commands: "..(discovered and #discovered or 0).."\n"
+    text = text .. "Discovered commands: " .. (discovered and #discovered or 0) .. "\n"
     perfFrame.statsText:SetText(text)
     perfFrame:Show()
 end

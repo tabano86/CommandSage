@@ -7,9 +7,9 @@ CommandSage_Discovery = {}
 
 local discoveredCommands = {}
 local forcedFallback = {
-    "/cmdsage","/cmdsagehistory","/help","/?","/reload","/console",
-    "/dance","/macro","/ghelp","/yell","/say","/emote","/combatlog","/afk","/dnd",
-    "/camp","/logout","/played","/time","/script"
+    "/cmdsage", "/cmdsagehistory", "/help", "/?", "/reload", "/console",
+    "/dance", "/macro", "/ghelp", "/yell", "/say", "/emote", "/combatlog", "/afk", "/dnd",
+    "/camp", "/logout", "/played", "/time", "/script"
 }
 
 local function ForceFallbacks()
@@ -18,21 +18,25 @@ local function ForceFallbacks()
         if not discoveredCommands[lower] then
             discoveredCommands[lower] = {
                 slash = lower,
-                callback = function(msg) print("Fallback for "..slash.." with args:", msg or "") end,
+                callback = function(msg)
+                    print("Fallback for " .. slash .. " with args:", msg or "")
+                end,
                 source = "Fallback",
                 description = "Auto-injected fallback command"
             }
         end
     end
     -- If userCustomFallbackEnabled, also add user custom fallback
-    if CommandSage_Config.Get("preferences","userCustomFallbackEnabled") then
+    if CommandSage_Config.Get("preferences", "userCustomFallbackEnabled") then
         if CommandSageDB.customFallbacks then
             for _, cb in ipairs(CommandSageDB.customFallbacks) do
                 local cbLower = cb:lower()
                 if not discoveredCommands[cbLower] then
                     discoveredCommands[cbLower] = {
                         slash = cbLower,
-                        callback = function(msg) print("User fallback for "..cb.." with:",msg or "") end,
+                        callback = function(msg)
+                            print("User fallback for " .. cb .. " with:", msg or "")
+                        end,
                         source = "UserFallback",
                         description = "User-added fallback"
                     }
@@ -47,8 +51,10 @@ local function ScanBuiltIn()
     for key, func in pairs(SlashCmdList) do
         local i = 1
         while true do
-            local slash = _G["SLASH_"..key..i]
-            if not slash then break end
+            local slash = _G["SLASH_" .. key .. i]
+            if not slash then
+                break
+            end
             slash = slash:lower()
             discoveredCommands[slash] = {
                 slash = slash,
@@ -69,22 +75,22 @@ end
 
 local function ScanAce()
     -- If Ace is loaded, we can introspect AceConsole or similar
-    if not CommandSage_Config.Get("preferences","macroInclusion") then
+    if not CommandSage_Config.Get("preferences", "macroInclusion") then
         return
     end
 
     local global, char = GetNumMacros()
-    for i=1, global do
+    for i = 1, global do
         local name, icon, body = GetMacroInfo(i)
         if name then
-            local slash = "/"..name:lower()
+            local slash = "/" .. name:lower()
             discoveredCommands[slash] = {
                 slash = slash,
                 callback = function(msg)
                     print("In-game macro: ", name, "body:", body)
                 end,
                 source = "Macro",
-                description = "Macro: "..name
+                description = "Macro: " .. name
             }
         end
     end
@@ -92,7 +98,7 @@ end
 
 function CommandSage_Discovery:ScanAllCommands()
     wipe(discoveredCommands)
-    if CommandSage_Config.Get("preferences","blizzAllFallback") then
+    if CommandSage_Config.Get("preferences", "blizzAllFallback") then
         ScanBuiltIn()
     end
     ScanMacros()     -- only if macroInclusion

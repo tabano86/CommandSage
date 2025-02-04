@@ -15,7 +15,7 @@ end
 
 function CommandSage_SecureCallback:ExecuteCommand(slash, args)
     if self:IsCommandProtected(slash) and InCombatLockdown() then
-        print("|cffff0000[CommandSage]|r: Can't run protected command in combat: "..slash)
+        print("|cffff0000[CommandSage]|r: Can't run protected command in combat: " .. slash)
         return
     end
     local disc = CommandSage_Discovery:GetDiscoveredCommands()
@@ -24,7 +24,7 @@ function CommandSage_SecureCallback:ExecuteCommand(slash, args)
         securecall(cmdObj.callback, args or "")
     else
         -- fallback
-        ChatFrame1EditBox:SetText(slash.." "..(args or ""))
+        ChatFrame1EditBox:SetText(slash .. " " .. (args or ""))
         ChatEdit_SendText(ChatFrame1EditBox, 0)
     end
 end

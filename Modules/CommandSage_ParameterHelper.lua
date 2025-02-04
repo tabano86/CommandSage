@@ -13,7 +13,9 @@ local knownParams = {
 
 function CommandSage_ParameterHelper:GetParameterSuggestions(slash, partialArg)
     local subcommands = knownParams[slash]
-    if not subcommands then return {} end
+    if not subcommands then
+        return {}
+    end
     local results = {}
     for _, sc in ipairs(subcommands) do
         if sc:lower():find(partialArg:lower()) then
@@ -25,6 +27,8 @@ end
 
 function CommandSage_ParameterHelper:GetInlineHint(slash)
     local subcommands = knownParams[slash]
-    if not subcommands then return nil end
+    if not subcommands then
+        return nil
+    end
     return table.concat(subcommands, " | ")
 end

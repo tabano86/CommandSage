@@ -29,7 +29,9 @@ function CommandSage_DeveloperAPI:DebugDump()
     local usageData = CommandSageDB.usageData
     local usageCount = 0
     if usageData then
-        for k in pairs(usageData) do usageCount=usageCount+1 end
+        for k in pairs(usageData) do
+            usageCount = usageCount + 1
+        end
     end
     print("Usage data entries:", usageCount)
     local hist = CommandSageDB.commandHistory

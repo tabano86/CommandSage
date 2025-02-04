@@ -17,10 +17,12 @@ CommandSage is a **feature-rich** WoW Classic addon for slash command auto-compl
 3. Type `/cmdsage` to see usage. Start typing slash commands for auto-complete.
 
 ## Local Dev & Scripts
+
 See `scripts/build.sh` for a quick packaging approach.  
 A sample GitHub workflow in `.github/workflows/curseforge.yml`.
 
 ## License
+
 [MIT](./LICENSE)
 
 Signed off by: <Your Name>, <Your Email> (2023)

@@ -12,12 +12,14 @@ local MAX_SUGGEST = 20
 
 -- Example snippet templates
 local snippetTemplates = {
-    { slash="/macro", desc="Create a new macro", snippet="/macro new <macroName>" },
-    { slash="/dance", desc="Fancy dance snippet", snippet="/dance fancy" },
+    { slash = "/macro", desc = "Create a new macro", snippet = "/macro new <macroName>" },
+    { slash = "/dance", desc = "Fancy dance snippet", snippet = "/dance fancy" },
 }
 
 local function CreateAutoCompleteUI()
-    if autoFrame then return autoFrame end
+    if autoFrame then
+        return autoFrame
+    end
 
     autoFrame = CreateFrame("Frame", "CommandSageAutoCompleteFrame", UIParent, "BackdropTemplate")
     autoFrame:SetSize(350, 250)
@@ -27,9 +29,9 @@ local function CreateAutoCompleteUI()
         edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
         tileSize = 16,
         edgeSize = 16,
-        insets = { left=4, right=4, top=4, bottom=4 },
+        insets = { left = 4, right = 4, top = 4, bottom = 4 },
     })
-    autoFrame:SetBackdropColor(0,0,0,0.9)
+    autoFrame:SetBackdropColor(0, 0, 0, 0.9)
     autoFrame:Hide()
 
     scrollFrame = CreateFrame("ScrollFrame", "CommandSageAutoScroll", autoFrame, "UIPanelScrollFrameTemplate")
@@ -37,24 +39,24 @@ local function CreateAutoCompleteUI()
     scrollFrame:SetPoint("BOTTOMRIGHT", -28, 5)
 
     content = CreateFrame("Frame", nil, scrollFrame)
-    content:SetSize(1,1)
+    content:SetSize(1, 1)
     scrollFrame:SetScrollChild(content)
     content.buttons = {}
 
-    for i=1, MAX_SUGGEST do
+    for i = 1, MAX_SUGGEST do
         local btn = CreateFrame("Button", nil, content)
         btn:SetHeight(20)
-        btn:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -(i-1)*20)
+        btn:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -(i - 1) * 20)
         btn:SetPoint("RIGHT", content, "RIGHT", 0, 0)
 
         btn.bg = btn:CreateTexture(nil, "BACKGROUND")
         btn.bg:SetAllPoints()
-        btn.bg:SetColorTexture(0.3,0.3,0.3,0.1)
+        btn.bg:SetColorTexture(0.3, 0.3, 0.3, 0.1)
         btn.bg:Hide()
 
         btn.highlight = btn:CreateTexture(nil, "HIGHLIGHT")
         btn.highlight:SetAllPoints()
-        btn.highlight:SetColorTexture(0.6,0.6,0.6,0.3)
+        btn.highlight:SetColorTexture(0.6, 0.6, 0.6, 0.3)
 
         btn.text = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         btn.text:SetPoint("LEFT", 5, 0)
@@ -63,7 +65,7 @@ local function CreateAutoCompleteUI()
         btn.info = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         btn.info:SetPoint("RIGHT", -5, 0)
         btn.info:SetJustifyH("RIGHT")
-        btn.info:SetTextColor(0.8,0.8,0.8,1)
+        btn.info:SetTextColor(0.8, 0.8, 0.8, 1)
 
         btn:SetScript("OnEnter", function(self)
             self.bg:Show()
@@ -86,19 +88,25 @@ end
 local function MoveSelection(delta)
     local frame = CreateAutoCompleteUI()
     local totalShown = 0
-    for i,b in ipairs(content.buttons) do
+    for i, b in ipairs(content.buttons) do
         if b:IsShown() then
             totalShown = totalShown + 1
         end
     end
-    if totalShown == 0 then return end
+    if totalShown == 0 then
+        return
+    end
 
     selectedIndex = selectedIndex + delta
-    if selectedIndex < 1 then selectedIndex = totalShown end
-    if selectedIndex > totalShown then selectedIndex = 1 end
+    if selectedIndex < 1 then
+        selectedIndex = totalShown
+    end
+    if selectedIndex > totalShown then
+        selectedIndex = 1
+    end
 
     -- highlight the selected one
-    for i,b in ipairs(content.buttons) do
+    for i, b in ipairs(content.buttons) do
         if i == selectedIndex then
             b.bg:Show()
         else
@@ -110,7 +118,7 @@ end
 function CommandSage_AutoComplete:AcceptSuggestion(sugg)
     local slashCmd = sugg.slash
     if slashCmd then
-        if CommandSage_Config.Get("preferences","animateAutoType") then
+        if CommandSage_Config.Get("preferences", "animateAutoType") then
             CommandSage_AutoType:BeginAutoType(slashCmd)
         else
             ChatFrame1EditBox:SetText(slashCmd)
@@ -135,15 +143,15 @@ function CommandSage_AutoComplete:ShowSuggestions(suggestions)
     local totalHeight = maxShow * btnHeight
     content:SetHeight(totalHeight)
 
-    for i,btn in ipairs(content.buttons) do
+    for i, btn in ipairs(content.buttons) do
         local s = suggestions[i]
         if i <= maxShow and s then
             btn.suggestionData = s
             local usageScore = CommandSage_AdaptiveLearning:GetUsageScore(s.slash)
-            local freqDisplay = usageScore > 0 and ("("..usageScore..")") or ""
+            local freqDisplay = usageScore > 0 and ("(" .. usageScore .. ")") or ""
             local cat = CommandSage_CommandOrganizer:GetCategory(s.slash)
             local desc = s.data and s.data.description or ""
-            btn.text:SetText(s.slash.." | "..cat)
+            btn.text:SetText(s.slash .. " | " .. cat)
             btn.info:SetText(freqDisplay)
 
             btn:Show()
@@ -152,7 +160,7 @@ function CommandSage_AutoComplete:ShowSuggestions(suggestions)
         end
     end
     selectedIndex = 0
-    frame:SetHeight(math.min(totalHeight+10, 250))
+    frame:SetHeight(math.min(totalHeight + 10, 250))
     frame:Show()
 end
 
@@ -178,14 +186,16 @@ end
 
 -- Snippet-based suggestions
 local function GetSnippets(partial)
-    if not CommandSage_Config.Get("preferences","snippetEnabled") then return {} end
+    if not CommandSage_Config.Get("preferences", "snippetEnabled") then
+        return {}
+    end
     local out = {}
     for _, snip in ipairs(snippetTemplates) do
         if snip.slash:find(partial:lower()) then
             table.insert(out, {
                 slash = snip.snippet,
                 data = { description = snip.desc },
-                rank=1
+                rank = 1
             })
         end
     end
@@ -194,7 +204,7 @@ end
 
 -- Filter out commands if contextFiltering=on and we are in combat
 local function FilterByContext(sugg)
-    if not CommandSage_Config.Get("preferences","contextFiltering") then
+    if not CommandSage_Config.Get("preferences", "contextFiltering") then
         return true
     end
     if InCombatLockdown() and (sugg.slash == "/macro") then
@@ -204,7 +214,7 @@ local function FilterByContext(sugg)
 end
 
 function CommandSage_AutoComplete:GenerateSuggestions(typedText)
-    local mode = CommandSage_Config.Get("preferences","suggestionMode") or "fuzzy"
+    local mode = CommandSage_Config.Get("preferences", "suggestionMode") or "fuzzy"
     local partialLower = typedText:lower()
 
     local possible = CommandSage_Trie:FindPrefix(partialLower)
@@ -214,9 +224,11 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
     else
         -- strict mode
         for _, cmd in ipairs(possible) do
-            table.insert(matched, { slash=cmd.slash, data=cmd.data, rank=0 })
+            table.insert(matched, { slash = cmd.slash, data = cmd.data, rank = 0 })
         end
-        table.sort(matched, function(a,b) return a.slash < b.slash end)
+        table.sort(matched, function(a, b)
+            return a.slash < b.slash
+        end)
     end
     -- add snippet suggestions
     local snippetList = GetSnippets(partialLower)
@@ -239,7 +251,9 @@ hookingFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 
 hookingFrame:SetScript("OnEvent", function()
     local edit = ChatFrame1EditBox
-    if not edit then return end
+    if not edit then
+        return
+    end
 
     -- Hook arrow keys & text changes
     edit:HookScript("OnKeyDown", function(self, key)
@@ -252,18 +266,28 @@ hookingFrame:SetScript("OnEvent", function()
 
     local orig = edit:GetScript("OnTextChanged")
     edit:SetScript("OnTextChanged", function(eBox, userInput)
-        if orig then orig(eBox, userInput) end
-        if not userInput then return end
-        if CommandSage_Fallback:IsFallbackActive() then return end
+        if orig then
+            orig(eBox, userInput)
+        end
+        if not userInput then
+            return
+        end
+        if CommandSage_Fallback:IsFallbackActive() then
+            return
+        end
 
         local text = eBox:GetText()
-        if text == "" or text:sub(1,1) ~= "/" then
-            if autoFrame then autoFrame:Hide() end
+        if text == "" or text:sub(1, 1) ~= "/" then
+            if autoFrame then
+                autoFrame:Hide()
+            end
             return
         end
         -- show suggestions after at least "/x" (2 chars)
         if #text < 2 then
-            if autoFrame then autoFrame:Hide() end
+            if autoFrame then
+                autoFrame:Hide()
+            end
             return
         end
 
@@ -274,8 +298,8 @@ hookingFrame:SetScript("OnEvent", function()
         if #paramHints > 0 then
             local paramSugg = {}
             for _, ph in ipairs(paramHints) do
-                local s = firstWord.." "..ph
-                table.insert(paramSugg, { slash=s, data={description="[Arg completion]"}, rank=0 })
+                local s = firstWord .. " " .. ph
+                table.insert(paramSugg, { slash = s, data = { description = "[Arg completion]" }, rank = 0 })
             end
             CommandSage_AutoComplete:ShowSuggestions(paramSugg)
             return

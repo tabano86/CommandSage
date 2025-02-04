@@ -14,7 +14,9 @@ local function EnsureHistoryDB()
 end
 
 function CommandSage_HistoryPlayback:AddToHistory(cmd)
-    if not CommandSage_Config.Get("preferences","persistHistory") then return end
+    if not CommandSage_Config.Get("preferences", "persistHistory") then
+        return
+    end
     EnsureHistoryDB()
     table.insert(CommandSageDB.commandHistory, cmd)
     if #CommandSageDB.commandHistory > maxHist then

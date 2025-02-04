@@ -20,8 +20,8 @@ end
 
 function CommandSage_Trie:InsertCommand(command, data)
     local node = root
-    for i=1, #command do
-        local c = command:sub(i,i)
+    for i = 1, #command do
+        local c = command:sub(i, i)
         if not node.children[c] then
             node.children[c] = {
                 children = {},
@@ -39,17 +39,17 @@ end
 
 local function gatherAll(node, prefix, results)
     if node.isTerminal and node.info then
-        table.insert(results, { slash=prefix, data=node.info })
+        table.insert(results, { slash = prefix, data = node.info })
     end
     for c, child in pairs(node.children) do
-        gatherAll(child, prefix..c, results)
+        gatherAll(child, prefix .. c, results)
     end
 end
 
 function CommandSage_Trie:FindPrefix(prefix)
     local node = root
-    for i=1,#prefix do
-        local c = prefix:sub(i,i)
+    for i = 1, #prefix do
+        local c = prefix:sub(i, i)
         local child = node.children[c]
         if not child then
             return {}

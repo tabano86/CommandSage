@@ -23,7 +23,7 @@ function CommandSage_Config:InitializeDefaults()
             animateAutoType = true,
             showTutorialOnStartup = true,
             usageAnalytics = true,
-            contextAwareness = true,   -- e.g. in-combat vs not
+            contextAwareness = true, -- e.g. in-combat vs not
             voiceCommandEnabled = false,
             fallbackEnabled = false,
             autoTypeDelay = 0.03,
@@ -31,14 +31,16 @@ function CommandSage_Config:InitializeDefaults()
             snippetEnabled = true,
             contextFiltering = true,
             typeAheadPrediction = true,
-            suggestionMode = "fuzzy",  -- or "strict"
+            suggestionMode = "fuzzy", -- or "strict"
         }
         CommandSageDB.config.preferences = prefs
     end
 end
 
 function CommandSage_Config.Get(category, key)
-    if not CommandSageDB or not CommandSageDB.config then return nil end
+    if not CommandSageDB or not CommandSageDB.config then
+        return nil
+    end
     local cTable = CommandSageDB.config[category]
     if cTable then
         return cTable[key]
@@ -47,7 +49,9 @@ function CommandSage_Config.Get(category, key)
 end
 
 function CommandSage_Config.Set(category, key, value)
-    if not CommandSageDB or not CommandSageDB.config then return end
+    if not CommandSageDB or not CommandSageDB.config then
+        return
+    end
     local cTable = CommandSageDB.config[category]
     if not cTable then
         cTable = {}
