@@ -14,6 +14,50 @@ local snippetTemplates = {
     { slash = "/dance", desc = "Fancy dance snippet", snippet = "/dance fancy" },
 }
 
+----------------------------------------------------------------
+-- Additional Public Methods for easier hooking:
+----------------------------------------------------------------
+function CommandSage_AutoComplete:MoveSelection(delta)
+    if not content then return end
+    local totalShown = 0
+    for _, b in ipairs(content.buttons) do
+        if b:IsShown() then
+            totalShown = totalShown + 1
+        end
+    end
+    if totalShown == 0 then
+        return
+    end
+
+    selectedIndex = selectedIndex + delta
+    if selectedIndex < 1 then
+        selectedIndex = totalShown
+    end
+    if selectedIndex > totalShown then
+        selectedIndex = 1
+    end
+
+    for i, b in ipairs(content.buttons) do
+        if i == selectedIndex then
+            b.bg:Show()
+        else
+            b.bg:Hide()
+        end
+    end
+end
+
+function CommandSage_AutoComplete:AcceptOrAdvance()
+    if not content then return end
+    if selectedIndex > 0 and content.buttons[selectedIndex]:IsShown() then
+        self:AcceptSuggestion(content.buttons[selectedIndex].suggestionData)
+    else
+        -- If none selected, we move by 1
+        self:MoveSelection(1)
+    end
+end
+
+----------------------------------------------------------------
+
 local function ApplyStylingToAutoFrame(frame)
     local advancedStyling  = CommandSage_Config.Get("preferences", "advancedStyling")
     local bgColor          = CommandSage_Config.Get("preferences", "autocompleteBgColor") or {0, 0, 0, 0.85}
@@ -83,7 +127,7 @@ local function CreateAutoCompleteUI()
 
         btn.highlight = btn:CreateTexture(nil, "HIGHLIGHT")
         btn.highlight:SetAllPoints()
-        btn.highlight:SetColorTexture(unpack(autoFrame._highlightColor))
+        btn.highlight:SetColorTexture(0.6, 0.6, 0.6, 0.3)
 
         btn.text = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         btn.text:SetPoint("LEFT", 5, 0)
@@ -222,6 +266,12 @@ function CommandSage_AutoComplete:ShowSuggestions(suggestions)
     frame:Show()
 end
 
+function CommandSage_AutoComplete:CloseSuggestions()
+    if autoFrame then
+        autoFrame:Hide()
+    end
+end
+
 function CommandSage_AutoComplete:PassesContextFilter(sugg)
     if not CommandSage_Config.Get("preferences", "contextFiltering") then
         return true
@@ -232,17 +282,60 @@ function CommandSage_AutoComplete:PassesContextFilter(sugg)
     return true
 end
 
+--------------------------------------------------------------------------------
+-- Merges command history items with discovered slash commands for extra coverage
+--------------------------------------------------------------------------------
+local function MergeHistoryWithCommands(typedLower, possible)
+    local hist = CommandSage_HistoryPlayback:GetHistory()
+    local merged = {}
+    local existing = {}
+    -- Mark existing slash commands in a set
+    for _, cmdObj in ipairs(possible) do
+        existing[cmdObj.slash] = true
+    end
+
+    -- Convert all slash commands to merged
+    for _, cmdObj in ipairs(possible) do
+        table.insert(merged, cmdObj)
+    end
+
+    -- Also add from history if partial match
+    for _, hcmd in ipairs(hist) do
+        local lower = hcmd:lower()
+        if lower:find(typedLower, 1, true) or (CommandSage_Config.Get("preferences", "partialFuzzyFallback")) then
+            -- only if not already in discovered
+            if not existing[lower] then
+                table.insert(merged, {
+                    slash = hcmd,
+                    data  = { description = "History command" },
+                    rank  = 0
+                })
+            end
+        end
+    end
+    return merged
+end
+
 function CommandSage_AutoComplete:GenerateSuggestions(typedText)
     local mode = CommandSage_Config.Get("preferences", "suggestionMode") or "fuzzy"
 
     typedText = CommandSage_ShellContext:RewriteInputIfNeeded(typedText)
-
     local partialLower = typedText:lower()
+
+    -- If the user typed something like "cmds" without a slash, we can forcibly prepend slash if not in shell context
+    if partialLower:sub(1,1) ~= "/" and not CommandSage_ShellContext:IsActive() then
+        partialLower = "/"..partialLower
+    end
+
     local possible = CommandSage_Trie:FindPrefix(partialLower)
 
+    -- If no direct prefix matches, fallback to entire command list
     if CommandSage_Config.Get("preferences", "partialFuzzyFallback") and #possible == 0 then
         possible = CommandSage_Trie:AllCommands()
     end
+
+    -- Also merge prior history to catch commands that might not be in the main Trie
+    possible = MergeHistoryWithCommands(partialLower, possible)
 
     local matched = {}
     if mode == "fuzzy" then
@@ -256,6 +349,7 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
         end)
     end
 
+    -- Insert snippet expansions if partial match
     if CommandSage_Config.Get("preferences", "snippetEnabled") then
         for _, snip in ipairs(snippetTemplates) do
             if snip.slash:find(partialLower, 1, true) then

@@ -1,12 +1,11 @@
 -- =============================================================================
 -- CommandSage_Config.lua
--- Holds addon-wide configuration defaults and getters/setters.
--- Includes DB versioning for simple migration if needed.
+-- ...
 -- =============================================================================
 
 CommandSage_Config = {}
 
-local CURRENT_DB_VERSION = 4  -- Bumped from 3 to 4 for new preference migration
+local CURRENT_DB_VERSION = 4
 
 function CommandSage_Config:InitializeDefaults()
     if not CommandSageDB then
@@ -16,7 +15,6 @@ function CommandSage_Config:InitializeDefaults()
     -- DB versioning
     if not CommandSageDB.dbVersion or CommandSageDB.dbVersion < CURRENT_DB_VERSION then
         CommandSageDB.dbVersion = CURRENT_DB_VERSION
-        -- Place migration logic here if needed
     end
 
     if not CommandSageDB.config then
@@ -25,19 +23,17 @@ function CommandSage_Config:InitializeDefaults()
 
     local prefs = CommandSageDB.config.preferences
     if not prefs then
-        -- Default preferences, updated to enable more features by default:
         prefs = {
-            -- Existing (older) defaults (tweaked):
             fuzzyMatchEnabled          = true,
             fuzzyMatchTolerance        = 2,
             maxSuggestions             = 12,
-            animateAutoType            = true,   -- Keep animations on
-            showTutorialOnStartup      = true,   -- Let them see tutorial on first load
+            animateAutoType            = true,
+            showTutorialOnStartup      = true,
             usageAnalytics             = true,
             contextAwareness           = true,
             voiceCommandEnabled        = false,
             fallbackEnabled            = false,
-            autoTypeDelay              = 0.08,   -- Slower typing to be more noticeable
+            autoTypeDelay              = 0.08,
             persistHistory             = true,
             snippetEnabled             = true,
             contextFiltering           = true,
@@ -54,31 +50,24 @@ function CommandSage_Config:InitializeDefaults()
             advancedStyling            = true,
             enableTerminalGoodies      = true,
             advancedKeybinds           = true,
-            partialFuzzyFallback       = true,   -- Enabled by default
-            shellContextEnabled        = true,   -- Enabled by default
-            monetizationEnabled        = false,  -- Keep monetization off by default
-
-            -- Additional scanning defaults:
+            partialFuzzyFallback       = true,
+            shellContextEnabled        = true,
+            monetizationEnabled        = false,
             macroInclusion             = true,
             aceConsoleInclusion        = true,
-            blizzAllFallback           = true,   -- Force scanning built-in commands
+            blizzAllFallback           = true,
             userCustomFallbackEnabled  = false,
-
-            -- NEW in version 4.1+ (still relevant for 4.2):
             uiTheme                    = "dark",
             uiScale                    = 1.0,
             autocompleteBgColor        = { 0, 0, 0, 0.85 },
             autocompleteHighlightColor = { 0.6, 0.6, 0.6, 0.3 },
             tutorialFadeIn             = true,
             configGuiEnabled           = true,
-
-            -- Always disable hotkeys in chat can be annoying, but let's enable:
             alwaysDisableHotkeysInChat = true,
         }
         CommandSageDB.config.preferences = prefs
     end
 
-    -- Ensure newly introduced keys exist
     if prefs.uiTheme == nil then
         prefs.uiTheme = "dark"
     end
@@ -125,10 +114,8 @@ function CommandSage_Config.Set(category, key, value)
     cTable[key] = value
 end
 
--- Enhancement: A quick helper to "reset" all preferences (in case user wants defaults)
 function CommandSage_Config:ResetPreferences()
     CommandSageDB.config.preferences = nil
     self:InitializeDefaults()
     print("CommandSage: Preferences reset to default.")
 end
-

@@ -2,7 +2,7 @@
 ## Title: CommandSage
 ## Notes: Next-Gen slash command auto-completion for WoW Classic
 ## Author: Anthony Tabano
-## Version: 4.2
+## Version: 4.3
 ## SavedVariables: CommandSageDB
 
 # Core
@@ -34,4 +34,3 @@ Modules\CommandSage_ShellContext.lua
 Modules\CommandSage_Licensing.lua
 Modules\CommandSage_ConfigGUI.lua
 Modules\CommandSage_KeyBlocker.lua
-

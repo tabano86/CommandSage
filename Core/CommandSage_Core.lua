@@ -1,6 +1,5 @@
 -- =============================================================================
 -- CommandSage_Core.lua
--- Primary entry point that sets up slash commands, loads config, etc.
 -- =============================================================================
 
 local addonName, _ = ...
@@ -32,6 +31,10 @@ local function OnEvent(self, event, ...)
             if CommandSage_Config.Get("preferences", "configGuiEnabled") then
                 CommandSage_ConfigGUI:InitGUI()
             end
+
+            -- Hook to *all* chat frames
+            CommandSage:HookAllChatFrames()
+
         end
 
     elseif event == "PLAYER_LOGIN" then
@@ -128,36 +131,149 @@ function CommandSage:RegisterSlashCommands()
     end
 end
 
-local bindingManagerFrame = CreateFrame("Frame", "CommandSageBindingManagerFrame")
+-- Hook function for each chat frame's edit box
+function CommandSage:HookChatFrameEditBox(editBox)
+    if not editBox or editBox.CommandSageHooked then return end  -- avoid double hooking
 
-local function DisableAllBindings()
-    local override = CommandSage_Config.Get("preferences", "overrideHotkeysWhileTyping")
-    local always   = CommandSage_Config.Get("preferences", "alwaysDisableHotkeysInChat")
-    if not override and not always then
-        return
+    local bindingManagerFrame = CreateFrame("Frame", nil)
+
+    local function DisableAllBindings()
+        local override = CommandSage_Config.Get("preferences", "overrideHotkeysWhileTyping")
+        local always   = CommandSage_Config.Get("preferences", "alwaysDisableHotkeysInChat")
+        if not override and not always then
+            return
+        end
+        for i = 1, GetNumBindings() do
+            local command, key1, key2 = GetBinding(i)
+            if key1 then SetOverrideBinding(bindingManagerFrame, true, key1, nil) end
+            if key2 then SetOverrideBinding(bindingManagerFrame, true, key2, nil) end
+        end
     end
-    for i = 1, GetNumBindings() do
-        local command, key1, key2 = GetBinding(i)
-        if key1 then SetOverrideBinding(bindingManagerFrame, true, key1, nil) end
-        if key2 then SetOverrideBinding(bindingManagerFrame, true, key2, nil) end
+
+    local function RestoreAllBindings()
+        ClearOverrideBindings(bindingManagerFrame)
     end
+
+    editBox:HookScript("OnEditFocusGained", function(self)
+        DisableAllBindings()
+        self:SetPropagateKeyboardInput(false)
+        CommandSage_KeyBlocker:BlockKeys()
+    end)
+    editBox:HookScript("OnEditFocusLost", function(self)
+        RestoreAllBindings()
+        self:SetPropagateKeyboardInput(true)
+        CommandSage_KeyBlocker:UnblockKeys()
+    end)
+
+    -- The code for OnKeyDown / OnTextChanged hooking is the same as in AutoComplete
+    -- but repeated to ensure it works for each editBox instance.
+
+    local function CloseAutoCompleteOnChatDeactivate()
+        CommandSage_AutoComplete:CloseSuggestions()
+    end
+    hooksecurefunc("ChatEdit_DeactivateChat", CloseAutoCompleteOnChatDeactivate)
+
+    editBox:HookScript("OnKeyDown", function(self, key)
+        local text = self:GetText() or ""
+        local isSlash = (text:sub(1,1) == "/")
+        local isInShellContext = CommandSage_ShellContext:IsActive()
+
+        if not CommandSage_Config.Get("preferences", "advancedKeybinds") then
+            self:SetPropagateKeyboardInput(true)
+            return
+        end
+
+        if isSlash or isInShellContext then
+            self:SetPropagateKeyboardInput(false)
+
+            if key == "UP" then
+                if IsShiftKeyDown() then
+                    CommandSage_AutoComplete:MoveSelection(-5)
+                else
+                    CommandSage_AutoComplete:MoveSelection(-1)
+                end
+                return
+            elseif key == "DOWN" then
+                if IsShiftKeyDown() then
+                    CommandSage_AutoComplete:MoveSelection(5)
+                else
+                    CommandSage_AutoComplete:MoveSelection(1)
+                end
+                return
+            elseif key == "TAB" then
+                if IsShiftKeyDown() then
+                    CommandSage_AutoComplete:MoveSelection(-1)
+                else
+                    CommandSage_AutoComplete:AcceptOrAdvance()
+                end
+                return
+            elseif key == "C" and IsControlKeyDown() then
+                self:SetText("")
+                CommandSage_AutoComplete:CloseSuggestions()
+                return
+            end
+        else
+            self:SetPropagateKeyboardInput(true)
+        end
+    end)
+
+    local orig = editBox:GetScript("OnTextChanged")
+    editBox:SetScript("OnTextChanged", function(eBox, userInput)
+        if orig then
+            orig(eBox, userInput)
+        end
+        if not userInput then
+            return
+        end
+        if CommandSage_Fallback:IsFallbackActive() then
+            return
+        end
+
+        local text = eBox:GetText()
+        if text == "" then
+            CommandSage_AutoComplete:CloseSuggestions()
+            return
+        end
+
+        local firstChar = text:sub(1,1)
+        if firstChar ~= "/" and not CommandSage_ShellContext:IsActive() then
+            CommandSage_AutoComplete:CloseSuggestions()
+            return
+        end
+
+        local firstWord = text:match("^(%S+)")
+        local rest = text:match("^%S+%s+(.*)") or ""
+        local paramHints = CommandSage_ParameterHelper:GetParameterSuggestions(firstWord, rest)
+        if #paramHints > 0 then
+            local paramSugg = {}
+            for _, ph in ipairs(paramHints) do
+                table.insert(paramSugg, {
+                    slash = firstWord .. " " .. ph,
+                    data  = { description = "[Arg completion]" },
+                    rank  = 0,
+                    isParamSuggestion = true
+                })
+            end
+            CommandSage_AutoComplete:ShowSuggestions(paramSugg)
+            return
+        end
+
+        local final = CommandSage_AutoComplete:GenerateSuggestions(text)
+        CommandSage_AutoComplete:ShowSuggestions(final)
+    end)
+
+    editBox.CommandSageHooked = true
 end
 
-local function RestoreAllBindings()
-    ClearOverrideBindings(bindingManagerFrame)
+-- Hooks all chat frames’ edit boxes
+function CommandSage:HookAllChatFrames()
+    for i = 1, NUM_CHAT_WINDOWS do
+        local cf = _G["ChatFrame"..i]
+        local editBox = cf and cf.editBox
+        if editBox then
+            self:HookChatFrameEditBox(editBox)
+        end
+    end
 end
-
-local chatBox = ChatFrame1EditBox
-chatBox:HookScript("OnEditFocusGained", function(self)
-    DisableAllBindings()
-    self:SetPropagateKeyboardInput(false)
-    CommandSage_KeyBlocker:BlockKeys()
-end)
-chatBox:HookScript("OnEditFocusLost", function(self)
-    RestoreAllBindings()
-    self:SetPropagateKeyboardInput(true)
-    CommandSage_KeyBlocker:UnblockKeys()
-end)
 
 f:SetScript("OnEvent", OnEvent)
-

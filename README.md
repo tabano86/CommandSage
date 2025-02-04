@@ -3,7 +3,7 @@
 **CommandSage** is a powerful, next-generation addon for World of Warcraft Classic that revolutionizes your
 slash-command experience with intelligent autocompletion, fuzzy matching, and advanced features.
 
-![Version](https://img.shields.io/badge/Version-4.1-blue)
+![Version](https://img.shields.io/badge/Version-4.3-blue)
 ![Game Version](https://img.shields.io/badge/WoW-Classic%2011.4.0-yellow)
 
 ## 🌟 Key Features
@@ -27,17 +27,17 @@ slash-command experience with intelligent autocompletion, fuzzy matching, and ad
 ## 🚀 Quick Start
 
 1. **Install:**  
-   Copy to `Interface/AddOns/CommandSage/`
+   Copy this folder into `Interface/AddOns/CommandSage/`
 
 2. **Basic Usage:**
-    - Type `/cmdsage` for help
-    - Use `/cmdsage tutorial` for interactive guide
-    - Access settings with `/cmdsage config`
+   - Type `/cmdsage` for help
+   - Use `/cmdsage tutorial` for interactive guide
+   - Access settings with `/cmdsage config`
 
 3. **First Steps:**
-    - Try typing a partial command to see suggestions
-    - Use Tab/Arrow keys to navigate suggestions
-    - Press Enter to complete the command
+   - Try typing a partial command (`/cmds`) to see suggestions (fuzzy matching to `/cmdsage`)
+   - Use Tab/Arrow keys to navigate suggestions
+   - Press Enter to complete the command
 
 ## ⚙️ Configuration
 
@@ -53,7 +53,7 @@ slash-command experience with intelligent autocompletion, fuzzy matching, and ad
 | uiScale                    | 0.8-2.0            | UI scaling factor                                    |
 | fuzzyMatchTolerance        | 0-5                | Typo tolerance                                       |
 | animateAutoType            | true/false         | Typing animation                                     |
-| alwaysDisableHotkeysInChat | true/false         | **NEW**: If true, fully disable hotkeys while typing |
+| alwaysDisableHotkeysInChat | true/false         | If true, fully disable hotkeys while typing         |
 
 ### GUI Configuration
 
@@ -64,7 +64,8 @@ Open settings panel with:
 
 ### Shell Context
 
-`/cd macro # Enter macro context new test # Creates new macro 'test' /cd .. # Exit context`
+`/cd macro` # Then type: `new test` # Creates new macro 'test'  
+`/cd clear` # Exit context
 
 ### Terminal Commands
 
@@ -74,9 +75,10 @@ Open settings panel with:
 - `/uptime` - Session duration
 - `/mem` - Memory usage
 - `/gold` - Gold across characters
-- And 45+ more commands!
+- `/donate` - Print donation link
+- And more commands!
 
-## 🎯 Performance
+## 💻 Performance
 
 Monitor addon performance:
 `/cmdsage perf`
@@ -87,7 +89,7 @@ Displays:
 - Trie node stats
 - Suggestion latency
 
-## 🎨 Accessibility
+## 🔎 Accessibility
 
 Built-in accessibility features:
 
@@ -96,7 +98,7 @@ Built-in accessibility features:
 - Color customization
 - Clear, readable fonts
 
-## 📖 Documentation
+## 📚 Documentation
 
 Full documentation:
 
@@ -105,9 +107,9 @@ Full documentation:
 - [API Documentation](link)
 - [Performance Tips](link)
 
-## 🤝 Support
+## 🙏 Support
 
-(coming soon...)
+Donations: Use `/donate` in-game to get a link!
 
 ## 📜 License
 

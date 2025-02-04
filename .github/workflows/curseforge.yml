@@ -18,7 +18,7 @@ jobs:
       - name: Extract Addon Version
         id: extract_version
         run: |
-          VERSION_LINE=$(grep -m1 -oP '(?<=Version-).*(?=-blue)' README.md || echo "4.2")
+          VERSION_LINE=$(grep -m1 -oP '(?<=Version-).*(?=-blue)' README.md || echo "4.3")
           echo "addon_version=$VERSION_LINE" >> $GITHUB_OUTPUT
 
       - name: Update TOC Version
@@ -50,10 +50,8 @@ jobs:
         if: false  # Replace 'false' with conditions for your actual release
         run: |
           echo "Would publish to CurseForge using token: ${{ secrets.CURSEFORGE_TOKEN }}"
-          # e.g. curl or CF CLI calls, etc.
 
       - name: Publish to SourceForge (Example)
         if: false
         run: |
           echo "Would upload to SourceForge with credentials."
-          # e.g. scp dist/*.zip user@web.sourceforge.net:/home/frs/project/...

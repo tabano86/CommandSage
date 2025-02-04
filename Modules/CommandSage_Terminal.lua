@@ -48,7 +48,7 @@ function CommandSage_Terminal:Initialize()
 
     SLASH_CMDVERSION1 = "/version"
     SlashCmdList["CMDVERSION"] = function(msg)
-        print("CommandSage Terminal v4.2")
+        print("CommandSage Terminal v4.3")
     end
 
     SLASH_CMDSHELLCD1 = "/cd"
@@ -66,5 +66,15 @@ function CommandSage_Terminal:Initialize()
         local name = UnitName("player") or "Unknown"
         print("You are: " .. name)
     end
-end
 
+    -- NEW: Donation command
+    SLASH_CMDDONATE1 = "/donate"
+    SlashCmdList["CMDDONATE"] = function(msg)
+        print("|cff00ff00[CommandSage]|r: Thanks for considering a donation! Visit:")
+        print("https://www.buymeacoffee.com/anthonytabano")
+    end
+
+    -- Alternatively: /coffee
+    SLASH_CMDCOFFEE1 = "/coffee"
+    SlashCmdList["CMDCOFFEE"] = SlashCmdList["CMDDONATE"]
+end
