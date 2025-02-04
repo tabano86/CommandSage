@@ -1,0 +1,30 @@
+## Interface: 11400
+## Title: CommandSage
+## Notes: Advanced slash command auto-completion system
+## Author: CommandSage Contributors
+## Version: 1.0
+## SavedVariables: CommandSageDB
+
+# Core
+Core\CommandSage_Config.lua
+Core\CommandSage_Core.lua
+Core\CommandSage_Discovery.lua
+
+# Modules
+Modules\CommandSage_Trie.lua
+Modules\CommandSage_FuzzyMatch.lua
+Modules\CommandSage_ParameterHelper.lua
+Modules\CommandSage_AdaptiveLearning.lua
+Modules\CommandSage_PersistentTrie.lua
+Modules\CommandSage_Tutorial.lua
+Modules\CommandSage_Performance.lua
+Modules\CommandSage_SecureCallback.lua
+Modules\CommandSage_Fallback.lua
+Modules\CommandSage_CommandOrganizer.lua
+Modules\CommandSage_AutoType.lua
+Modules\CommandSage_HistoryPlayback.lua
+Modules\CommandSage_DeveloperAPI.lua
+Modules\CommandSage_UIAccessibility.lua
+Modules\CommandSage_Analytics.lua
+Modules\CommandSage_MultiModal.lua
+Modules\CommandSage_AROverlays.lua
