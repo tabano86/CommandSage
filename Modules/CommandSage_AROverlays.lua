@@ -1,6 +1,6 @@
 -- =============================================================================
 -- CommandSage_AROverlays.lua
--- Just for fun animated overlay
+-- Animated overlay for fun
 -- =============================================================================
 
 CommandSage_AROverlays = {}

@@ -1,6 +1,6 @@
 -- =============================================================================
 -- CommandSage_HistoryPlayback.lua
--- Persists command history, incremental search
+-- Persists command history, with incremental search if desired
 -- =============================================================================
 
 CommandSage_HistoryPlayback = {}

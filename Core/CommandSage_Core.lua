@@ -1,6 +1,6 @@
 -- =============================================================================
 -- CommandSage_Core.lua
--- Entry point, sets up slash commands, loads config, etc.
+-- Primary entry point that sets up slash commands, loads config, etc.
 -- =============================================================================
 
 local addonName, _ = ...
@@ -18,15 +18,22 @@ local function OnEvent(self, event, ...)
         if loadedAddon == addonName then
             CommandSage_Config:InitializeDefaults()
 
-            -- Load terminal goodies if enabled
+            -- Initialize Terminal goodies if enabled
             if CommandSage_Config.Get("preferences", "enableTerminalGoodies") then
                 CommandSage_Terminal:Initialize()
             end
 
+            -- Load persistent data
             CommandSage_PersistentTrie:LoadTrie()
             CommandSage_Discovery:ScanAllCommands()
             CommandSage:RegisterSlashCommands()
+
+            -- Initialize config GUI if allowed
+            if CommandSage_Config.Get("preferences", "configGuiEnabled") then
+                CommandSage_ConfigGUI:InitGUI()
+            end
         end
+
     elseif event == "PLAYER_LOGIN" then
         if CommandSage_Config.Get("preferences", "showTutorialOnStartup") then
             CommandSage_Tutorial:ShowTutorialPrompt()
@@ -59,7 +66,7 @@ function CommandSage:RegisterSlashCommands()
             CommandSage_DeveloperAPI:DebugDump()
 
         elseif cmd == "config" then
-            -- e.g. /cmdsage config fuzzy 3
+            -- e.g. /cmdsage config fuzzyMatchTolerance 3
             local key = args[2]
             local val = args[3]
             if key and val then
@@ -86,26 +93,52 @@ function CommandSage:RegisterSlashCommands()
                 print("Usage: /cmdsage mode <fuzzy|strict>")
             end
 
+        elseif cmd == "theme" then
+            -- e.g. /cmdsage theme dark|light|classic
+            local themeVal = args[2]
+            if themeVal then
+                CommandSage_Config.Set("preferences", "uiTheme", themeVal)
+                print("UI theme set to", themeVal)
+            else
+                print("Usage: /cmdsage theme <dark|light|classic>")
+            end
+
+        elseif cmd == "scale" then
+            -- e.g. /cmdsage scale 1.2
+            local scaleVal = args[2] and tonumber(args[2])
+            if scaleVal then
+                CommandSage_Config.Set("preferences", "uiScale", scaleVal)
+                print("UI scale set to", scaleVal)
+            else
+                print("Usage: /cmdsage scale <number>")
+            end
+
+        elseif cmd == "gui" then
+            -- Toggle or show config GUI
+            if CommandSage_ConfigGUI then
+                CommandSage_ConfigGUI:Toggle()
+            else
+                print("Config GUI not available.")
+            end
+
         else
             print("|cff00ff00CommandSage Usage:|r")
             print(" /cmdsage tutorial - Show tutorial")
             print(" /cmdsage scan - Re-scan commands")
             print(" /cmdsage fallback - On, nofallback - Off")
             print(" /cmdsage debug - Show debug info")
-            print(" /cmdsage config <key> <val> - Set a config param")
+            print(" /cmdsage config <key> <val> - Set config")
             print(" /cmdsage mode <fuzzy|strict> - Switch suggestion mode")
+            print(" /cmdsage theme <dark|light|classic> - Set UI theme")
+            print(" /cmdsage scale <1.0> - Set autocomplete UI scale")
+            print(" /cmdsage gui - Open/close the config panel")
         end
     end
 end
 
--- =============================================================================
--- Keybinding Management to Prevent Interference While Typing in Chat
--- =============================================================================
-
--- Create a frame to manage override bindings
+-- Keybinding override to avoid conflicts while typing
 local bindingManagerFrame = CreateFrame("Frame", "CommandSageBindingManagerFrame")
 
--- Function to disable all keybindings
 local function DisableAllBindings()
     if not CommandSage_Config.Get("preferences", "overrideHotkeysWhileTyping") then
         return
@@ -117,12 +150,11 @@ local function DisableAllBindings()
     end
 end
 
--- Function to restore all keybindings
 local function RestoreAllBindings()
     ClearOverrideBindings(bindingManagerFrame)
 end
 
--- Hook into the chat edit box events
+-- Hook chat edit box events
 local chatBox = ChatFrame1EditBox
 chatBox:HookScript("OnEditFocusGained", function(self)
     DisableAllBindings()

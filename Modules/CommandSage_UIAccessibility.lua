@@ -1,6 +1,6 @@
 -- =============================================================================
 -- CommandSage_UIAccessibility.lua
--- High contrast, TTS readback, large text
+-- High contrast, TTS readback, large text stubs
 -- =============================================================================
 
 CommandSage_UIAccessibility = {}
@@ -10,7 +10,7 @@ local largeText = false
 
 function CommandSage_UIAccessibility:EnableHighContrast()
     highContrast = true
-    -- Possibly restyle frames
+    -- Could do advanced restyling here
 end
 
 function CommandSage_UIAccessibility:DisableHighContrast()
@@ -19,6 +19,7 @@ end
 
 function CommandSage_UIAccessibility:EnableLargeText()
     largeText = true
+    -- Possibly scale up certain frames or fonts
 end
 
 function CommandSage_UIAccessibility:DisableLargeText()

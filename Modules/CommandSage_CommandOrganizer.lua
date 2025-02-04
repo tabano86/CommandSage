@@ -1,15 +1,15 @@
 -- =============================================================================
 -- CommandSage_CommandOrganizer.lua
--- Group commands by category (combat, social, macros, etc.)
+-- Group slash commands by category for potential filtering or display
 -- =============================================================================
 
 CommandSage_CommandOrganizer = {}
 
 local tagDB = {
-    ["/dance"]  = { "social" },
-    ["/macro"]  = { "macros" },
+    ["/dance"]   = { "social" },
+    ["/macro"]   = { "macros" },
     ["/cmdsage"] = { "plugin" },
-    -- Add more known slash->category mappings here
+    -- more known slash->category mappings if you like
 }
 
 function CommandSage_CommandOrganizer:GetCommandTags(slash)

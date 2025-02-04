@@ -8,9 +8,9 @@ CommandSage_Analytics = {}
 local function EnsureAnalytics()
     if not CommandSageDB.analytics then
         CommandSageDB.analytics = {
-            favorites = {},
+            favorites   = {},
             blacklisted = {},
-            usageStats = {},
+            usageStats  = {},
         }
     end
 end

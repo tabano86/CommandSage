@@ -1,6 +1,6 @@
 -- =============================================================================
 -- CommandSage_PersistentTrie.lua
--- Save/Load the Trie to speed up reload
+-- Save/load the Trie structure for faster reload times
 -- =============================================================================
 
 CommandSage_PersistentTrie = {}
@@ -43,8 +43,8 @@ function CommandSage_PersistentTrie:LoadTrie()
     local s = CommandSageDB[KEY]
     if s then
         CommandSage_Trie:Clear()
-        local r = CommandSage_Trie:GetRoot()
         local loaded = deserializeNode(s)
+        local r = CommandSage_Trie:GetRoot()
         r.children   = loaded.children
         r.isTerminal = loaded.isTerminal
         r.info       = loaded.info

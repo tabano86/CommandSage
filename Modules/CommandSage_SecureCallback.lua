@@ -1,11 +1,12 @@
 -- =============================================================================
 -- CommandSage_SecureCallback.lua
--- If a command is protected, warn inline
+-- Check for protected commands, handle them carefully
 -- =============================================================================
 
 CommandSage_SecureCallback = {}
 
 function CommandSage_SecureCallback:IsCommandProtected(slash)
+    -- Example: /console might be protected in certain contexts
     if slash == "/console" then
         return true
     end
@@ -14,7 +15,7 @@ end
 
 function CommandSage_SecureCallback:ExecuteCommand(slash, args)
     if self:IsCommandProtected(slash) and InCombatLockdown() then
-        print("|cffff0000[CommandSage]|r: Can't run protected command in combat: " .. slash)
+        print("|cffff0000[CommandSage]|r: Can't run protected command in combat:", slash)
         return
     end
     local disc = CommandSage_Discovery:GetDiscoveredCommands()
@@ -22,7 +23,6 @@ function CommandSage_SecureCallback:ExecuteCommand(slash, args)
     if cmdObj and cmdObj.callback then
         securecall(cmdObj.callback, args or "")
     else
-        -- fallback
         ChatFrame1EditBox:SetText(slash .. " " .. (args or ""))
         ChatEdit_SendText(ChatFrame1EditBox, 0)
     end

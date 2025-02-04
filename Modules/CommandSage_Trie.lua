@@ -1,17 +1,15 @@
 -- =============================================================================
 -- CommandSage_Trie.lua
 -- Optimized Trie for storing slash commands
--- Includes RemoveCommand() so we can unregister
--- Now includes AllCommands() for partial fallback
 -- =============================================================================
 
 CommandSage_Trie = {}
 
 local root = {
-    children = {},
+    children   = {},
     isTerminal = false,
-    info = nil,
-    maxDepth = 0,
+    info       = nil,
+    maxDepth   = 0,
 }
 
 local function updateMaxDepth(node, depth)
@@ -26,10 +24,10 @@ function CommandSage_Trie:InsertCommand(command, data)
         local c = command:sub(i, i)
         if not node.children[c] then
             node.children[c] = {
-                children = {},
+                children   = {},
                 isTerminal = false,
-                info = nil,
-                maxDepth = 0,
+                info       = nil,
+                maxDepth   = 0,
             }
         end
         node = node.children[c]
@@ -63,7 +61,6 @@ function CommandSage_Trie:FindPrefix(prefix)
     return results
 end
 
--- New: return all commands in the trie
 function CommandSage_Trie:AllCommands()
     local results = {}
     gatherAll(root, "", results)
@@ -77,8 +74,8 @@ end
 function CommandSage_Trie:Clear()
     wipe(root.children)
     root.isTerminal = false
-    root.info = nil
-    root.maxDepth = 0
+    root.info       = nil
+    root.maxDepth   = 0
 end
 
 function CommandSage_Trie:RemoveCommand(command)

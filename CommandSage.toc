@@ -1,8 +1,8 @@
 ## Interface: 11400
 ## Title: CommandSage
 ## Notes: Next-Gen slash command auto-completion for WoW Classic
-## Author: <Your Name>
-## Version: 2.1
+## Author: Anthony Tabano
+## Version: 4.0
 ## SavedVariables: CommandSageDB
 
 # Core
@@ -32,3 +32,4 @@ Modules\CommandSage_AutoComplete.lua
 Modules\CommandSage_Terminal.lua
 Modules\CommandSage_ShellContext.lua
 Modules\CommandSage_Licensing.lua
+Modules\CommandSage_ConfigGUI.lua

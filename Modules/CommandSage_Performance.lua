@@ -1,6 +1,6 @@
 -- =============================================================================
 -- CommandSage_Performance.lua
--- Shows performance or debug stats
+-- Displays performance metrics in a simple frame
 -- =============================================================================
 
 CommandSage_Performance = {}
@@ -33,6 +33,9 @@ function CommandSage_Performance:ShowDashboard()
     end
     text = text .. "Discovered commands: " .. count .. "\n"
 
+    local memKB = collectgarbage("count")
+    text = text .. string.format("Addon Memory: %.2f MB\n", memKB / 1024)
+
     perfFrame.statsText:SetText(text)
     perfFrame:Show()
 end
@@ -40,7 +43,7 @@ end
 function CommandSage_Performance:CountTrieNodes()
     local function count(node)
         local total = 1
-        for c, child in pairs(node.children) do
+        for _, child in pairs(node.children) do
             total = total + count(child)
         end
         return total

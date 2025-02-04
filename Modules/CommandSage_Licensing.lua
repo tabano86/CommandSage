@@ -1,19 +1,17 @@
 -- =============================================================================
 -- CommandSage_Licensing.lua
--- Simple licensing stub for gating "pro" features
+-- Simple "pro" feature gating example
 -- =============================================================================
 
 CommandSage_Licensing = {}
 
 local LICENSE_KEY_DB_FIELD = "licenseKey"
 
--- Check or retrieve license
 function CommandSage_Licensing:IsProActive()
     if not CommandSage_Config.Get("preferences", "monetizationEnabled") then
-        return true  -- If monetization not used, everything is free
+        return true
     end
     local key = CommandSageDB[LICENSE_KEY_DB_FIELD]
-    -- Simple check (replace with your real validation or server check)
     if key and key == "MY-PRO-KEY" then
         return true
     end
@@ -23,7 +21,6 @@ end
 function CommandSage_Licensing:HandleLicenseCommand(msg)
     local cmd = msg:match("^(%S+)$") or ""
     if cmd == "" then
-        -- show current status
         if self:IsProActive() then
             print("CommandSage Pro is ACTIVE.")
         else
@@ -32,7 +29,6 @@ function CommandSage_Licensing:HandleLicenseCommand(msg)
         return
     end
 
-    -- user typed a key
     CommandSageDB[LICENSE_KEY_DB_FIELD] = cmd
     if self:IsProActive() then
         print("License accepted. Pro features enabled.")

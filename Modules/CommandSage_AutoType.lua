@@ -1,6 +1,6 @@
 -- =============================================================================
 -- CommandSage_AutoType.lua
--- Animated "typing" effect
+-- Animated "typing" effect for slash commands
 -- =============================================================================
 
 CommandSage_AutoType = {}
@@ -18,6 +18,7 @@ frame:SetScript("OnUpdate", function(self, elapsed)
         local partial = self.textToType:sub(1, self.index)
         ChatFrame1EditBox:SetText(partial)
         ChatFrame1EditBox:SetCursorPosition(#partial)
+
         self.delay = CommandSage_Config.Get("preferences", "autoTypeDelay") or 0.03
         if self.index >= #self.textToType then
             self:Hide()

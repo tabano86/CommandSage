@@ -1,6 +1,6 @@
 -- =============================================================================
 -- CommandSage_FuzzyMatch.lua
--- Weighted fuzzy matching with usage & context
+-- Weighted fuzzy matching (Levenshtein) with usage & context
 -- =============================================================================
 
 CommandSage_FuzzyMatch = {}
@@ -52,11 +52,11 @@ function CommandSage_FuzzyMatch:GetSuggestions(input, possibleCommands)
         if dist <= tolerance then
             local usageScore = CommandSage_AdaptiveLearning:GetUsageScore(slash)
             local cBonus = getContextBonus()
-            local rank = -dist + usageScore * 0.7 + cBonus
+            local rank = -dist + (usageScore * 0.7) + cBonus
             table.insert(results, {
-                slash = slash,
-                data  = cmdObj.data,
-                rank  = rank,
+                slash    = slash,
+                data     = cmdObj.data,
+                rank     = rank,
                 distance = dist
             })
         end
@@ -69,9 +69,9 @@ end
 
 function CommandSage_FuzzyMatch:SuggestCorrections(input)
     local discovered = CommandSage_Discovery:GetDiscoveredCommands()
-    local bestDist = 999
+    local bestDist = math.huge
     local bestCmd = nil
-    for slash, info in pairs(discovered) do
+    for slash, _ in pairs(discovered) do
         local d = Levenshtein(slash, input)
         if d < bestDist then
             bestDist = d

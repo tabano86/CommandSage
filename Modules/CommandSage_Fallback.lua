@@ -1,6 +1,6 @@
 -- =============================================================================
 -- CommandSage_Fallback.lua
--- Toggle fallback mode
+-- Allows toggling fallback mode if auto-suggestions fail
 -- =============================================================================
 
 CommandSage_Fallback = {}

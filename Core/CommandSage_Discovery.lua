@@ -1,6 +1,6 @@
 -- =============================================================================
 -- CommandSage_Discovery.lua
--- Dynamic scanning, background updates, forced fallback, macro integration
+-- Dynamic scanning, forced fallback, macro integration
 -- =============================================================================
 
 CommandSage_Discovery = {}
@@ -17,16 +17,16 @@ local function ForceFallbacks()
         local lower = slash:lower()
         if not discoveredCommands[lower] then
             discoveredCommands[lower] = {
-                slash = lower,
-                callback = function(msg)
+                slash       = lower,
+                callback    = function(msg)
                     print("Fallback for " .. slash .. " with args:", msg or "")
                 end,
-                source = "Fallback",
-                description = "Auto-injected fallback command"
+                source      = "Fallback",
+                description = "Auto-injected fallback command",
             }
         end
     end
-    -- If userCustomFallbackEnabled, also add user custom fallback
+
     if CommandSage_Config.Get("preferences", "userCustomFallbackEnabled") then
         if CommandSageDB.customFallbacks then
             for _, cb in ipairs(CommandSageDB.customFallbacks) do
@@ -46,7 +46,6 @@ local function ForceFallbacks()
     end
 end
 
--- Attempt to parse built-in slash commands
 local function ScanBuiltIn()
     for key, func in pairs(SlashCmdList) do
         local i = 1
@@ -57,10 +56,10 @@ local function ScanBuiltIn()
             end
             slash = slash:lower()
             discoveredCommands[slash] = {
-                slash = slash,
-                callback = func,
-                source = "Blizzard",
-                description = "<No description>",
+                slash       = slash,
+                callback    = func,
+                source      = "Blizzard",
+                description = "<No description>"
             }
             i = i + 1
         end
@@ -68,7 +67,7 @@ local function ScanBuiltIn()
 end
 
 local function ScanMacros()
-    -- Stubs for reading macros, or actual usage with WoW API
+    -- If you want to automatically incorporate macros or something custom
 end
 
 local function ScanAce()
@@ -81,11 +80,11 @@ local function ScanAce()
         if name then
             local slash = "/" .. name:lower()
             discoveredCommands[slash] = {
-                slash = slash,
-                callback = function(msg)
+                slash       = slash,
+                callback    = function(msg)
                     print("In-game macro: ", name, "body:", body)
                 end,
-                source = "Macro",
+                source      = "Macro",
                 description = "Macro: " .. name
             }
         end
@@ -100,6 +99,7 @@ function CommandSage_Discovery:ScanAllCommands()
     ScanMacros()
     ScanAce()
     ForceFallbacks()
+
     for slash, data in pairs(discoveredCommands) do
         CommandSage_Trie:InsertCommand(slash, data)
     end
@@ -109,14 +109,3 @@ end
 function CommandSage_Discovery:GetDiscoveredCommands()
     return discoveredCommands
 end
-
--- We'll do a background timer to re-scan every 3 minutes
-local bgFrame = CreateFrame("Frame")
-bgFrame.elapsed = 0
-bgFrame:SetScript("OnUpdate", function(self, e)
-    self.elapsed = self.elapsed + e
-    if self.elapsed > 180 then
-        self.elapsed = 0
-        CommandSage_Discovery:ScanAllCommands()
-    end
-end)
