@@ -6,7 +6,6 @@
 CommandSage_SecureCallback = {}
 
 function CommandSage_SecureCallback:IsCommandProtected(slash)
-    -- We might store a table of protected commands or guess
     if slash == "/console" then
         return true
     end

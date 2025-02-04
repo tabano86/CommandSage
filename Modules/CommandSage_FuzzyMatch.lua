@@ -37,9 +37,8 @@ local function Levenshtein(a, b)
 end
 
 local function getContextBonus()
-    -- If in combat, or certain zone, etc.
     if InCombatLockdown() then
-        return -1 -- example: deprioritize some commands if we want?
+        return -1
     end
     return 0
 end
@@ -50,12 +49,16 @@ function CommandSage_FuzzyMatch:GetSuggestions(input, possibleCommands)
     for _, cmdObj in ipairs(possibleCommands) do
         local slash = cmdObj.slash
         local dist = Levenshtein(slash, input)
-        -- Basic tolerance check
         if dist <= tolerance then
             local usageScore = CommandSage_AdaptiveLearning:GetUsageScore(slash)
             local cBonus = getContextBonus()
             local rank = -dist + usageScore * 0.7 + cBonus
-            table.insert(results, { slash = slash, data = cmdObj.data, rank = rank, distance = dist })
+            table.insert(results, {
+                slash = slash,
+                data  = cmdObj.data,
+                rank  = rank,
+                distance = dist
+            })
         end
     end
     table.sort(results, function(a, b)
@@ -64,9 +67,7 @@ function CommandSage_FuzzyMatch:GetSuggestions(input, possibleCommands)
     return results
 end
 
--- For error correction if no matches found
 function CommandSage_FuzzyMatch:SuggestCorrections(input)
-    -- We can do a wide search among all discovered commands
     local discovered = CommandSage_Discovery:GetDiscoveredCommands()
     local bestDist = 999
     local bestCmd = nil

@@ -27,7 +27,12 @@ function CommandSage_Performance:ShowDashboard()
 
     local text = "Trie Nodes: " .. self:CountTrieNodes() .. "\n"
     local discovered = CommandSage_Discovery:GetDiscoveredCommands()
-    text = text .. "Discovered commands: " .. (discovered and #discovered or 0) .. "\n"
+    local count = 0
+    for _ in pairs(discovered) do
+        count = count + 1
+    end
+    text = text .. "Discovered commands: " .. count .. "\n"
+
     perfFrame.statsText:SetText(text)
     perfFrame:Show()
 end

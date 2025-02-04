@@ -1,6 +1,7 @@
 -- =============================================================================
 -- CommandSage_Trie.lua
 -- Optimized Trie for storing slash commands
+-- Includes RemoveCommand() so we can unregister
 -- =============================================================================
 
 CommandSage_Trie = {}
@@ -9,7 +10,7 @@ local root = {
     children = {},
     isTerminal = false,
     info = nil,
-    maxDepth = 0, -- optional optimization
+    maxDepth = 0,
 }
 
 local function updateMaxDepth(node, depth)
@@ -70,4 +71,41 @@ function CommandSage_Trie:Clear()
     root.isTerminal = false
     root.info = nil
     root.maxDepth = 0
+end
+
+function CommandSage_Trie:RemoveCommand(command)
+    local path = {}
+    local node = root
+
+    for i = 1, #command do
+        local c = command:sub(i, i)
+        if not node.children[c] then
+            return
+        end
+        table.insert(path, { parent = node, char = c })
+        node = node.children[c]
+    end
+
+    if not node.isTerminal then
+        return
+    end
+
+    node.isTerminal = false
+    node.info = nil
+
+    for i = #path, 1, -1 do
+        local entry = path[i]
+        local parent = entry.parent
+        local char = entry.char
+        local child = parent.children[char]
+
+        if child.isTerminal then
+            break
+        end
+        if not next(child.children) then
+            parent.children[char] = nil
+        else
+            break
+        end
+    end
 end

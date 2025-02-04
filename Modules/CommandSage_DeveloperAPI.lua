@@ -1,6 +1,6 @@
 -- =============================================================================
 -- CommandSage_DeveloperAPI.lua
--- Events, debug, forced reindex, etc.
+-- Events, debug, forced reindex, plus external plugin registration
 -- =============================================================================
 
 CommandSage_DeveloperAPI = {}
@@ -44,4 +44,38 @@ end
 
 function CommandSage_DeveloperAPI:GetAllCommands()
     return CommandSage_Discovery:GetDiscoveredCommands()
+end
+
+-- =============================================================================
+-- Registration/unregistration for external addons
+-- =============================================================================
+
+function CommandSage_DeveloperAPI:RegisterCommand(slash, callback, description, category)
+    if not slash or slash == "" then return end
+    local discovered = CommandSage_Discovery:GetDiscoveredCommands()
+    local lowerSlash = slash:lower()
+
+    discovered[lowerSlash] = {
+        slash     = lowerSlash,
+        callback  = callback or function(msg)
+            print("No callback defined for:", slash)
+        end,
+        source    = "ExternalPlugin",
+        description = description or "",
+        category  = category or "plugin"
+    }
+    CommandSage_Trie:InsertCommand(lowerSlash, discovered[lowerSlash])
+    self:FireEvent("COMMANDS_UPDATED")
+end
+
+function CommandSage_DeveloperAPI:UnregisterCommand(slash)
+    if not slash or slash == "" then return end
+    local discovered = CommandSage_Discovery:GetDiscoveredCommands()
+    local lowerSlash = slash:lower()
+
+    if discovered[lowerSlash] then
+        discovered[lowerSlash] = nil
+        CommandSage_Trie:RemoveCommand(lowerSlash)
+        self:FireEvent("COMMANDS_UPDATED")
+    end
 end

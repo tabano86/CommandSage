@@ -68,17 +68,15 @@ local function ScanBuiltIn()
 end
 
 local function ScanMacros()
-    -- Stubs for reading macros
+    -- Stubs for reading macros, or actual usage with WoW API
     -- local global, char = GetNumMacros()
     -- ...
 end
 
 local function ScanAce()
-    -- If Ace is loaded, we can introspect AceConsole or similar
     if not CommandSage_Config.Get("preferences", "macroInclusion") then
         return
     end
-
     local global, char = GetNumMacros()
     for i = 1, global do
         local name, icon, body = GetMacroInfo(i)

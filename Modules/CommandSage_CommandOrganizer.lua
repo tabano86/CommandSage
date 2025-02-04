@@ -6,9 +6,10 @@
 CommandSage_CommandOrganizer = {}
 
 local tagDB = {
-    ["/dance"] = { "social" },
-    ["/macro"] = { "macros" },
+    ["/dance"]  = { "social" },
+    ["/macro"]  = { "macros" },
     ["/cmdsage"] = { "plugin" },
+    -- Add more known slash->category mappings here
 }
 
 function CommandSage_CommandOrganizer:GetCommandTags(slash)

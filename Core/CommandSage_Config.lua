@@ -1,6 +1,6 @@
 -- =============================================================================
 -- CommandSage_Config.lua
--- All features ON by default
+-- All features ON by default, plus extra user config from new features
 -- =============================================================================
 
 CommandSage_Config = {}
@@ -17,21 +17,36 @@ function CommandSage_Config:InitializeDefaults()
     local prefs = CommandSageDB.config.preferences
     if not prefs then
         prefs = {
-            fuzzyMatchEnabled = true,
-            fuzzyMatchTolerance = 2,
-            maxSuggestions = 12,
-            animateAutoType = true,
-            showTutorialOnStartup = true,
-            usageAnalytics = true,
-            contextAwareness = true, -- e.g. in-combat vs not
-            voiceCommandEnabled = false,
-            fallbackEnabled = false,
-            autoTypeDelay = 0.03,
-            persistHistory = true,
-            snippetEnabled = true,
-            contextFiltering = true,
-            typeAheadPrediction = true,
-            suggestionMode = "fuzzy", -- or "strict"
+            -- Existing defaults:
+            fuzzyMatchEnabled        = true,
+            fuzzyMatchTolerance      = 2,
+            maxSuggestions           = 12,
+            animateAutoType          = true,
+            showTutorialOnStartup    = true,
+            usageAnalytics           = true,
+            contextAwareness         = true,  -- e.g. in-combat vs not
+            voiceCommandEnabled      = false,
+            fallbackEnabled          = false,
+            autoTypeDelay            = 0.03,
+            persistHistory           = true,
+            snippetEnabled           = true,
+            contextFiltering         = true,
+            typeAheadPrediction      = true,
+            suggestionMode           = "fuzzy",  -- or "strict"
+
+            -- Preferences added in a previous update:
+            overrideHotkeysWhileTyping = true,
+            favoritesSortingEnabled    = true,
+
+            -- NEW: Additional user config options
+            autocompleteOpenDirection      = "down",  -- "up" or "down"
+            maxSuggestionsOverride         = nil,      -- user can override the default
+            showParamSuggestionsInColor    = true,
+            paramSuggestionsColor          = { 1.0, 0.8, 0.0 }, -- a golden color
+            showDescriptionsInAutocomplete = true,
+            terminalNavigationEnabled      = true, -- up/down/tab mimics typical shell
+            advancedStyling               = true,  -- "prettier" UI if true
+            enableTerminalGoodies          = true,  -- e.g. /cls, /lsmacros, etc.
         }
         CommandSageDB.config.preferences = prefs
     end

@@ -1,11 +1,10 @@
 -- =============================================================================
 -- CommandSage_ParameterHelper.lua
--- Show subcommands, expected args inline
+-- Show subcommands, expected args inline (colored differently if desired)
 -- =============================================================================
 
 CommandSage_ParameterHelper = {}
 
--- Example metadata for certain commands
 local knownParams = {
     ["/dance"] = { "silly", "fancy", "epic" },
     ["/macro"] = { "new", "delete", "edit" },

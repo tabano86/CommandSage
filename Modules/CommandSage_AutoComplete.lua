@@ -1,6 +1,11 @@
 -- =============================================================================
 -- CommandSage_AutoComplete.lua
--- The “next-decade” UI: scrollable, arrow keys, context filtering, etc.
+-- Enhanced with:
+--  - separate color for param suggestions
+--  - descriptions next to commands
+--  - new "autocompleteOpenDirection" support (up or down)
+--  - close window when exiting chat
+--  - real terminal-like navigation with Tab/Up/Down
 -- =============================================================================
 
 CommandSage_AutoComplete = {}
@@ -8,7 +13,7 @@ CommandSage_AutoComplete = {}
 local autoFrame, scrollFrame, content
 local selectedIndex = 0
 local suggestionButtons = {}
-local MAX_SUGGEST = 20
+local DEFAULT_MAX_SUGGEST = 20
 
 -- Example snippet templates
 local snippetTemplates = {
@@ -21,17 +26,38 @@ local function CreateAutoCompleteUI()
         return autoFrame
     end
 
+    -- Decide anchor direction
+    local direction = CommandSage_Config.Get("preferences", "autocompleteOpenDirection") or "down"
+
     autoFrame = CreateFrame("Frame", "CommandSageAutoCompleteFrame", UIParent, "BackdropTemplate")
+
+    -- If user wants the autocomplete above the chat input
+    if direction == "up" then
+        autoFrame:SetPoint("BOTTOMLEFT", ChatFrame1EditBox, "TOPLEFT", 0, 2)
+    else
+        -- default "down"
+        autoFrame:SetPoint("TOPLEFT", ChatFrame1EditBox, "BOTTOMLEFT", 0, -2)
+    end
     autoFrame:SetSize(350, 250)
-    autoFrame:SetPoint("TOPLEFT", ChatFrame1EditBox, "BOTTOMLEFT", 0, -2)
-    autoFrame:SetBackdrop({
-        bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
-        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-        tileSize = 16,
-        edgeSize = 16,
-        insets = { left = 4, right = 4, top = 4, bottom = 4 },
-    })
-    autoFrame:SetBackdropColor(0, 0, 0, 0.9)
+
+    if CommandSage_Config.Get("preferences", "advancedStyling") then
+        autoFrame:SetBackdrop({
+            bgFile   = "Interface\\Tooltips\\UI-Tooltip-Background",
+            edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+            tile     = true, tileSize = 16, edgeSize = 16,
+            insets   = { left = 4, right = 4, top = 4, bottom = 4 },
+        })
+        autoFrame:SetBackdropColor(0, 0, 0, 0.85)
+    else
+        -- simpler styling
+        autoFrame:SetBackdrop({
+            bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+            edgeFile = nil,
+            tile = false, tileSize = 0, edgeSize = 0,
+        })
+        autoFrame:SetBackdropColor(0.05, 0.05, 0.05, 0.9)
+    end
+
     autoFrame:Hide()
 
     scrollFrame = CreateFrame("ScrollFrame", "CommandSageAutoScroll", autoFrame, "UIPanelScrollFrameTemplate")
@@ -43,7 +69,11 @@ local function CreateAutoCompleteUI()
     scrollFrame:SetScrollChild(content)
     content.buttons = {}
 
-    for i = 1, MAX_SUGGEST do
+    -- We compute max suggestions from either user override or default
+    local userMax = CommandSage_Config.Get("preferences", "maxSuggestionsOverride")
+    local maxSuggest = userMax or DEFAULT_MAX_SUGGEST
+
+    for i = 1, maxSuggest do
         local btn = CreateFrame("Button", nil, content)
         btn:SetHeight(20)
         btn:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -(i - 1) * 20)
@@ -62,10 +92,10 @@ local function CreateAutoCompleteUI()
         btn.text:SetPoint("LEFT", 5, 0)
         btn.text:SetJustifyH("LEFT")
 
-        btn.info = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        btn.info:SetPoint("RIGHT", -5, 0)
-        btn.info:SetJustifyH("RIGHT")
-        btn.info:SetTextColor(0.8, 0.8, 0.8, 1)
+        btn.desc = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        btn.desc:SetPoint("RIGHT", -5, 0)
+        btn.desc:SetJustifyH("RIGHT")
+        btn.desc:SetTextColor(0.7, 0.7, 0.7, 1) -- a bit dimmer
 
         btn:SetScript("OnEnter", function(self)
             self.bg:Show()
@@ -86,9 +116,10 @@ end
 
 -- Keyboard navigation
 local function MoveSelection(delta)
-    local frame = CreateAutoCompleteUI()
+    if not content then return end
+
     local totalShown = 0
-    for i, b in ipairs(content.buttons) do
+    for _, b in ipairs(content.buttons) do
         if b:IsShown() then
             totalShown = totalShown + 1
         end
@@ -105,7 +136,6 @@ local function MoveSelection(delta)
         selectedIndex = 1
     end
 
-    -- highlight the selected one
     for i, b in ipairs(content.buttons) do
         if i == selectedIndex then
             b.bg:Show()
@@ -116,6 +146,7 @@ local function MoveSelection(delta)
 end
 
 function CommandSage_AutoComplete:AcceptSuggestion(sugg)
+    if not sugg then return end
     local slashCmd = sugg.slash
     if slashCmd then
         if CommandSage_Config.Get("preferences", "animateAutoType") then
@@ -128,7 +159,9 @@ function CommandSage_AutoComplete:AcceptSuggestion(sugg)
         CommandSage_AdaptiveLearning:IncrementUsage(slashCmd)
         CommandSage_HistoryPlayback:AddToHistory(slashCmd)
     end
-    autoFrame:Hide()
+    if autoFrame then
+        autoFrame:Hide()
+    end
 end
 
 function CommandSage_AutoComplete:ShowSuggestions(suggestions)
@@ -138,81 +171,55 @@ function CommandSage_AutoComplete:ShowSuggestions(suggestions)
         return
     end
 
-    local maxShow = math.min(#suggestions, MAX_SUGGEST)
+    local userMax = CommandSage_Config.Get("preferences", "maxSuggestionsOverride")
+    local maxSuggest = userMax or DEFAULT_MAX_SUGGEST
+    local totalToShow = math.min(#suggestions, maxSuggest)
     local btnHeight = 20
-    local totalHeight = maxShow * btnHeight
+    local totalHeight = totalToShow * btnHeight
     content:SetHeight(totalHeight)
 
     for i, btn in ipairs(content.buttons) do
         local s = suggestions[i]
-        if i <= maxShow and s then
+        if i <= totalToShow and s then
             btn.suggestionData = s
+
             local usageScore = CommandSage_AdaptiveLearning:GetUsageScore(s.slash)
             local freqDisplay = usageScore > 0 and ("(" .. usageScore .. ")") or ""
             local cat = CommandSage_CommandOrganizer:GetCategory(s.slash)
-            local desc = s.data and s.data.description or ""
-            btn.text:SetText(s.slash .. " | " .. cat)
-            btn.info:SetText(freqDisplay)
+            local desc = s.data and (s.data.description or "") or ""
+
+            local displayText = s.slash
+            -- If param suggestion, color it
+            if s.isParamSuggestion and CommandSage_Config.Get("preferences", "showParamSuggestionsInColor") then
+                btn.text:SetTextColor(unpack(CommandSage_Config.Get("preferences", "paramSuggestionsColor")))
+            else
+                btn.text:SetTextColor(1, 1, 1, 1)
+            end
+
+            btn.text:SetText(displayText)
+
+            if CommandSage_Config.Get("preferences", "showDescriptionsInAutocomplete") then
+                -- Show category or desc on the right
+                if desc == "" then
+                    desc = cat
+                end
+                btn.desc:SetText(freqDisplay .. " " .. desc)
+            else
+                btn.desc:SetText(freqDisplay)
+            end
 
             btn:Show()
         else
             btn:Hide()
         end
     end
+
     selectedIndex = 0
     frame:SetHeight(math.min(totalHeight + 10, 250))
     frame:Show()
 end
 
-function CommandSage_AutoComplete:OnEditBoxKeyDown(key)
-    if not autoFrame or not autoFrame:IsShown() then
-        return false
-    end
-    if key == "UP" then
-        MoveSelection(-1)
-        return true
-    elseif key == "DOWN" then
-        MoveSelection(1)
-        return true
-    elseif key == "ENTER" or key == "TAB" then
-        local i = selectedIndex
-        if i > 0 and content.buttons[i] and content.buttons[i]:IsShown() then
-            self:AcceptSuggestion(content.buttons[i].suggestionData)
-            return true
-        end
-    end
-    return false
-end
-
--- Snippet-based suggestions
-local function GetSnippets(partial)
-    if not CommandSage_Config.Get("preferences", "snippetEnabled") then
-        return {}
-    end
-    local out = {}
-    for _, snip in ipairs(snippetTemplates) do
-        if snip.slash:find(partial:lower()) then
-            table.insert(out, {
-                slash = snip.snippet,
-                data = { description = snip.desc },
-                rank = 1
-            })
-        end
-    end
-    return out
-end
-
--- Filter out commands if contextFiltering=on and we are in combat
-local function FilterByContext(sugg)
-    if not CommandSage_Config.Get("preferences", "contextFiltering") then
-        return true
-    end
-    if InCombatLockdown() and (sugg.slash == "/macro") then
-        return false
-    end
-    return true
-end
-
+-- Generate all suggestions from the typed text
 function CommandSage_AutoComplete:GenerateSuggestions(typedText)
     local mode = CommandSage_Config.Get("preferences", "suggestionMode") or "fuzzy"
     local partialLower = typedText:lower()
@@ -230,24 +237,66 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
             return a.slash < b.slash
         end)
     end
-    -- add snippet suggestions
-    local snippetList = GetSnippets(partialLower)
-    for _, s in ipairs(snippetList) do
-        table.insert(matched, s)
+
+    -- snippet suggestions
+    if CommandSage_Config.Get("preferences", "snippetEnabled") then
+        for _, snip in ipairs(snippetTemplates) do
+            if snip.slash:find(partialLower) then
+                table.insert(matched, {
+                    slash = snip.snippet,
+                    data = { description = snip.desc },
+                    rank = 1
+                })
+            end
+        end
     end
+
     -- Filter out blacklisted or context
     local final = {}
     for _, m in ipairs(matched) do
-        if not CommandSage_Analytics:IsBlacklisted(m.slash) and FilterByContext(m) then
+        if not CommandSage_Analytics:IsBlacklisted(m.slash) and CommandSage_AutoComplete:PassesContextFilter(m) then
             table.insert(final, m)
         end
     end
+
+    -- If user wants favorites first
+    if CommandSage_Config.Get("preferences", "favoritesSortingEnabled") then
+        table.sort(final, function(a, b)
+            local aFav = CommandSage_Analytics:IsFavorite(a.slash) and 1 or 0
+            local bFav = CommandSage_Analytics:IsFavorite(b.slash) and 1 or 0
+            if aFav ~= bFav then
+                return aFav > bFav
+            end
+            return (a.rank or 0) > (b.rank or 0)
+        end)
+    else
+        table.sort(final, function(a, b)
+            return (a.rank or 0) > (b.rank or 0)
+        end)
+    end
+
     return final
 end
 
--- Real-time auto-complete hooking
+function CommandSage_AutoComplete:PassesContextFilter(sugg)
+    if not CommandSage_Config.Get("preferences", "contextFiltering") then
+        return true
+    end
+    if InCombatLockdown() and (sugg.slash == "/macro") then
+        return false
+    end
+    return true
+end
+
+-- Keyboard hooking logic
 local hookingFrame = CreateFrame("Frame")
 hookingFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+
+local function CloseAutoCompleteOnChatDeactivate()
+    if autoFrame and autoFrame:IsShown() then
+        autoFrame:Hide()
+    end
+end
 
 hookingFrame:SetScript("OnEvent", function()
     local edit = ChatFrame1EditBox
@@ -255,15 +304,68 @@ hookingFrame:SetScript("OnEvent", function()
         return
     end
 
-    -- Hook arrow keys & text changes
+    -- 1) Close auto-complete when exiting chat
+    hooksecurefunc("ChatEdit_DeactivateChat", CloseAutoCompleteOnChatDeactivate)
+
+    -- 2) KeyDown logic
     edit:HookScript("OnKeyDown", function(self, key)
-        if CommandSage_AutoComplete:OnEditBoxKeyDown(key) then
-            -- swallow
+        local text = self:GetText() or ""
+        local override = CommandSage_Config.Get("preferences", "overrideHotkeysWhileTyping")
+
+        -- If user is typing a slash command, block certain WoW hotkeys
+        if override and #text > 0 and text:sub(1,1) == "/" then
+            self:SetPropagateKeyboardInput(false)
+            if CommandSage_Config.Get("preferences", "terminalNavigationEnabled") then
+                if key == "UP" then
+                    MoveSelection(-1)
+                    return
+                elseif key == "DOWN" then
+                    MoveSelection(1)
+                    return
+                elseif key == "TAB" then
+                    if selectedIndex > 0 and content.buttons[selectedIndex]:IsShown() then
+                        CommandSage_AutoComplete:AcceptSuggestion(content.buttons[selectedIndex].suggestionData)
+                    else
+                        -- If no selection yet, move to first
+                        MoveSelection(1)
+                    end
+                    return
+                end
+            end
         else
-            self:SetPropagateKeyboardInput(true)
+            -- fallback
+            if CommandSage_Config.Get("preferences", "terminalNavigationEnabled") then
+                -- If auto-complete is open, try to handle arrow keys
+                if autoFrame and autoFrame:IsShown() then
+                    if key == "UP" or key == "DOWN" or key == "TAB" then
+                        self:SetPropagateKeyboardInput(false)
+                        if key == "UP" then
+                            MoveSelection(-1)
+                            return
+                        elseif key == "DOWN" then
+                            MoveSelection(1)
+                            return
+                        elseif key == "TAB" then
+                            if selectedIndex > 0 and content.buttons[selectedIndex]:IsShown() then
+                                CommandSage_AutoComplete:AcceptSuggestion(content.buttons[selectedIndex].suggestionData)
+                            else
+                                MoveSelection(1)
+                            end
+                            return
+                        end
+                    else
+                        self:SetPropagateKeyboardInput(true)
+                    end
+                else
+                    self:SetPropagateKeyboardInput(true)
+                end
+            else
+                self:SetPropagateKeyboardInput(true)
+            end
         end
     end)
 
+    -- 3) Text changed => generate suggestions
     local orig = edit:GetScript("OnTextChanged")
     edit:SetScript("OnTextChanged", function(eBox, userInput)
         if orig then
@@ -283,7 +385,6 @@ hookingFrame:SetScript("OnEvent", function()
             end
             return
         end
-        -- show suggestions after at least "/x" (2 chars)
         if #text < 2 then
             if autoFrame then
                 autoFrame:Hide()
@@ -291,21 +392,24 @@ hookingFrame:SetScript("OnEvent", function()
             return
         end
 
-        -- if user typed a recognized command + space => show parameter hints
+        -- check if we typed "command param..."
         local firstWord = text:match("^(%S+)")
         local rest = text:match("^%S+%s+(.*)") or ""
         local paramHints = CommandSage_ParameterHelper:GetParameterSuggestions(firstWord, rest)
         if #paramHints > 0 then
             local paramSugg = {}
             for _, ph in ipairs(paramHints) do
-                local s = firstWord .. " " .. ph
-                table.insert(paramSugg, { slash = s, data = { description = "[Arg completion]" }, rank = 0 })
+                table.insert(paramSugg, {
+                    slash = firstWord .. " " .. ph,
+                    data  = { description = "[Arg completion]" },
+                    rank  = 0,
+                    isParamSuggestion = true
+                })
             end
             CommandSage_AutoComplete:ShowSuggestions(paramSugg)
             return
         end
 
-        -- normal generation
         local final = CommandSage_AutoComplete:GenerateSuggestions(text)
         CommandSage_AutoComplete:ShowSuggestions(final)
     end)
