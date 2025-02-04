@@ -22,7 +22,3 @@ See `scripts/build.sh` for a quick packaging approach.
 A sample GitHub workflow in `.github/workflows/curseforge.yml`.
 
 ## License
-
-[MIT](./LICENSE)
-
-Signed off by: <Your Name>, <Your Email> (2023)
