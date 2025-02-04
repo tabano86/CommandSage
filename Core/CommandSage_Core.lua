@@ -148,12 +148,13 @@ end
 local chatBox = ChatFrame1EditBox
 chatBox:HookScript("OnEditFocusGained", function(self)
     DisableAllBindings()
-    -- Always consume all key events while chat is active:
     self:SetPropagateKeyboardInput(false)
+    CommandSage_KeyBlocker:BlockKeys()
 end)
 chatBox:HookScript("OnEditFocusLost", function(self)
     RestoreAllBindings()
     self:SetPropagateKeyboardInput(true)
+    CommandSage_KeyBlocker:UnblockKeys()
 end)
 
 f:SetScript("OnEvent", OnEvent)
