@@ -12,6 +12,7 @@ function CommandSage_Performance:ShowDashboard()
         perfFrame:Hide()
         return
     end
+
     if not perfFrame then
         perfFrame = CreateFrame("Frame", "CommandSagePerfFrame", UIParent, "BasicFrameTemplate")
         perfFrame:SetSize(300, 200)
@@ -22,15 +23,14 @@ function CommandSage_Performance:ShowDashboard()
         fs:SetPoint("TOPLEFT", 15, -30)
         fs:SetWidth(270)
         fs:SetJustifyH("LEFT")
-        fs:SetText("Collecting stats...")
-
+        fs:SetText("")
         perfFrame.statsText = fs
     end
 
     local statsText = ""
-    statsText = statsText .. "Trie Nodes: " .. CommandSage_Performance:CountTrieNodes() .. "\n"
-    statsText = statsText .. "Cached Commands: " .. #CommandSage_Discovery:GetDiscoveredCommands() .. "\n"
-    statsText = statsText .. "(More metrics could go here...)"
+    statsText = statsText .. "Trie Nodes: " .. self:CountTrieNodes() .. "\n"
+    statsText = statsText .. "Discovered commands: " .. #CommandSage_Discovery:GetDiscoveredCommands() .. "\n"
+    statsText = statsText .. "(More metrics can go here)\n"
 
     perfFrame.statsText:SetText(statsText)
     perfFrame:Show()
@@ -39,7 +39,7 @@ end
 function CommandSage_Performance:CountTrieNodes()
     local function countNodes(node)
         local sum = 1
-        for _, child in pairs(node.children) do
+        for _,child in pairs(node.children) do
             sum = sum + countNodes(child)
         end
         return sum

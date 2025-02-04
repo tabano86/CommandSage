@@ -1,0 +1,24 @@
+# Typical ignores
+*.bak
+*.swp
+*.zip
+*~
+.*.swp
+.DS_Store
+Thumbs.db
+
+# Tools
+dist/
+build/
+scripts/*.log
+
+# LuaCheck or lint logs
+luacheck.log
+
+# Possibly user config or local DB
+CommandSageDB.lua
+CommandSageDB.lua.bak
+
+# Any editor config
+.idea/
+.vscode/

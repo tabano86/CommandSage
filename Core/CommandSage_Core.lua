@@ -9,7 +9,6 @@ CommandSage = {}
 _G["CommandSage"] = CommandSage
 
 local coreFrame = CreateFrame("Frame")
-
 coreFrame:RegisterEvent("ADDON_LOADED")
 coreFrame:RegisterEvent("PLAYER_LOGIN")
 
@@ -17,16 +16,12 @@ local function OnEvent(self, event, ...)
     if event == "ADDON_LOADED" then
         local loadedAddon = ...
         if loadedAddon == addonName then
-            -- Initialize config
             CommandSage_Config:InitializeDefaults()
 
-            -- Build or load the Trie from saved variables
+            -- Load saved Trie, then do a re-scan
             CommandSage_PersistentTrie:LoadTrie()
-
-            -- Possibly do an initial re-scan for commands
             CommandSage_Discovery:ScanAllCommands()
 
-            -- Setup slash commands
             CommandSage:RegisterSlashCommands()
         end
     elseif event == "PLAYER_LOGIN" then
@@ -35,8 +30,6 @@ local function OnEvent(self, event, ...)
         end
     end
 end
-
-coreFrame:SetScript("OnEvent", OnEvent)
 
 function CommandSage:RegisterSlashCommands()
     SLASH_COMMANDSAGE1 = "/cmdsage"
@@ -66,3 +59,5 @@ function CommandSage:RegisterSlashCommands()
         end
     end
 end
+
+coreFrame:SetScript("OnEvent", OnEvent)

@@ -5,7 +5,6 @@
 
 CommandSage_CommandOrganizer = {}
 
--- For demonstration, a simple table storing tags for each slash
 local tagDB = {}
 
 function CommandSage_CommandOrganizer:SetCommandTags(slash, tags)

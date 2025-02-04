@@ -8,10 +8,9 @@ CommandSage_Trie = {}
 local root = {
     children = {},
     isTerminal = false,
-    info = nil,  -- For storing the command metadata
+    info = nil,
 }
 
--- Insert a slash command into the Trie
 function CommandSage_Trie:InsertCommand(command, data)
     local node = root
     for i=1, #command do
@@ -29,23 +28,21 @@ function CommandSage_Trie:InsertCommand(command, data)
     node.info = data
 end
 
--- Helper to recursively gather all terminal nodes under a node
 local function GatherAllCommands(node, prefix, results)
     if node.isTerminal and node.info then
         table.insert(results, { slash=prefix, data=node.info })
     end
     for c, child in pairs(node.children) do
-        GatherAllCommands(child, prefix .. c, results)
+        GatherAllCommands(child, prefix..c, results)
     end
 end
 
--- Find all completions for a given prefix
 function CommandSage_Trie:FindPrefix(prefix)
     local node = root
     for i=1, #prefix do
         local c = prefix:sub(i,i)
         if not node.children[c] then
-            return {} -- No matches
+            return {}
         end
         node = node.children[c]
     end

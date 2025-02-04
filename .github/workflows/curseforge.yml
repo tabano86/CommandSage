@@ -1,0 +1,32 @@
+name: Build CommandSage
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v2
+
+      - name: Set up zip
+        run: sudo apt-get install zip
+
+      - name: Build Addon
+        run: |
+          chmod +x scripts/build.sh
+          ./scripts/build.sh
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: CommandSage-Zip
+          path: ./dist/CommandSage-*.zip
+
+      # Example step for auto-publishing to CurseForge (requires a real action or custom script)
+      # - name: Publish to CurseForge
+      #   run: echo "Would upload to CurseForge with ${{ secrets.CURSEFORGE_TOKEN }}..."

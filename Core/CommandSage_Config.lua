@@ -9,24 +9,24 @@ function CommandSage_Config:InitializeDefaults()
     if not CommandSageDB then
         CommandSageDB = {}
     end
-
     if not CommandSageDB.config then
         CommandSageDB.config = {}
     end
 
-    -- Basic user preferences
+    -- Basic user preferences, all ON by default
     if not CommandSageDB.config.preferences then
         CommandSageDB.config.preferences = {
             fuzzyMatchEnabled = true,
-            fuzzyMatchTolerance = 2,  -- Levenshtein distance tolerance
-            maxSuggestions = 8,
-            animateAutoType = false,
+            fuzzyMatchTolerance = 2,
+            maxSuggestions = 10,
+            animateAutoType = true,
             showTutorialOnStartup = true,
             usageAnalytics = true,
             contextAwareness = true,
-            voiceCommandEnabled = false,
-            fallbackEnabled = true,
-            autoTypeDelay = 0.05, -- seconds per character typed
+            voiceCommandEnabled = true,
+            fallbackEnabled = false,      -- fallback OFF by default
+            autoTypeDelay = 0.03,         -- faster auto-typing
+            persistHistory = true,        -- new preference to remember commands
         }
     end
 end

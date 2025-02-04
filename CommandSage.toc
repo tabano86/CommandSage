@@ -1,7 +1,7 @@
 ## Interface: 11400
 ## Title: CommandSage
 ## Notes: Advanced slash command auto-completion system
-## Author: CommandSage Contributors
+## Author: Dirtbikr
 ## Version: 1.0
 ## SavedVariables: CommandSageDB
 

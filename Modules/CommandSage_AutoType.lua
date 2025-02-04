@@ -18,7 +18,7 @@ typingFrame:SetScript("OnUpdate", function(self, elapsed)
         local partial = self.textToType:sub(1, self.currentIndex)
         ChatFrame1EditBox:SetText(partial)
         ChatFrame1EditBox:SetCursorPosition(#partial)
-        self.delay = CommandSage_Config.Get("preferences", "autoTypeDelay") or 0.05
+        self.delay = CommandSage_Config.Get("preferences","autoTypeDelay") or 0.03
         if self.currentIndex >= #self.textToType then
             self:Hide()
         end
@@ -26,8 +26,7 @@ typingFrame:SetScript("OnUpdate", function(self, elapsed)
 end)
 
 function CommandSage_AutoType:BeginAutoType(fullCommand)
-    if not CommandSage_Config.Get("preferences", "animateAutoType") then
-        -- Just set the text instantly
+    if not CommandSage_Config.Get("preferences","animateAutoType") then
         ChatFrame1EditBox:SetText(fullCommand)
         ChatFrame1EditBox:SetCursorPosition(#fullCommand)
         return

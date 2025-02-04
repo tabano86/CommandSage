@@ -6,8 +6,6 @@
 CommandSage_MultiModal = {}
 
 function CommandSage_MultiModal:OnVoiceCommand(transcribedText)
-    -- The user said something that was transcribed
-    -- We attempt to match it to a slash command
     local best = CommandSage_FuzzyMatch:GetSuggestions(transcribedText, CommandSage_Trie:FindPrefix("/"))
     if #best > 0 then
         local top = best[1]

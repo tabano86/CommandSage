@@ -5,8 +5,6 @@
 
 CommandSage_ParameterHelper = {}
 
--- Example: we assume that data.subcommands = { "start", "stop", "info" }
--- or data.params = { "on", "off", "verbose" }
 function CommandSage_ParameterHelper:GetParameterSuggestions(commandData, partialArg)
     if not commandData then return {} end
     local results = {}
@@ -17,6 +15,5 @@ function CommandSage_ParameterHelper:GetParameterSuggestions(commandData, partia
             end
         end
     end
-    -- Could also parse /help text or extended metadata
     return results
 end

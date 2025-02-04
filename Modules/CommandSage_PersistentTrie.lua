@@ -10,7 +10,7 @@ local TRIE_DB_KEY = "cachedTrie"
 local function SerializeTrieNode(node)
     local result = {
         isTerminal = node.isTerminal,
-        info = node.info,  -- store slash command data
+        info = node.info,
         children = {},
     }
     for c, child in pairs(node.children) do
@@ -43,7 +43,6 @@ function CommandSage_PersistentTrie:LoadTrie()
         CommandSage_Trie:Clear()
         local root = CommandSage_Trie:GetRoot()
         local loadedRoot = DeserializeTrieNode(cached)
-        -- Overwrite root with loaded data
         root.children = loadedRoot.children
         root.isTerminal = loadedRoot.isTerminal
         root.info = loadedRoot.info

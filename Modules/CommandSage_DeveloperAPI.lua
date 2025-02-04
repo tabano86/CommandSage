@@ -24,9 +24,17 @@ end
 function CommandSage_DeveloperAPI:DebugDump()
     print("== CommandSage Debug Info ==")
     print("Trie node count:", CommandSage_Performance:CountTrieNodes())
-    print("Discovered commands:", #CommandSage_Discovery:GetDiscoveredCommands())
-    print("Usage data entries:", CommandSageDB.usageData and #CommandSageDB.usageData or 0)
-    -- etc.
+    local discovered = CommandSage_Discovery:GetDiscoveredCommands()
+    print("Discovered commands:", discovered and #discovered or 0)
+    if CommandSageDB.usageData then
+        local usageCount = 0
+        for _ in pairs(CommandSageDB.usageData) do usageCount=usageCount+1 end
+        print("Usage data entries:", usageCount)
+    else
+        print("Usage data entries: 0")
+    end
+    local hist = CommandSageDB.commandHistory
+    print("Persisted History entries:", hist and #hist or 0)
 end
 
 function CommandSage_DeveloperAPI:ForceReindex()
