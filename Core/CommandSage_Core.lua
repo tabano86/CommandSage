@@ -63,7 +63,6 @@ function CommandSage:RegisterSlashCommands()
         elseif cmd == "debug" then
             CommandSage_DeveloperAPI:DebugDump()
         elseif cmd == "config" then
-            -- e.g. /cmdsage config fuzzyMatchTolerance 3
             local key = args[2]
             local val = args[3]
             if key and val then
@@ -80,7 +79,6 @@ function CommandSage:RegisterSlashCommands()
                 print("Usage: /cmdsage config <key> <value>")
             end
         elseif cmd == "mode" then
-            -- e.g. /cmdsage mode strict|fuzzy
             local modeVal = args[2]
             if modeVal == "fuzzy" or modeVal == "strict" then
                 CommandSage_Config.Set("preferences", "suggestionMode", modeVal)
@@ -89,7 +87,6 @@ function CommandSage:RegisterSlashCommands()
                 print("Usage: /cmdsage mode <fuzzy|strict>")
             end
         elseif cmd == "theme" then
-            -- e.g. /cmdsage theme dark|light|classic
             local themeVal = args[2]
             if themeVal then
                 CommandSage_Config.Set("preferences", "uiTheme", themeVal)
@@ -98,7 +95,6 @@ function CommandSage:RegisterSlashCommands()
                 print("Usage: /cmdsage theme <dark|light|classic>")
             end
         elseif cmd == "scale" then
-            -- e.g. /cmdsage scale 1.2
             local scaleVal = args[2] and tonumber(args[2])
             if scaleVal then
                 CommandSage_Config.Set("preferences", "uiScale", scaleVal)
@@ -130,7 +126,6 @@ function CommandSage:RegisterSlashCommands()
     end
 end
 
--- Keybinding override to avoid conflicts while typing
 local bindingManagerFrame = CreateFrame("Frame", "CommandSageBindingManagerFrame")
 
 local function DisableAllBindings()
@@ -150,13 +145,15 @@ local function RestoreAllBindings()
     ClearOverrideBindings(bindingManagerFrame)
 end
 
--- Hook chat edit box events
 local chatBox = ChatFrame1EditBox
 chatBox:HookScript("OnEditFocusGained", function(self)
     DisableAllBindings()
+    -- Always consume all key events while chat is active:
+    self:SetPropagateKeyboardInput(false)
 end)
 chatBox:HookScript("OnEditFocusLost", function(self)
     RestoreAllBindings()
+    self:SetPropagateKeyboardInput(true)
 end)
 
 f:SetScript("OnEvent", OnEvent)

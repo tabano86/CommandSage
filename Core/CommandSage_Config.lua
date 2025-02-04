@@ -66,7 +66,7 @@ function CommandSage_Config:InitializeDefaults()
             configGuiEnabled           = true,
 
             -- NEW in version 4.1: fully disable hotkeys in chat
-            alwaysDisableHotkeysInChat = false,
+            alwaysDisableHotkeysInChat = true,
         }
         CommandSageDB.config.preferences = prefs
     end
@@ -90,9 +90,8 @@ function CommandSage_Config:InitializeDefaults()
     if prefs.configGuiEnabled == nil then
         prefs.configGuiEnabled = true
     end
-    -- Check our newly added key
     if prefs.alwaysDisableHotkeysInChat == nil then
-        prefs.alwaysDisableHotkeysInChat = false
+        prefs.alwaysDisableHotkeysInChat = true
     end
 end
 
