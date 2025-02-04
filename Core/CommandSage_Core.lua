@@ -18,7 +18,7 @@ local function OnEvent(self, event, ...)
         if loadedAddon == addonName then
             CommandSage_Config:InitializeDefaults()
 
-            -- We now load terminal goodies if enabled
+            -- Load terminal goodies if enabled
             if CommandSage_Config.Get("preferences", "enableTerminalGoodies") then
                 CommandSage_Terminal:Initialize()
             end
@@ -97,5 +97,38 @@ function CommandSage:RegisterSlashCommands()
         end
     end
 end
+
+-- =============================================================================
+-- Keybinding Management to Prevent Interference While Typing in Chat
+-- =============================================================================
+
+-- Create a frame to manage override bindings
+local bindingManagerFrame = CreateFrame("Frame", "CommandSageBindingManagerFrame")
+
+-- Function to disable all keybindings
+local function DisableAllBindings()
+    for i = 1, GetNumBindings() do
+        local command, key1, key2 = GetBinding(i)
+        if key1 then SetOverrideBinding(bindingManagerFrame, true, key1, nil) end
+        if key2 then SetOverrideBinding(bindingManagerFrame, true, key2, nil) end
+    end
+end
+
+-- Function to restore all keybindings
+local function RestoreAllBindings()
+    ClearOverrideBindings(bindingManagerFrame)
+end
+
+-- Hook into the chat edit box events
+local chatBox = ChatFrame1EditBox
+chatBox:HookScript("OnEditFocusGained", function(self)
+    DisableAllBindings()
+end)
+
+chatBox:HookScript("OnEditFocusLost", function(self)
+    RestoreAllBindings()
+end)
+
+-- =============================================================================
 
 f:SetScript("OnEvent", OnEvent)

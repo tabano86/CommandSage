@@ -307,63 +307,33 @@ hookingFrame:SetScript("OnEvent", function()
     -- 1) Close auto-complete when exiting chat
     hooksecurefunc("ChatEdit_DeactivateChat", CloseAutoCompleteOnChatDeactivate)
 
-    -- 2) KeyDown logic
+    local edit = ChatFrame1EditBox
     edit:HookScript("OnKeyDown", function(self, key)
         local text = self:GetText() or ""
-        local override = CommandSage_Config.Get("preferences", "overrideHotkeysWhileTyping")
-
-        -- If user is typing a slash command, block certain WoW hotkeys
-        if override and #text > 0 and text:sub(1,1) == "/" then
+        if text:sub(1, 1) == "/" then
+            -- Always block key propagation while typing a slash command
             self:SetPropagateKeyboardInput(false)
-            if CommandSage_Config.Get("preferences", "terminalNavigationEnabled") then
-                if key == "UP" then
-                    MoveSelection(-1)
-                    return
-                elseif key == "DOWN" then
+
+            -- Optionally handle navigation keys for your auto-complete UI:
+            if key == "UP" then
+                MoveSelection(-1)
+                return
+            elseif key == "DOWN" then
+                MoveSelection(1)
+                return
+            elseif key == "TAB" then
+                if selectedIndex > 0 and content.buttons[selectedIndex]:IsShown() then
+                    CommandSage_AutoComplete:AcceptSuggestion(content.buttons[selectedIndex].suggestionData)
+                else
                     MoveSelection(1)
-                    return
-                elseif key == "TAB" then
-                    if selectedIndex > 0 and content.buttons[selectedIndex]:IsShown() then
-                        CommandSage_AutoComplete:AcceptSuggestion(content.buttons[selectedIndex].suggestionData)
-                    else
-                        -- If no selection yet, move to first
-                        MoveSelection(1)
-                    end
-                    return
                 end
+                return
             end
         else
-            -- fallback
-            if CommandSage_Config.Get("preferences", "terminalNavigationEnabled") then
-                -- If auto-complete is open, try to handle arrow keys
-                if autoFrame and autoFrame:IsShown() then
-                    if key == "UP" or key == "DOWN" or key == "TAB" then
-                        self:SetPropagateKeyboardInput(false)
-                        if key == "UP" then
-                            MoveSelection(-1)
-                            return
-                        elseif key == "DOWN" then
-                            MoveSelection(1)
-                            return
-                        elseif key == "TAB" then
-                            if selectedIndex > 0 and content.buttons[selectedIndex]:IsShown() then
-                                CommandSage_AutoComplete:AcceptSuggestion(content.buttons[selectedIndex].suggestionData)
-                            else
-                                MoveSelection(1)
-                            end
-                            return
-                        end
-                    else
-                        self:SetPropagateKeyboardInput(true)
-                    end
-                else
-                    self:SetPropagateKeyboardInput(true)
-                end
-            else
-                self:SetPropagateKeyboardInput(true)
-            end
+            self:SetPropagateKeyboardInput(true)
         end
     end)
+
 
     -- 3) Text changed => generate suggestions
     local orig = edit:GetScript("OnTextChanged")
