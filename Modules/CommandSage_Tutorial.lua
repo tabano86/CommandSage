@@ -28,7 +28,7 @@ function CommandSage_Tutorial:ShowTutorialPrompt()
 
     local title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     title:SetPoint("TOP", 0, -10)
-    title:SetText("Welcome to CommandSage Next-Gen!")
+    title:SetText("Welcome to CommandSage Next-Gen 4.2!")
 
     local desc = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     desc:SetPoint("TOPLEFT", 20, -40)
@@ -56,3 +56,4 @@ function CommandSage_Tutorial:RefreshTutorialPrompt()
     print("Refreshing tutorial prompt...")
     self:ShowTutorialPrompt()
 end
+

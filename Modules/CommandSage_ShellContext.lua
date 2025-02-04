@@ -35,7 +35,7 @@ function CommandSage_ShellContext:HandleCd(msg)
     end
 
     local target = msg:lower():trim()
-    if target == ".." or target == "" then
+    if target == ".." or target == "none" or target == "clear" or target == "" then
         currentContext = nil
         print("CommandSage shell context cleared.")
     else
@@ -53,3 +53,4 @@ end
 function CommandSage_ShellContext:GetCurrentContext()
     return currentContext
 end
+

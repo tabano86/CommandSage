@@ -8,7 +8,8 @@ CommandSage_KeyBlocker = {}
 local blockerButton = CreateFrame("Button", "CommandSageKeyBlocker", UIParent, "SecureActionButtonTemplate")
 blockerButton:Hide()
 
--- Comprehensive list of keys based on a standard QWERTY layout and common keys.
+-- Comprehensive list of keys.
+-- If users find SHIFT usage is blocked, we can omit SHIFT, ALT from the block list.
 local allKeys = {
   -- Letters
   "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
@@ -20,7 +21,8 @@ local allKeys = {
   -- Arrow keys
   "UP", "DOWN", "LEFT", "RIGHT",
   -- Common control keys
-  "BACKSPACE", "TAB", "CAPSLOCK", "SHIFT", "CTRL", "ALT",
+  "BACKSPACE", "TAB", "CAPSLOCK",
+  -- Omit SHIFT, CTRL, ALT from block list to allow capital letters & combos
   "NUMLOCK", "SCROLLLOCK", "INSERT", "DELETE",
   "HOME", "END", "PAGEUP", "PAGEDOWN",
   "PRINTSCREEN", "PAUSE", "SPACE",
@@ -32,7 +34,6 @@ local allKeys = {
 
 function CommandSage_KeyBlocker:BlockKeys()
   for _, key in ipairs(allKeys) do
-    -- Bind each key to the dummy button so that the key press is consumed.
     SetOverrideBindingClick(blockerButton, true, key, "CommandSageKeyBlocker")
   end
   blockerButton:Show()
@@ -43,7 +44,8 @@ function CommandSage_KeyBlocker:UnblockKeys()
   blockerButton:Hide()
 end
 
--- Dummy OnClick handler that does nothing.
+-- Dummy OnClick handler
 blockerButton:SetScript("OnClick", function(self)
-  -- Intentionally empty: key events are blocked.
+  -- Intentionally empty
 end)
+

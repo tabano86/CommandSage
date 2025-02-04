@@ -25,18 +25,19 @@ function CommandSage_Config:InitializeDefaults()
 
     local prefs = CommandSageDB.config.preferences
     if not prefs then
+        -- Default preferences, updated to enable more features by default:
         prefs = {
-            -- Existing (older) defaults:
+            -- Existing (older) defaults (tweaked):
             fuzzyMatchEnabled          = true,
             fuzzyMatchTolerance        = 2,
             maxSuggestions             = 12,
-            animateAutoType            = true,
-            showTutorialOnStartup      = true,
+            animateAutoType            = true,   -- Keep animations on
+            showTutorialOnStartup      = true,   -- Let them see tutorial on first load
             usageAnalytics             = true,
             contextAwareness           = true,
             voiceCommandEnabled        = false,
             fallbackEnabled            = false,
-            autoTypeDelay              = 0.03,
+            autoTypeDelay              = 0.08,   -- Slower typing to be more noticeable
             persistHistory             = true,
             snippetEnabled             = true,
             contextFiltering           = true,
@@ -51,13 +52,19 @@ function CommandSage_Config:InitializeDefaults()
             showDescriptionsInAutocomplete = true,
             terminalNavigationEnabled  = true,
             advancedStyling            = true,
-            enableTerminalGoodies       = true,
-            advancedKeybinds            = true,
-            partialFuzzyFallback        = true,
-            shellContextEnabled         = false,
-            monetizationEnabled         = false,
+            enableTerminalGoodies      = true,
+            advancedKeybinds           = true,
+            partialFuzzyFallback       = true,   -- Enabled by default
+            shellContextEnabled        = true,   -- Enabled by default
+            monetizationEnabled        = false,  -- Keep monetization off by default
 
-            -- Newer expansions:
+            -- Additional scanning defaults:
+            macroInclusion             = true,
+            aceConsoleInclusion        = true,
+            blizzAllFallback           = true,   -- Force scanning built-in commands
+            userCustomFallbackEnabled  = false,
+
+            -- NEW in version 4.1+ (still relevant for 4.2):
             uiTheme                    = "dark",
             uiScale                    = 1.0,
             autocompleteBgColor        = { 0, 0, 0, 0.85 },
@@ -65,7 +72,7 @@ function CommandSage_Config:InitializeDefaults()
             tutorialFadeIn             = true,
             configGuiEnabled           = true,
 
-            -- NEW in version 4.1: fully disable hotkeys in chat
+            -- Always disable hotkeys in chat can be annoying, but let's enable:
             alwaysDisableHotkeysInChat = true,
         }
         CommandSageDB.config.preferences = prefs
@@ -124,3 +131,4 @@ function CommandSage_Config:ResetPreferences()
     self:InitializeDefaults()
     print("CommandSage: Preferences reset to default.")
 end
+

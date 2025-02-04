@@ -10,7 +10,6 @@ local largeText = false
 
 function CommandSage_UIAccessibility:EnableHighContrast()
     highContrast = true
-    -- Advanced restyling could be applied here
     print("High contrast mode enabled.")
 end
 
@@ -21,7 +20,6 @@ end
 
 function CommandSage_UIAccessibility:EnableLargeText()
     largeText = true
-    -- Increase font sizes or scale up UI elements as needed
     print("Large text mode enabled.")
 end
 
@@ -45,3 +43,4 @@ function CommandSage_UIAccessibility:ToggleHighContrast()
         self:EnableHighContrast()
     end
 end
+

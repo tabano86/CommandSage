@@ -24,7 +24,7 @@ function CommandSage_Licensing:HandleLicenseCommand(msg)
         if self:IsProActive() then
             print("CommandSage Pro is ACTIVE.")
         else
-            print("CommandSage Pro is NOT active. Enter /license <key> to activate.")
+            print("CommandSage Pro is NOT active. Enter /license <key> to activate or ignore if not needed.")
         end
         return
     end
@@ -40,3 +40,4 @@ end
 function CommandSage_Licensing:GetLicenseKey()
     return CommandSageDB[LICENSE_KEY_DB_FIELD]
 end
+

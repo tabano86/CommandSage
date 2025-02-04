@@ -14,13 +14,13 @@ function CommandSage_Performance:ShowDashboard()
     end
     if not perfFrame then
         perfFrame = CreateFrame("Frame", "CommandSagePerfFrame", UIParent, "BasicFrameTemplate")
-        perfFrame:SetSize(320, 200)
+        perfFrame:SetSize(360, 220)
         perfFrame:SetPoint("CENTER")
         perfFrame.TitleText:SetText("CommandSage Performance")
 
         local fs = perfFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
         fs:SetPoint("TOPLEFT", 15, -30)
-        fs:SetWidth(290)
+        fs:SetWidth(330)
         fs:SetText("")
         perfFrame.statsText = fs
     end
@@ -62,3 +62,4 @@ function CommandSage_Performance:PrintDetailedStats()
     print("Discovered commands:", count)
     print("Memory (MB):", string.format("%.2f", collectgarbage("count")/1024))
 end
+

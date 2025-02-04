@@ -36,3 +36,4 @@ function CommandSage_AROverlays:ToggleOverlay()
         f:Show()
     end
 end
+

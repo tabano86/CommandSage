@@ -87,3 +87,4 @@ end
 function CommandSage_FuzzyMatch:GetFuzzyDistance(strA, strB)
     return Levenshtein(strA:lower(), strB:lower())
 end
+

@@ -48,7 +48,7 @@ function CommandSage_Terminal:Initialize()
 
     SLASH_CMDVERSION1 = "/version"
     SlashCmdList["CMDVERSION"] = function(msg)
-        print("CommandSage Terminal v4.1")
+        print("CommandSage Terminal v4.2")
     end
 
     SLASH_CMDSHELLCD1 = "/cd"
@@ -67,3 +67,4 @@ function CommandSage_Terminal:Initialize()
         print("You are: " .. name)
     end
 end
+

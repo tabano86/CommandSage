@@ -19,7 +19,7 @@ frame:SetScript("OnUpdate", function(self, elapsed)
         ChatFrame1EditBox:SetText(partial)
         ChatFrame1EditBox:SetCursorPosition(#partial)
 
-        self.delay = CommandSage_Config.Get("preferences", "autoTypeDelay") or 0.03
+        self.delay = CommandSage_Config.Get("preferences", "autoTypeDelay") or 0.08
         if self.index >= #self.textToType then
             self:Hide()
         end
@@ -43,3 +43,4 @@ function CommandSage_AutoType:StopAutoType()
     frame.textToType = ""
     frame.index = 0
 end
+

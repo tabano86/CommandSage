@@ -37,6 +37,8 @@ local function OnEvent(self, event, ...)
     elseif event == "PLAYER_LOGIN" then
         if CommandSage_Config.Get("preferences", "showTutorialOnStartup") then
             CommandSage_Tutorial:ShowTutorialPrompt()
+            -- Optionally disable so it won't spam every login
+            -- CommandSage_Config.Set("preferences", "showTutorialOnStartup", false)
         end
     end
 end
@@ -116,7 +118,7 @@ function CommandSage:RegisterSlashCommands()
             print(" /cmdsage scan - Re-scan commands")
             print(" /cmdsage fallback/nofallback/togglefallback")
             print(" /cmdsage debug - Show debug info")
-            print(" /cmdsage config <key> <val> - Set config")
+            print(" /cmdsage config <key> <value> - Set config")
             print(" /cmdsage mode <fuzzy|strict> - Switch suggestion mode")
             print(" /cmdsage theme <dark|light|classic> - Set UI theme")
             print(" /cmdsage scale <1.0> - Set autocomplete UI scale")
@@ -158,3 +160,4 @@ chatBox:HookScript("OnEditFocusLost", function(self)
 end)
 
 f:SetScript("OnEvent", OnEvent)
+

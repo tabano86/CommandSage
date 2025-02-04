@@ -275,6 +275,7 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
         end
     end
 
+    -- Sort favorites up
     if CommandSage_Config.Get("preferences", "favoritesSortingEnabled") then
         table.sort(final, function(a, b)
             local aFav = CommandSage_Analytics:IsFavorite(a.slash) and 1 or 0
@@ -318,6 +319,7 @@ hookingFrame:SetScript("OnEvent", function()
             return
         end
 
+        -- If user typed slash or is in shell context, handle special keys:
         if isSlash or isInShellContext then
             self:SetPropagateKeyboardInput(false)
 
@@ -376,6 +378,15 @@ hookingFrame:SetScript("OnEvent", function()
             return
         end
 
+        local firstChar = text:sub(1,1)
+        if firstChar ~= "/" and not CommandSage_ShellContext:IsActive() then
+            -- Not a slash command and not in shell mode; hide suggestions
+            if autoFrame then
+                autoFrame:Hide()
+            end
+            return
+        end
+
         local firstWord = text:match("^(%S+)")
         local rest = text:match("^%S+%s+(.*)") or ""
         local paramHints = CommandSage_ParameterHelper:GetParameterSuggestions(firstWord, rest)
@@ -403,3 +414,4 @@ function CommandSage_AutoComplete:CloseSuggestions()
         autoFrame:Hide()
     end
 end
+

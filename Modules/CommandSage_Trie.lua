@@ -114,3 +114,4 @@ function CommandSage_Trie:RemoveCommand(command)
         end
     end
 end
+

@@ -18,7 +18,7 @@ jobs:
       - name: Extract Addon Version
         id: extract_version
         run: |
-          VERSION_LINE=$(grep -m1 -oP '(?<=Version-).*(?=-blue)' README.md || echo "4.1")
+          VERSION_LINE=$(grep -m1 -oP '(?<=Version-).*(?=-blue)' README.md || echo "4.2")
           echo "addon_version=$VERSION_LINE" >> $GITHUB_OUTPUT
 
       - name: Update TOC Version

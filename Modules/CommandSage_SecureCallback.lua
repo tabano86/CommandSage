@@ -35,3 +35,4 @@ function CommandSage_SecureCallback:IsAnyCommandProtected(commandList)
     end
     return false
 end
+

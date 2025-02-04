@@ -1,16 +1,6 @@
 -- =============================================================================
 -- CommandSage_Discovery.lua
 -- Extended dynamic scanning for 100% command discovery:
---  - Built-in Blizzard commands
---  - Macros (global & character)
---  - Ace (or similar library) registered commands (via macros and via AceConsole if available)
---  - Emotes (hardcoded & global lookup if available)
---  - Help commands (including any command with "help" in its key)
---  - Extra commands (custom table)
---  - Scanning the global environment for any unregistered slash commands
---  - AceConsole scan (if enabled and available)
---  - Custom commands from a global table (if available)
---  - Forced fallback commands
 -- =============================================================================
 
 CommandSage_Discovery = {}
@@ -30,7 +20,6 @@ local extraCommands = {
       callback = function(msg) print("Ping: Feature not implemented yet.") end },
     { slash = "/mem", source = "Extra", description = "Display addon memory usage",
       callback = function(msg) print("Memory (KB): " .. collectgarbage("count")) end },
-    -- Add more extra commands as needed...
 }
 
 -- Helper: insert a discovered command if not already present.
@@ -121,11 +110,24 @@ local function ScanAce()
     if not CommandSage_Config.Get("preferences", "macroInclusion") then
         return
     end
-    -- Here we simply reuse the macro scan; if an Ace registry is available, extend here.
+    -- Reuse macro scan if macroInclusion = true; we also do...
+    if CommandSage_Config.Get("preferences", "aceConsoleInclusion") then
+        local AceConsole = LibStub and LibStub("AceConsole-3.0", true)
+        if AceConsole and AceConsole.GetCommands then
+            local cmds = AceConsole:GetCommands()
+            if cmds and type(cmds) == "table" then
+                for cmd, func in pairs(cmds) do
+                    addCommand(cmd, { callback = func, source = "AceConsole", description = "AceConsole command: " .. cmd })
+                end
+            end
+        end
+    end
+
+    -- Also scan macros if included:
     ScanMacros()
 end
 
--- Scan for emote commands. In addition to a hardcoded list, try to use a global EMOTE_LIST if available.
+-- Scan for emote commands.
 local function ScanEmotes()
     local hardcodedEmotes = { "/dance", "/cheer", "/wave", "/laugh", "/cry", "/roar", "/salute", "/smile", "/frown" }
     for _, e in ipairs(hardcodedEmotes) do
@@ -140,7 +142,7 @@ local function ScanEmotes()
     end
 end
 
--- Scan for help commands. Look for a primary help command plus any command key that contains "help".
+-- Scan for help commands.
 local function ScanHelp()
     if SlashCmdList["HELP"] then
         local helpSlash = _G["SLASH_HELP1"]
@@ -163,45 +165,18 @@ local function ScanExtra()
     end
 end
 
--- Scan the global environment for any variables starting with "SLASH_"
--- that might not have been captured already.
+-- Scan the global environment for slash commands (SLASH_...).
 local function ScanGlobalSlashCommands()
     for k, v in pairs(_G) do
         if type(k) == "string" and k:sub(1,6) == "SLASH_" and type(v) == "string" then
             local lower = v:lower()
             if not discoveredCommands[lower] then
-                -- Try to get the corresponding callback from SlashCmdList.
                 local key = k:match("SLASH_(%w+)%d+")
                 local func = SlashCmdList[key]
                 if func then
                     addCommand(v, { callback = func, source = "GlobalScan", description = "Discovered via global scan" })
                 end
             end
-        end
-    end
-end
-
--- Scan AceConsole commands if available and enabled.
-local function ScanAceConsole()
-    if not CommandSage_Config.Get("preferences", "aceConsoleInclusion") then
-        return
-    end
-    local AceConsole = LibStub and LibStub("AceConsole-3.0", true)
-    if AceConsole and AceConsole.GetCommands then
-        local cmds = AceConsole:GetCommands()  -- Assume GetCommands returns a table: command -> callback
-        if cmds and type(cmds) == "table" then
-            for cmd, func in pairs(cmds) do
-                addCommand(cmd, { callback = func, source = "AceConsole", description = "AceConsole command: " .. cmd })
-            end
-        end
-    end
-end
-
--- Scan for custom commands from a global table.
-local function ScanCustomCommands()
-    if _G.CustomSlashCommands and type(_G.CustomSlashCommands) == "table" then
-        for slash, data in pairs(_G.CustomSlashCommands) do
-            addCommand(slash, { callback = data.callback, source = data.source or "Custom", description = data.description })
         end
     end
 end
@@ -218,8 +193,6 @@ function CommandSage_Discovery:ScanAllCommands()
     ScanHelp()
     ScanExtra()
     ScanGlobalSlashCommands()
-    ScanAceConsole()
-    ScanCustomCommands()
     ForceFallbacks()
 
     -- Insert all discovered commands into the Trie.
@@ -242,3 +215,4 @@ function CommandSage_Discovery:ForceAllFallbacks(newFallbacks)
         print("CommandSage: Additional fallback commands added.")
     end
 end
+

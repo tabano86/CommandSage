@@ -36,7 +36,7 @@ end
 
 function CommandSage_ConfigGUI:InitGUI()
     guiFrame = CreateFrame("Frame", "CommandSageConfigFrame", UIParent, "BasicFrameTemplate")
-    guiFrame:SetSize(380, 430)
+    guiFrame:SetSize(380, 460)
     guiFrame:SetPoint("CENTER")
     guiFrame:SetMovable(true)
     guiFrame:EnableMouse(true)
@@ -63,9 +63,12 @@ function CommandSage_ConfigGUI:InitGUI()
     local cb6 = CreateCheckbox(guiFrame, "Persist Command History", "persistHistory", yOffset, "Save command usage between sessions.")
     yOffset = yOffset - 30
 
-    -- New in 4.1
     local cb7 = CreateCheckbox(guiFrame, "Always Disable Hotkeys in Chat", "alwaysDisableHotkeysInChat", yOffset,
             "If checked, your normal keybinds won't fire when chat is focused.")
+    yOffset = yOffset - 30
+
+    local cb8 = CreateCheckbox(guiFrame, "Blizzard All Fallback", "blizzAllFallback", yOffset,
+            "Scan all built-in slash commands by default.")
     yOffset = yOffset - 30
 
     local closeBtn = CreateFrame("Button", nil, guiFrame, "UIPanelButtonTemplate")
@@ -89,3 +92,4 @@ function CommandSage_ConfigGUI:Toggle()
         guiFrame:Show()
     end
 end
+

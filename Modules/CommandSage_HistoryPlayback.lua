@@ -55,3 +55,4 @@ SlashCmdList["CLEARHISTORY"] = function(msg)
     CommandSageDB.commandHistory = {}
     print("CommandSage: Command history cleared.")
 end
+
