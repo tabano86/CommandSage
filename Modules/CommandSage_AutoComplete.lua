@@ -310,29 +310,29 @@ hookingFrame:SetScript("OnEvent", function()
     local edit = ChatFrame1EditBox
     edit:HookScript("OnKeyDown", function(self, key)
         local text = self:GetText() or ""
-        if text:sub(1, 1) == "/" then
-            -- Always block key propagation while typing a slash command
-            self:SetPropagateKeyboardInput(false)
-
-            -- Optionally handle navigation keys for your auto-complete UI:
-            if key == "UP" then
-                MoveSelection(-1)
-                return
-            elseif key == "DOWN" then
-                MoveSelection(1)
-                return
-            elseif key == "TAB" then
-                if selectedIndex > 0 and content.buttons[selectedIndex]:IsShown() then
-                    CommandSage_AutoComplete:AcceptSuggestion(content.buttons[selectedIndex].suggestionData)
-                else
-                    MoveSelection(1)
-                end
-                return
+        if key == "UP" and text:sub(1,1) == "/" then
+            if IsShiftKeyDown() then
+                MoveSelection(-5) -- Jump 5 suggestions with Shift+Up
+            else
+                MoveSelection(-1) -- Move up one suggestion
             end
-        else
-            self:SetPropagateKeyboardInput(true)
+            return
+        elseif key == "DOWN" and text:sub(1,1) == "/" then
+            if IsShiftKeyDown() then
+                MoveSelection(5)
+            else
+                MoveSelection(1)
+            end
+            return
+        elseif (key == "C" or key == "X") and IsControlKeyDown() then
+            -- Ctrl+C or Ctrl+X to cancel the current input or close the autocomplete
+            self:SetText("")
+            if autoFrame then autoFrame:Hide() end
+            return
         end
+        self:SetPropagateKeyboardInput(true)
     end)
+
 
 
     -- 3) Text changed => generate suggestions
