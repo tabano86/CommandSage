@@ -8,24 +8,20 @@ on:
 jobs:
   build-and-upload:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out repo
+      - name: Check out
         uses: actions/checkout@v2
-
-      - name: Set up zip
+      - name: Install zip
         run: sudo apt-get install zip
-
-      - name: Build Addon
+      - name: Build
         run: |
           chmod +x scripts/build.sh
           ./scripts/build.sh
-
-      - name: Upload build artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
           name: CommandSage-Zip
-          path: ./dist/CommandSage-*.zip
+          path: ./dist/*.zip
 
       # Example step for auto-publishing to CurseForge (requires a real action or custom script)
       # - name: Publish to CurseForge

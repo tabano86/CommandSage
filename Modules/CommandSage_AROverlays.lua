@@ -1,30 +1,30 @@
 -- =============================================================================
 -- CommandSage_AROverlays.lua
--- "AR-inspired" overlays for fun visuals
+-- Just for fun animated overlay
 -- =============================================================================
 
 CommandSage_AROverlays = {}
 
-local overlayFrame = CreateFrame("Frame", "CommandSageAROverlayFrame", UIParent)
-overlayFrame:SetSize(200, 200)
-overlayFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
-overlayFrame:Hide()
+local f = CreateFrame("Frame", "CommandSageAROverlayFrame", UIParent)
+f:SetSize(200, 200)
+f:SetPoint("CENTER")
+f:Hide()
 
-local texture = overlayFrame:CreateTexture(nil, "BACKGROUND")
-texture:SetAllPoints()
-texture:SetTexture("Interface\\AddOns\\CommandSage\\Media\\ArcaneOverlay")
-texture:SetAlpha(0.3)
+local tex = f:CreateTexture(nil, "BACKGROUND")
+tex:SetAllPoints()
+tex:SetTexture("Interface\\AddOns\\CommandSage\\Media\\ArcaneOverlay")
+tex:SetAlpha(0.3)
+
+f:SetScript("OnUpdate", function(self, elapsed)
+    self.timer = (self.timer or 0) + elapsed
+    local a = 0.3 + 0.2 * math.sin(self.timer * 2)
+    tex:SetAlpha(a)
+end)
 
 function CommandSage_AROverlays:ShowOverlay()
-    overlayFrame:Show()
+    f:Show()
 end
 
 function CommandSage_AROverlays:HideOverlay()
-    overlayFrame:Hide()
+    f:Hide()
 end
-
-overlayFrame:SetScript("OnUpdate", function(self, elapsed)
-    self.timer = (self.timer or 0) + elapsed
-    local alpha = 0.3 + 0.2 * math.sin(self.timer * 2)
-    texture:SetAlpha(alpha)
-end)

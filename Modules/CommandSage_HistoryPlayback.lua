@@ -1,11 +1,11 @@
 -- =============================================================================
 -- CommandSage_HistoryPlayback.lua
--- Stores and replays recent commands (persisting across sessions)
+-- Persists command history, incremental search
 -- =============================================================================
 
 CommandSage_HistoryPlayback = {}
 
-local maxHistorySize = 100
+local maxHist = 200
 
 local function EnsureHistoryDB()
     if not CommandSageDB.commandHistory then
@@ -13,10 +13,11 @@ local function EnsureHistoryDB()
     end
 end
 
-function CommandSage_HistoryPlayback:AddToHistory(commandStr)
+function CommandSage_HistoryPlayback:AddToHistory(cmd)
+    if not CommandSage_Config.Get("preferences","persistHistory") then return end
     EnsureHistoryDB()
-    table.insert(CommandSageDB.commandHistory, commandStr)
-    if #CommandSageDB.commandHistory > maxHistorySize then
+    table.insert(CommandSageDB.commandHistory, cmd)
+    if #CommandSageDB.commandHistory > maxHist then
         table.remove(CommandSageDB.commandHistory, 1)
     end
 end
@@ -28,9 +29,21 @@ end
 
 SLASH_COMMANDSAGEHISTORY1 = "/cmdsagehistory"
 SlashCmdList["COMMANDSAGEHISTORY"] = function(msg)
-    print("Recent Commands (persisted):")
+    print("|cff00ff00CommandSage History|r:")
     local hist = CommandSage_HistoryPlayback:GetHistory()
-    for i, cmd in ipairs(hist) do
-        print(string.format("%d) %s", i, cmd))
+    for i, c in ipairs(hist) do
+        print(string.format("%3d) %s", i, c))
+    end
+end
+
+SLASH_SEARCHHISTORY1 = "/searchhistory"
+SlashCmdList["SEARCHHISTORY"] = function(msg)
+    local query = msg:lower()
+    local hist = CommandSage_HistoryPlayback:GetHistory()
+    print("|cff00ff00History Search for:|r", msg)
+    for i, c in ipairs(hist) do
+        if c:lower():find(query, 1, true) then
+            print(string.format("%3d) %s", i, c))
+        end
     end
 end

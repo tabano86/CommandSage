@@ -1,6 +1,6 @@
 -- =============================================================================
 -- CommandSage_Trie.lua
--- Stores discovered commands in a Trie for efficient lookups
+-- Optimized Trie for storing slash commands
 -- =============================================================================
 
 CommandSage_Trie = {}
@@ -9,7 +9,14 @@ local root = {
     children = {},
     isTerminal = false,
     info = nil,
+    maxDepth = 0, -- optional optimization
 }
+
+local function updateMaxDepth(node, depth)
+    if depth > (node.maxDepth or 0) then
+        node.maxDepth = depth
+    end
+end
 
 function CommandSage_Trie:InsertCommand(command, data)
     local node = root
@@ -20,34 +27,37 @@ function CommandSage_Trie:InsertCommand(command, data)
                 children = {},
                 isTerminal = false,
                 info = nil,
+                maxDepth = 0,
             }
         end
         node = node.children[c]
+        updateMaxDepth(node, #command - i)
     end
     node.isTerminal = true
     node.info = data
 end
 
-local function GatherAllCommands(node, prefix, results)
+local function gatherAll(node, prefix, results)
     if node.isTerminal and node.info then
         table.insert(results, { slash=prefix, data=node.info })
     end
     for c, child in pairs(node.children) do
-        GatherAllCommands(child, prefix..c, results)
+        gatherAll(child, prefix..c, results)
     end
 end
 
 function CommandSage_Trie:FindPrefix(prefix)
     local node = root
-    for i=1, #prefix do
+    for i=1,#prefix do
         local c = prefix:sub(i,i)
-        if not node.children[c] then
+        local child = node.children[c]
+        if not child then
             return {}
         end
-        node = node.children[c]
+        node = child
     end
     local results = {}
-    GatherAllCommands(node, prefix, results)
+    gatherAll(node, prefix, results)
     return results
 end
 
@@ -59,4 +69,5 @@ function CommandSage_Trie:Clear()
     wipe(root.children)
     root.isTerminal = false
     root.info = nil
+    root.maxDepth = 0
 end

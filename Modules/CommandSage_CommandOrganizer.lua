@@ -1,31 +1,24 @@
 -- =============================================================================
 -- CommandSage_CommandOrganizer.lua
--- Groups commands by category or custom tags for filtering
+-- Group commands by category (combat, social, macros, etc.)
 -- =============================================================================
 
 CommandSage_CommandOrganizer = {}
 
-local tagDB = {}
-
-function CommandSage_CommandOrganizer:SetCommandTags(slash, tags)
-    tagDB[slash] = tags
-end
+local tagDB = {
+    ["/dance"] = { "social" },
+    ["/macro"] = { "macros" },
+    ["/cmdsage"] = { "plugin" },
+}
 
 function CommandSage_CommandOrganizer:GetCommandTags(slash)
     return tagDB[slash] or {}
 end
 
-function CommandSage_CommandOrganizer:FilterCommandsByTag(tag)
-    local results = {}
-    for slash, discovered in pairs(CommandSage_Discovery:GetDiscoveredCommands()) do
-        local cmdTags = tagDB[slash]
-        if cmdTags then
-            for _, t in ipairs(cmdTags) do
-                if t == tag then
-                    table.insert(results, slash)
-                end
-            end
-        end
+function CommandSage_CommandOrganizer:GetCategory(slash)
+    local t = self:GetCommandTags(slash)
+    if #t > 0 then
+        return t[1]
     end
-    return results
+    return "other"
 end

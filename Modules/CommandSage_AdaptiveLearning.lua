@@ -1,6 +1,6 @@
 -- =============================================================================
 -- CommandSage_AdaptiveLearning.lua
--- Tracks usage frequency for each command
+-- Tracks usage frequency, adaptively re-ranks
 -- =============================================================================
 
 CommandSage_AdaptiveLearning = {}

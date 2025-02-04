@@ -1,6 +1,6 @@
 -- =============================================================================
 -- CommandSage_DeveloperAPI.lua
--- Provides external integration points, event firing, debug, etc.
+-- Events, debug, forced reindex, etc.
 -- =============================================================================
 
 CommandSage_DeveloperAPI = {}
@@ -8,9 +8,10 @@ CommandSage_DeveloperAPI = {}
 local callbacks = {}
 
 function CommandSage_DeveloperAPI:FireEvent(eventName, ...)
-    if not callbacks[eventName] then return end
-    for _, fn in ipairs(callbacks[eventName]) do
-        pcall(fn, ...)
+    if callbacks[eventName] then
+        for _, fn in ipairs(callbacks[eventName]) do
+            pcall(fn, ...)
+        end
     end
 end
 
@@ -23,18 +24,16 @@ end
 
 function CommandSage_DeveloperAPI:DebugDump()
     print("== CommandSage Debug Info ==")
-    print("Trie node count:", CommandSage_Performance:CountTrieNodes())
     local discovered = CommandSage_Discovery:GetDiscoveredCommands()
     print("Discovered commands:", discovered and #discovered or 0)
-    if CommandSageDB.usageData then
-        local usageCount = 0
-        for _ in pairs(CommandSageDB.usageData) do usageCount=usageCount+1 end
-        print("Usage data entries:", usageCount)
-    else
-        print("Usage data entries: 0")
+    local usageData = CommandSageDB.usageData
+    local usageCount = 0
+    if usageData then
+        for k in pairs(usageData) do usageCount=usageCount+1 end
     end
+    print("Usage data entries:", usageCount)
     local hist = CommandSageDB.commandHistory
-    print("Persisted History entries:", hist and #hist or 0)
+    print("History entries:", hist and #hist or 0)
 end
 
 function CommandSage_DeveloperAPI:ForceReindex()

@@ -1,17 +1,17 @@
 -- =============================================================================
 -- CommandSage_MultiModal.lua
--- Multi-modal input (voice, macros, gestures) stubs
+-- Voice or other input stubs
 -- =============================================================================
 
 CommandSage_MultiModal = {}
 
-function CommandSage_MultiModal:OnVoiceCommand(transcribedText)
-    local best = CommandSage_FuzzyMatch:GetSuggestions(transcribedText, CommandSage_Trie:FindPrefix("/"))
-    if #best > 0 then
-        local top = best[1]
-        print("Voice recognized command: " .. top.slash)
-        -- Possibly auto-execute or auto-complete
+function CommandSage_MultiModal:OnVoiceCommand(phrase)
+    local possible = CommandSage_Trie:FindPrefix("/")
+    local suggestions = CommandSage_FuzzyMatch:GetSuggestions(phrase:lower(), possible)
+    if #suggestions > 0 then
+        local top = suggestions[1]
+        print("Voice recognized => ", top.slash)
     else
-        print("No match for voice input: " .. transcribedText)
+        print("No match for voice input: ", phrase)
     end
 end

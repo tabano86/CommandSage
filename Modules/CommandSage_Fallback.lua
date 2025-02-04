@@ -1,6 +1,6 @@
 -- =============================================================================
 -- CommandSage_Fallback.lua
--- Allows toggling or reverting to default slash command behavior
+-- Toggle fallback mode
 -- =============================================================================
 
 CommandSage_Fallback = {}

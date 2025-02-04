@@ -1,19 +1,30 @@
 -- =============================================================================
 -- CommandSage_ParameterHelper.lua
--- Suggests subcommands or parameters once a slash command is matched
+-- Show subcommands, expected args inline
 -- =============================================================================
 
 CommandSage_ParameterHelper = {}
 
-function CommandSage_ParameterHelper:GetParameterSuggestions(commandData, partialArg)
-    if not commandData then return {} end
+-- Example metadata for certain commands
+local knownParams = {
+    ["/dance"] = { "silly", "fancy", "epic" },
+    ["/macro"] = { "new", "delete", "edit" },
+}
+
+function CommandSage_ParameterHelper:GetParameterSuggestions(slash, partialArg)
+    local subcommands = knownParams[slash]
+    if not subcommands then return {} end
     local results = {}
-    if commandData.subcommands then
-        for _, subc in ipairs(commandData.subcommands) do
-            if subc:find(partialArg) then
-                table.insert(results, subc)
-            end
+    for _, sc in ipairs(subcommands) do
+        if sc:lower():find(partialArg:lower()) then
+            table.insert(results, sc)
         end
     end
     return results
+end
+
+function CommandSage_ParameterHelper:GetInlineHint(slash)
+    local subcommands = knownParams[slash]
+    if not subcommands then return nil end
+    return table.concat(subcommands, " | ")
 end

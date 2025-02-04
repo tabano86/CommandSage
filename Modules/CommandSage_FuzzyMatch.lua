@@ -1,50 +1,78 @@
 -- =============================================================================
 -- CommandSage_FuzzyMatch.lua
--- Levenshtein-based fuzzy matching
+-- Weighted fuzzy matching with usage & context
 -- =============================================================================
 
 CommandSage_FuzzyMatch = {}
 
 local function Levenshtein(a, b)
-    local lenA, lenB = #a, #b
-    if lenA == 0 then return lenB end
-    if lenB == 0 then return lenA end
+    local la, lb = #a, #b
+    if la == 0 then return lb end
+    if lb == 0 then return la end
 
     local matrix = {}
-    for i=0,lenA do
+    for i=0,la do
         matrix[i] = {}
         matrix[i][0] = i
     end
-    for j=0,lenB do
+    for j=0,lb do
         matrix[0][j] = j
     end
 
-    for i=1,lenA do
-        for j=1,lenB do
+    for i=1,la do
+        for j=1,lb do
             local cost = (a:sub(i,i) == b:sub(j,j)) and 0 or 1
             matrix[i][j] = math.min(
-                    matrix[i-1][j] + 1,    -- deletion
-                    matrix[i][j-1] + 1,    -- insertion
-                    matrix[i-1][j-1] + cost -- substitution
+                    matrix[i-1][j] + 1,
+                    matrix[i][j-1] + 1,
+                    matrix[i-1][j-1] + cost
             )
         end
     end
-    return matrix[lenA][lenB]
+    return matrix[la][lb]
+end
+
+local function getContextBonus()
+    -- If in combat, or certain zone, etc.
+    if InCombatLockdown() then
+        return -1 -- example: deprioritize some commands if we want?
+    end
+    return 0
 end
 
 function CommandSage_FuzzyMatch:GetSuggestions(input, possibleCommands)
-    local tol = CommandSage_Config.Get("preferences","fuzzyMatchTolerance") or 2
+    local tolerance = CommandSage_Config.Get("preferences","fuzzyMatchTolerance") or 2
     local results = {}
-
     for _, cmdObj in ipairs(possibleCommands) do
         local slash = cmdObj.slash
         local dist = Levenshtein(slash, input)
-        if dist <= tol then
+        -- Basic tolerance check
+        if dist <= tolerance then
             local usageScore = CommandSage_AdaptiveLearning:GetUsageScore(slash)
-            local rank = -dist + usageScore * 0.5
-            table.insert(results, { slash=slash, data=cmdObj.data, rank=rank })
+            local cBonus = getContextBonus()
+            local rank = -dist + usageScore * 0.7 + cBonus
+            table.insert(results, { slash=slash, data=cmdObj.data, rank=rank, distance=dist })
         end
     end
     table.sort(results, function(a,b) return a.rank > b.rank end)
     return results
+end
+
+-- For error correction if no matches found
+function CommandSage_FuzzyMatch:SuggestCorrections(input)
+    -- We can do a wide search among all discovered commands
+    local discovered = CommandSage_Discovery:GetDiscoveredCommands()
+    local bestDist = 999
+    local bestCmd = nil
+    for slash, info in pairs(discovered) do
+        local d = Levenshtein(slash, input)
+        if d < bestDist then
+            bestDist = d
+            bestCmd = slash
+        end
+    end
+    if bestDist <= (CommandSage_Config.Get("preferences","fuzzyMatchTolerance") or 2)+1 then
+        return bestCmd, bestDist
+    end
+    return nil, bestDist
 end

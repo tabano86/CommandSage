@@ -1,13 +1,13 @@
 -- =============================================================================
 -- CommandSage_Tutorial.lua
--- Shows a basic tutorial or help popup
+-- Basic tutorial pop-up
 -- =============================================================================
 
 CommandSage_Tutorial = {}
 
 function CommandSage_Tutorial:ShowTutorialPrompt()
     local frame = CreateFrame("Frame", "CommandSageTutorialFrame", UIParent, "BasicFrameTemplate")
-    frame:SetSize(400, 200)
+    frame:SetSize(420, 220)
     frame:SetPoint("CENTER")
     frame:EnableMouse(true)
     frame:SetMovable(true)
@@ -17,14 +17,14 @@ function CommandSage_Tutorial:ShowTutorialPrompt()
 
     local title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     title:SetPoint("TOP", 0, -10)
-    title:SetText("Welcome to CommandSage!")
+    title:SetText("Welcome to CommandSage Next-Gen!")
 
     local desc = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     desc:SetPoint("TOPLEFT", 20, -40)
-    desc:SetWidth(360)
-    desc:SetText("Type partial slash commands in chat to see suggestions.\n"..
-            "Use '/cmdsage scan' to rescan, '/cmdsage debug' for stats.\n"..
-            "Enjoy advanced auto-completion!\n")
+    desc:SetWidth(380)
+    desc:SetText("Type a slash command (e.g. /dance, /cmdsage) to see context-aware suggestions.\n"..
+            "Use arrow keys to navigate, Enter to commit.\n"..
+            "Try '/cmdsage scan' to re-scan, '/cmdsage debug' for stats, or /cmdsage config <key> <val>.\nEnjoy your new auto-completion experience!")
 
     local closeBtn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
     closeBtn:SetSize(80, 22)

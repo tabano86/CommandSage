@@ -1,6 +1,6 @@
 -- =============================================================================
 -- CommandSage_Config.lua
--- Responsible for creating and loading default config into CommandSageDB
+-- All features ON by default
 -- =============================================================================
 
 CommandSage_Config = {}
@@ -9,45 +9,49 @@ function CommandSage_Config:InitializeDefaults()
     if not CommandSageDB then
         CommandSageDB = {}
     end
+
     if not CommandSageDB.config then
         CommandSageDB.config = {}
     end
 
-    -- Basic user preferences, all ON by default
-    if not CommandSageDB.config.preferences then
-        CommandSageDB.config.preferences = {
+    local prefs = CommandSageDB.config.preferences
+    if not prefs then
+        prefs = {
             fuzzyMatchEnabled = true,
             fuzzyMatchTolerance = 2,
-            maxSuggestions = 10,
+            maxSuggestions = 12,
             animateAutoType = true,
             showTutorialOnStartup = true,
             usageAnalytics = true,
-            contextAwareness = true,
-            voiceCommandEnabled = true,
-            fallbackEnabled = false,      -- fallback OFF by default
-            autoTypeDelay = 0.03,         -- faster auto-typing
-            persistHistory = true,        -- new preference to remember commands
+            contextAwareness = true,   -- e.g. in-combat vs not
+            voiceCommandEnabled = false,
+            fallbackEnabled = false,
+            autoTypeDelay = 0.03,
+            persistHistory = true,
+            snippetEnabled = true,
+            contextFiltering = true,
+            typeAheadPrediction = true,
+            suggestionMode = "fuzzy",  -- or "strict"
         }
+        CommandSageDB.config.preferences = prefs
     end
 end
 
 function CommandSage_Config.Get(category, key)
-    if not CommandSageDB or not CommandSageDB.config then
-        return nil
-    end
-    local catTable = CommandSageDB.config[category]
-    if catTable then
-        return catTable[key]
+    if not CommandSageDB or not CommandSageDB.config then return nil end
+    local cTable = CommandSageDB.config[category]
+    if cTable then
+        return cTable[key]
     end
     return nil
 end
 
 function CommandSage_Config.Set(category, key, value)
     if not CommandSageDB or not CommandSageDB.config then return end
-    local catTable = CommandSageDB.config[category]
-    if not catTable then
-        catTable = {}
-        CommandSageDB.config[category] = catTable
+    local cTable = CommandSageDB.config[category]
+    if not cTable then
+        cTable = {}
+        CommandSageDB.config[category] = cTable
     end
-    catTable[key] = value
+    cTable[key] = value
 end

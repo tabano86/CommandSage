@@ -1,11 +1,11 @@
 -- =============================================================================
 -- CommandSage_Analytics.lua
--- Gathers anonymized usage data, user feedback (favorite / blacklist) stubs
+-- Favorites, blacklisting, usage stats
 -- =============================================================================
 
 CommandSage_Analytics = {}
 
-local function EnsureAnalyticsDB()
+local function EnsureAnalytics()
     if not CommandSageDB.analytics then
         CommandSageDB.analytics = {
             favorites = {},
@@ -16,31 +16,31 @@ local function EnsureAnalyticsDB()
 end
 
 function CommandSage_Analytics:AddFavorite(cmd)
-    EnsureAnalyticsDB()
+    EnsureAnalytics()
     CommandSageDB.analytics.favorites[cmd] = true
 end
 
 function CommandSage_Analytics:RemoveFavorite(cmd)
-    EnsureAnalyticsDB()
+    EnsureAnalytics()
     CommandSageDB.analytics.favorites[cmd] = nil
 end
 
 function CommandSage_Analytics:IsFavorite(cmd)
-    EnsureAnalyticsDB()
+    EnsureAnalytics()
     return CommandSageDB.analytics.favorites[cmd]
 end
 
 function CommandSage_Analytics:Blacklist(cmd)
-    EnsureAnalyticsDB()
+    EnsureAnalytics()
     CommandSageDB.analytics.blacklisted[cmd] = true
 end
 
 function CommandSage_Analytics:Unblacklist(cmd)
-    EnsureAnalyticsDB()
+    EnsureAnalytics()
     CommandSageDB.analytics.blacklisted[cmd] = nil
 end
 
 function CommandSage_Analytics:IsBlacklisted(cmd)
-    EnsureAnalyticsDB()
+    EnsureAnalytics()
     return CommandSageDB.analytics.blacklisted[cmd]
 end

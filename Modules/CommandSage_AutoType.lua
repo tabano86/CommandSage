@@ -1,39 +1,38 @@
 -- =============================================================================
 -- CommandSage_AutoType.lua
--- Simulates typing out the command for a fun, visual effect
+-- Animated "typing" effect
 -- =============================================================================
 
 CommandSage_AutoType = {}
 
-local typingFrame = CreateFrame("Frame")
-typingFrame:Hide()
-typingFrame.delay = 0
-typingFrame.textToType = ""
-typingFrame.currentIndex = 0
+local frame = CreateFrame("Frame")
+frame:Hide()
+frame.delay = 0
+frame.textToType = ""
+frame.index = 0
 
-typingFrame:SetScript("OnUpdate", function(self, elapsed)
+frame:SetScript("OnUpdate", function(self, elapsed)
     self.delay = self.delay - elapsed
     if self.delay <= 0 then
-        self.currentIndex = self.currentIndex + 1
-        local partial = self.textToType:sub(1, self.currentIndex)
+        self.index = self.index + 1
+        local partial = self.textToType:sub(1, self.index)
         ChatFrame1EditBox:SetText(partial)
         ChatFrame1EditBox:SetCursorPosition(#partial)
-        self.delay = CommandSage_Config.Get("preferences","autoTypeDelay") or 0.03
-        if self.currentIndex >= #self.textToType then
+        self.delay = CommandSage_Config.Get("preferences", "autoTypeDelay") or 0.03
+        if self.index >= #self.textToType then
             self:Hide()
         end
     end
 end)
 
-function CommandSage_AutoType:BeginAutoType(fullCommand)
-    if not CommandSage_Config.Get("preferences","animateAutoType") then
-        ChatFrame1EditBox:SetText(fullCommand)
-        ChatFrame1EditBox:SetCursorPosition(#fullCommand)
+function CommandSage_AutoType:BeginAutoType(cmdStr)
+    if not CommandSage_Config.Get("preferences", "animateAutoType") then
+        ChatFrame1EditBox:SetText(cmdStr)
+        ChatFrame1EditBox:SetCursorPosition(#cmdStr)
         return
     end
-
-    typingFrame.textToType = fullCommand
-    typingFrame.currentIndex = 0
-    typingFrame.delay = 0
-    typingFrame:Show()
+    frame.textToType = cmdStr
+    frame.index = 0
+    frame.delay = 0
+    frame:Show()
 end

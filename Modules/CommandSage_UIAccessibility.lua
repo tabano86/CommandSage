@@ -1,6 +1,6 @@
 -- =============================================================================
 -- CommandSage_UIAccessibility.lua
--- Accessibility features like high-contrast mode, large text, TTS readback
+-- High contrast, TTS readback, large text
 -- =============================================================================
 
 CommandSage_UIAccessibility = {}
@@ -10,7 +10,7 @@ local largeText = false
 
 function CommandSage_UIAccessibility:EnableHighContrast()
     highContrast = true
-    -- Possibly restyle frames, etc.
+    -- Possibly restyle frames
 end
 
 function CommandSage_UIAccessibility:DisableHighContrast()
@@ -29,6 +29,6 @@ function CommandSage_UIAccessibility:ReadBack(text)
     if C_VoiceChat and C_VoiceChat.SpeakText then
         C_VoiceChat.SpeakText(text, Enum.VoiceTtsDestination.LocalPlayback, 0, 100)
     else
-        print("(TTS not available) " .. text)
+        print("(TTS not available) "..text)
     end
 end

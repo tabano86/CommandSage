@@ -1,50 +1,53 @@
 -- =============================================================================
 -- CommandSage_PersistentTrie.lua
--- Saves and loads the Trie to reduce startup scans
+-- Save/Load the Trie to speed up reload
 -- =============================================================================
 
 CommandSage_PersistentTrie = {}
 
-local TRIE_DB_KEY = "cachedTrie"
+local KEY = "cachedTrie"
 
-local function SerializeTrieNode(node)
-    local result = {
+local function serializeNode(node)
+    local data = {
         isTerminal = node.isTerminal,
         info = node.info,
         children = {},
+        maxDepth = node.maxDepth or 0,
     }
     for c, child in pairs(node.children) do
-        result.children[c] = SerializeTrieNode(child)
+        data.children[c] = serializeNode(child)
     end
-    return result
+    return data
 end
 
-local function DeserializeTrieNode(data)
+local function deserializeNode(data)
     local node = {
         children = {},
         isTerminal = data.isTerminal,
         info = data.info,
+        maxDepth = data.maxDepth,
     }
     for c, childData in pairs(data.children) do
-        node.children[c] = DeserializeTrieNode(childData)
+        node.children[c] = deserializeNode(childData)
     end
     return node
 end
 
 function CommandSage_PersistentTrie:SaveTrie()
-    local root = CommandSage_Trie:GetRoot()
-    local serialized = SerializeTrieNode(root)
-    CommandSageDB[TRIE_DB_KEY] = serialized
+    local r = CommandSage_Trie:GetRoot()
+    local s = serializeNode(r)
+    CommandSageDB[KEY] = s
 end
 
 function CommandSage_PersistentTrie:LoadTrie()
-    local cached = CommandSageDB[TRIE_DB_KEY]
-    if cached then
+    local s = CommandSageDB[KEY]
+    if s then
         CommandSage_Trie:Clear()
-        local root = CommandSage_Trie:GetRoot()
-        local loadedRoot = DeserializeTrieNode(cached)
-        root.children = loadedRoot.children
-        root.isTerminal = loadedRoot.isTerminal
-        root.info = loadedRoot.info
+        local r = CommandSage_Trie:GetRoot()
+        local loaded = deserializeNode(s)
+        r.children = loaded.children
+        r.isTerminal = loaded.isTerminal
+        r.info = loaded.info
+        r.maxDepth = loaded.maxDepth
     end
 end

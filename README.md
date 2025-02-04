@@ -1,32 +1,26 @@
 # CommandSage
 
-A **production-ready** WoW Classic addon offering advanced auto-completion for slash commands. Features:
+CommandSage is a **feature-rich** WoW Classic addon for slash command auto-completion:
 
-- **Dynamic Command Discovery** (built-in, macros, forced fallback commands).
-- **Trie + Fuzzy Matching** for partial/typo input.
-- **Context & Adaptive Learning** (stubs for advanced usage).
-- **“Next-decade” auto-complete UI** with highlight effects, clickable suggestions, animations.
-- **Persistent Usage & History** across sessions—never retype frequent commands again.
-- **Local Build & CI** with `scripts/build.sh` and `.github/workflows/curseforge.yml`.
+- Real-time context-aware suggestions
+- Weighted fuzzy matching
+- Inline parameter hints, command snippets
+- Persistent history-based auto-suggestions
+- Type-ahead predictions with keyboard navigation
+- Adaptive learning & usage indicators
+- Scrollable next-decade UI for suggestions
 
-## Quick Start
+## Usage
 
-1. Download or clone into `Interface/AddOns/CommandSage`.
-2. Launch WoW Classic.
-3. Type partial slash commands (e.g. `"/cmds"`) to see suggestions. Click or press Enter to accept.
-4. `/cmdsage scan` rescans commands, `/cmdsage debug` shows stats, `/cmdsage fallback` toggles fallback.
+1. Install into `Interface/AddOns/CommandSage`.
+2. `/reload` or restart game.
+3. Type `/cmdsage` to see usage. Start typing slash commands for auto-complete.
 
-## Building
+## Local Dev & Scripts
+See `scripts/build.sh` for a quick packaging approach.  
+A sample GitHub workflow in `.github/workflows/curseforge.yml`.
 
-```bash
-cd CommandSage
-chmod +x scripts/build.sh
-./scripts/build.sh
-# => dist/CommandSage-1.0.zip
-```
+## License
+[MIT](./LICENSE)
 
-License
-MIT License
-
-Author
-<Your Name or Team> - 2023. Signed off by: <Your Name> your@email.com
+Signed off by: <Your Name>, <Your Email> (2023)
