@@ -8,8 +8,8 @@ CommandSage_Discovery = {}
 local discoveredCommands = {}
 local forcedFallback = {
     "/cmdsage", "/cmdsagehistory", "/help", "/?", "/reload", "/console",
-    "/dance", "/macro", "/ghelp", "/yell", "/say", "/emote", "/combatlog", "/afk", "/dnd",
-    "/camp", "/logout", "/played", "/time", "/script"
+    "/dance", "/macro", "/ghelp", "/yell", "/say", "/emote", "/combatlog",
+    "/afk", "/dnd", "/camp", "/logout", "/played", "/time", "/script"
 }
 
 local function ForceFallbacks()
@@ -108,4 +108,14 @@ end
 
 function CommandSage_Discovery:GetDiscoveredCommands()
     return discoveredCommands
+end
+
+-- Enhancement: allow external modules to forcibly add fallback commands
+function CommandSage_Discovery:ForceAllFallbacks(newFallbacks)
+    if type(newFallbacks) == "table" then
+        for _, slash in ipairs(newFallbacks) do
+            table.insert(forcedFallback, slash)
+        end
+        print("CommandSage: Additional fallback commands added.")
+    end
 end

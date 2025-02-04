@@ -10,7 +10,7 @@ try
 {
     # Recursively get files matching the specified extensions,
     # excluding any files in "Libs" folders.
-    $files = Get-ChildItem -Path $SourceDirectory -Recurse -Include *.toc, *.md, *.lua -File |
+    $files = Get-ChildItem -Path $SourceDirectory -Recurse -Include *.toc, *.yml, *.md, *.lua -File |
             Where-Object {
                 $_.FullName -notmatch '(\\|/)Libs(\\|/)' -and
                         $ExcludeFiles -notcontains $_.Name

@@ -6,7 +6,6 @@
 CommandSage_SecureCallback = {}
 
 function CommandSage_SecureCallback:IsCommandProtected(slash)
-    -- Example: /console might be protected in certain contexts
     if slash == "/console" then
         return true
     end
@@ -26,4 +25,13 @@ function CommandSage_SecureCallback:ExecuteCommand(slash, args)
         ChatFrame1EditBox:SetText(slash .. " " .. (args or ""))
         ChatEdit_SendText(ChatFrame1EditBox, 0)
     end
+end
+
+function CommandSage_SecureCallback:IsAnyCommandProtected(commandList)
+    for _, slash in ipairs(commandList) do
+        if self:IsCommandProtected(slash) then
+            return true
+        end
+    end
+    return false
 end

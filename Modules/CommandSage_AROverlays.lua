@@ -28,3 +28,11 @@ end
 function CommandSage_AROverlays:HideOverlay()
     f:Hide()
 end
+
+function CommandSage_AROverlays:ToggleOverlay()
+    if f:IsShown() then
+        f:Hide()
+    else
+        f:Show()
+    end
+end

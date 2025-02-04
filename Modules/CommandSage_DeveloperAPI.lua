@@ -83,3 +83,11 @@ function CommandSage_DeveloperAPI:UnregisterCommand(slash)
         self:FireEvent("COMMANDS_UPDATED")
     end
 end
+
+function CommandSage_DeveloperAPI:ListAllEvents()
+    local evts = {}
+    for eventName, _ in pairs(callbacks) do
+        table.insert(evts, eventName)
+    end
+    return evts
+end

@@ -6,7 +6,7 @@
 
 CommandSage_Config = {}
 
-local CURRENT_DB_VERSION = 3  -- Bump this if you need to migrate older DB structures
+local CURRENT_DB_VERSION = 4  -- Bumped from 3 to 4 for new preference migration
 
 function CommandSage_Config:InitializeDefaults()
     if not CommandSageDB then
@@ -27,45 +27,46 @@ function CommandSage_Config:InitializeDefaults()
     if not prefs then
         prefs = {
             -- Existing (older) defaults:
-            fuzzyMatchEnabled         = true,
-            fuzzyMatchTolerance       = 2,
-            maxSuggestions            = 12,
-            animateAutoType           = true,
-            showTutorialOnStartup     = true,
-            usageAnalytics            = true,
-            contextAwareness          = true,
-            voiceCommandEnabled       = false,
-            fallbackEnabled           = false,
-            autoTypeDelay             = 0.03,
-            persistHistory            = true,
-            snippetEnabled            = true,
-            contextFiltering          = true,
-            typeAheadPrediction       = true,
-            suggestionMode            = "fuzzy",  -- or "strict"
-            overrideHotkeysWhileTyping= true,
-            favoritesSortingEnabled   = true,
-            autocompleteOpenDirection = "down", -- or "up"
-            maxSuggestionsOverride    = nil,
+            fuzzyMatchEnabled          = true,
+            fuzzyMatchTolerance        = 2,
+            maxSuggestions             = 12,
+            animateAutoType            = true,
+            showTutorialOnStartup      = true,
+            usageAnalytics             = true,
+            contextAwareness           = true,
+            voiceCommandEnabled        = false,
+            fallbackEnabled            = false,
+            autoTypeDelay              = 0.03,
+            persistHistory             = true,
+            snippetEnabled             = true,
+            contextFiltering           = true,
+            typeAheadPrediction        = true,
+            suggestionMode             = "fuzzy",
+            overrideHotkeysWhileTyping = true,
+            favoritesSortingEnabled    = true,
+            autocompleteOpenDirection  = "down",
+            maxSuggestionsOverride     = nil,
             showParamSuggestionsInColor= true,
-            paramSuggestionsColor     = { 1.0, 0.8, 0.0 }, -- gold
+            paramSuggestionsColor      = { 1.0, 0.8, 0.0 },
             showDescriptionsInAutocomplete = true,
-            terminalNavigationEnabled = true,
-            advancedStyling           = true,
-            enableTerminalGoodies      = true,
-            advancedKeybinds           = true,
-            partialFuzzyFallback       = true,
-            shellContextEnabled        = false,
-            monetizationEnabled        = false,
+            terminalNavigationEnabled  = true,
+            advancedStyling            = true,
+            enableTerminalGoodies       = true,
+            advancedKeybinds            = true,
+            partialFuzzyFallback        = true,
+            shellContextEnabled         = false,
+            monetizationEnabled         = false,
 
             -- Newer expansions:
-            uiTheme                   = "dark",   -- "dark", "light", "classic"
-            uiScale                   = 1.0,
-            autocompleteBgColor       = { 0, 0, 0, 0.85 },
-            autocompleteHighlightColor= { 0.6, 0.6, 0.6, 0.3 },
-            tutorialFadeIn            = true,
+            uiTheme                    = "dark",
+            uiScale                    = 1.0,
+            autocompleteBgColor        = { 0, 0, 0, 0.85 },
+            autocompleteHighlightColor = { 0.6, 0.6, 0.6, 0.3 },
+            tutorialFadeIn             = true,
+            configGuiEnabled           = true,
 
-            -- Config GUI toggles:
-            configGuiEnabled          = true,     -- If false, the GUI won't load
+            -- NEW in version 4.1: fully disable hotkeys in chat
+            alwaysDisableHotkeysInChat = false,
         }
         CommandSageDB.config.preferences = prefs
     end
@@ -88,6 +89,10 @@ function CommandSage_Config:InitializeDefaults()
     end
     if prefs.configGuiEnabled == nil then
         prefs.configGuiEnabled = true
+    end
+    -- Check our newly added key
+    if prefs.alwaysDisableHotkeysInChat == nil then
+        prefs.alwaysDisableHotkeysInChat = false
     end
 end
 
@@ -112,4 +117,11 @@ function CommandSage_Config.Set(category, key, value)
         CommandSageDB.config[category] = cTable
     end
     cTable[key] = value
+end
+
+-- Enhancement: A quick helper to "reset" all preferences (in case user wants defaults)
+function CommandSage_Config:ResetPreferences()
+    CommandSageDB.config.preferences = nil
+    self:InitializeDefaults()
+    print("CommandSage: Preferences reset to default.")
 end

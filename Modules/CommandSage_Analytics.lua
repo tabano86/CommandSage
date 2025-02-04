@@ -44,3 +44,12 @@ function CommandSage_Analytics:IsBlacklisted(cmd)
     EnsureAnalytics()
     return CommandSageDB.analytics.blacklisted[cmd]
 end
+
+function CommandSage_Analytics:ListFavorites()
+    EnsureAnalytics()
+    local favs = {}
+    for cmd, _ in pairs(CommandSageDB.analytics.favorites) do
+        table.insert(favs, cmd)
+    end
+    return favs
+end

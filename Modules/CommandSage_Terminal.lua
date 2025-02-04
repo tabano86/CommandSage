@@ -35,17 +35,22 @@ function CommandSage_Terminal:Initialize()
 
     CommandSage_Terminal.startTime = GetTime()
 
-    -- Then the big list of other commands: /whoami, /time, /uptime, /ping, ...
-    -- [Truncated in explanation; same as previous versions with ~50 commands added]
-    -- ...
-    -- For brevity, we keep them as in the earlier version but updated version number:
+    SLASH_CMDTIME1 = "/time"
+    SlashCmdList["CMDTIME"] = function(msg)
+        print("Server time: " .. date("%H:%M:%S"))
+    end
+
+    SLASH_CMDUPTIME1 = "/uptime"
+    SlashCmdList["CMDUPTIME"] = function(msg)
+        local uptime = GetTime() - CommandSage_Terminal.startTime
+        print("Session uptime: " .. math.floor(uptime) .. " seconds")
+    end
 
     SLASH_CMDVERSION1 = "/version"
     SlashCmdList["CMDVERSION"] = function(msg)
-        print("CommandSage Terminal v4.0")
+        print("CommandSage Terminal v4.1")
     end
 
-    -- Final extras:
     SLASH_CMDSHELLCD1 = "/cd"
     SlashCmdList["CMDSHELLCD"] = function(msg)
         CommandSage_ShellContext:HandleCd(msg)
@@ -54,5 +59,11 @@ function CommandSage_Terminal:Initialize()
     SLASH_CMDLICENSE1 = "/license"
     SlashCmdList["CMDLICENSE"] = function(msg)
         CommandSage_Licensing:HandleLicenseCommand(msg)
+    end
+
+    SLASH_CMDWHOAMI1 = "/whoami"
+    SlashCmdList["CMDWHOAMI"] = function(msg)
+        local name = UnitName("player") or "Unknown"
+        print("You are: " .. name)
     end
 end

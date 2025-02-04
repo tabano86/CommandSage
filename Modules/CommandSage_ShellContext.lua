@@ -49,3 +49,7 @@ function CommandSage_ShellContext:HandleCd(msg)
         end
     end
 end
+
+function CommandSage_ShellContext:GetCurrentContext()
+    return currentContext
+end

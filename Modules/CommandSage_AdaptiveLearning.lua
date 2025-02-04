@@ -20,3 +20,8 @@ function CommandSage_AdaptiveLearning:GetUsageScore(slash)
     EnsureUsageData()
     return CommandSageDB.usageData[slash] or 0
 end
+
+function CommandSage_AdaptiveLearning:ResetUsageData()
+    CommandSageDB.usageData = {}
+    print("CommandSage: All usage data has been cleared.")
+end

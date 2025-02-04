@@ -30,14 +30,13 @@ local function CreateCheckbox(parent, label, cvar, offsetY, tooltip)
         end
     end)
 
-    -- set initial state from config
     cb:SetChecked(CommandSage_Config.Get("preferences", cvar))
     return cb
 end
 
 function CommandSage_ConfigGUI:InitGUI()
     guiFrame = CreateFrame("Frame", "CommandSageConfigFrame", UIParent, "BasicFrameTemplate")
-    guiFrame:SetSize(380, 400)
+    guiFrame:SetSize(380, 430)
     guiFrame:SetPoint("CENTER")
     guiFrame:SetMovable(true)
     guiFrame:EnableMouse(true)
@@ -51,19 +50,24 @@ function CommandSage_ConfigGUI:InitGUI()
     guiFrame.TitleText:SetText("CommandSage Configuration")
 
     local yOffset = -40
-    local cb1 = CreateCheckbox(guiFrame, "Enable Animated AutoType", "animateAutoType", yOffset, "If enabled, simulates typing slash commands letter by letter.")
+    local cb1 = CreateCheckbox(guiFrame, "Enable Animated AutoType", "animateAutoType", yOffset, "Simulates typing slash commands.")
     yOffset = yOffset - 30
-    local cb2 = CreateCheckbox(guiFrame, "Advanced Styling", "advancedStyling", yOffset, "If disabled, uses simpler frames for the suggestions popup.")
+    local cb2 = CreateCheckbox(guiFrame, "Advanced Styling", "advancedStyling", yOffset, "Enable fancy styling for suggestion popup.")
     yOffset = yOffset - 30
-    local cb3 = CreateCheckbox(guiFrame, "Partial Fuzzy Fallback", "partialFuzzyFallback", yOffset, "When prefix fails, search entire command list in fuzzy mode.")
+    local cb3 = CreateCheckbox(guiFrame, "Partial Fuzzy Fallback", "partialFuzzyFallback", yOffset, "When no prefix match, search entire list.")
     yOffset = yOffset - 30
-    local cb4 = CreateCheckbox(guiFrame, "Shell Context Enabled", "shellContextEnabled", yOffset, "Allows /cd <slash> usage to omit the slash for subsequent commands.")
+    local cb4 = CreateCheckbox(guiFrame, "Shell Context Enabled", "shellContextEnabled", yOffset, "Use /cd <command> to skip slash.")
     yOffset = yOffset - 30
-    local cb5 = CreateCheckbox(guiFrame, "Terminal Goodies", "enableTerminalGoodies", yOffset, "Enables the extended set of 50+ terminal-like slash commands.")
+    local cb5 = CreateCheckbox(guiFrame, "Terminal Goodies", "enableTerminalGoodies", yOffset, "Enables 50+ terminal-like slash commands.")
     yOffset = yOffset - 30
-    local cb6 = CreateCheckbox(guiFrame, "Persist Command History", "persistHistory", yOffset, "If disabled, command usage won't be saved between sessions.")
+    local cb6 = CreateCheckbox(guiFrame, "Persist Command History", "persistHistory", yOffset, "Save command usage between sessions.")
+    yOffset = yOffset - 30
 
-    -- Close button
+    -- New in 4.1
+    local cb7 = CreateCheckbox(guiFrame, "Always Disable Hotkeys in Chat", "alwaysDisableHotkeysInChat", yOffset,
+            "If checked, your normal keybinds won't fire when chat is focused.")
+    yOffset = yOffset - 30
+
     local closeBtn = CreateFrame("Button", nil, guiFrame, "UIPanelButtonTemplate")
     closeBtn:SetSize(80, 22)
     closeBtn:SetPoint("BOTTOM", 0, 10)

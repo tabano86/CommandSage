@@ -37,3 +37,9 @@ function CommandSage_AutoType:BeginAutoType(cmdStr)
     frame.delay = 0
     frame:Show()
 end
+
+function CommandSage_AutoType:StopAutoType()
+    frame:Hide()
+    frame.textToType = ""
+    frame.index = 0
+end

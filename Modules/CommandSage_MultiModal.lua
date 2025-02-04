@@ -15,3 +15,8 @@ function CommandSage_MultiModal:OnVoiceCommand(phrase)
         print("No match for voice input:", phrase)
     end
 end
+
+function CommandSage_MultiModal:SimulateVoiceCommand(phrase)
+    print("Simulating voice input:", phrase)
+    self:OnVoiceCommand(phrase)
+end

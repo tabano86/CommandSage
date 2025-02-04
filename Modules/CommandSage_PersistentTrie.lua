@@ -51,3 +51,8 @@ function CommandSage_PersistentTrie:LoadTrie()
         r.maxDepth   = loaded.maxDepth
     end
 end
+
+function CommandSage_PersistentTrie:ClearCachedTrie()
+    CommandSageDB[KEY] = nil
+    print("CommandSage: Persistent trie data cleared.")
+end

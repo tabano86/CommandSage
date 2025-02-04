@@ -83,3 +83,7 @@ function CommandSage_FuzzyMatch:SuggestCorrections(input)
     end
     return nil, bestDist
 end
+
+function CommandSage_FuzzyMatch:GetFuzzyDistance(strA, strB)
+    return Levenshtein(strA:lower(), strB:lower())
+end

@@ -36,3 +36,7 @@ function CommandSage_Licensing:HandleLicenseCommand(msg)
         print("License invalid or not recognized.")
     end
 end
+
+function CommandSage_Licensing:GetLicenseKey()
+    return CommandSageDB[LICENSE_KEY_DB_FIELD]
+end

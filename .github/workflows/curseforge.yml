@@ -1,4 +1,4 @@
-name: Build CommandSage
+name: Build and Publish CommandSage
 
 on:
   push:
@@ -11,18 +11,49 @@ jobs:
     steps:
       - name: Check out
         uses: actions/checkout@v2
+
       - name: Install zip
-        run: sudo apt-get install zip
+        run: sudo apt-get install -y zip
+
+      - name: Extract Addon Version
+        id: extract_version
+        run: |
+          VERSION_LINE=$(grep -m1 -oP '(?<=Version-).*(?=-blue)' README.md || echo "4.1")
+          echo "addon_version=$VERSION_LINE" >> $GITHUB_OUTPUT
+
+      - name: Update TOC Version
+        run: |
+          echo "Detected version: ${{ steps.extract_version.outputs.addon_version }}"
+          sed -i "s/## Version: .*/## Version: ${{ steps.extract_version.outputs.addon_version }}/" CommandSage.toc
+
       - name: Build
         run: |
           chmod +x scripts/build.sh
           ./scripts/build.sh
-      - name: Upload artifact
+
+      - name: Package Addon
+        run: |
+          mkdir -p dist
+          zip -r dist/CommandSage-${{ steps.extract_version.outputs.addon_version }}.zip . \
+            -x ".git*" \
+            -x ".github*" \
+            -x "scripts/*" \
+            -x "dist/*"
+
+      - name: Upload artifact to GitHub
         uses: actions/upload-artifact@v2
         with:
           name: CommandSage-Zip
           path: ./dist/*.zip
 
-      # Example step for auto-publishing to CurseForge (requires a real action or custom script)
-      # - name: Publish to CurseForge
-      #   run: echo "Would upload to CurseForge with ${{ secrets.CURSEFORGE_TOKEN }}..."
+      - name: Publish to CurseForge (Example)
+        if: false  # Replace 'false' with conditions for your actual release
+        run: |
+          echo "Would publish to CurseForge using token: ${{ secrets.CURSEFORGE_TOKEN }}"
+          # e.g. curl or CF CLI calls, etc.
+
+      - name: Publish to SourceForge (Example)
+        if: false
+        run: |
+          echo "Would upload to SourceForge with credentials."
+          # e.g. scp dist/*.zip user@web.sourceforge.net:/home/frs/project/...

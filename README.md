@@ -1,13 +1,15 @@
 # CommandSage 🎮✨
 
-**CommandSage** is a powerful, next-generation addon for World of Warcraft Classic that revolutionizes your slash-command experience with intelligent autocompletion, fuzzy matching, and advanced features.
+**CommandSage** is a powerful, next-generation addon for World of Warcraft Classic that revolutionizes your
+slash-command experience with intelligent autocompletion, fuzzy matching, and advanced features.
 
-![Version](https://img.shields.io/badge/Version-4.0-blue)
+![Version](https://img.shields.io/badge/Version-4.1-blue)
 ![Game Version](https://img.shields.io/badge/WoW-Classic%2011.4.0-yellow)
 
 ## 🌟 Key Features
 
 ### Core Functionality
+
 - **Smart Autocomplete** - Context-aware command suggestions
 - **Fuzzy Matching** - Tolerant to typos and partial matches
 - **Command History** - Learns from your usage patterns
@@ -15,6 +17,7 @@
 - **Snippet System** - Custom command expansions
 
 ### Advanced Features
+
 - **Shell Context** - Use `/cd` to enter command contexts
 - **Terminal Commands** - 50+ utility commands like `/cls`, `/time`, `/ping`
 - **Performance Tools** - Built-in metrics and optimization
@@ -23,50 +26,48 @@
 
 ## 🚀 Quick Start
 
-1. **Install:**
-   ```
-   Copy to Interface/AddOns/CommandSage/
-   ```
+1. **Install:**  
+   Copy to `Interface/AddOns/CommandSage/`
 
 2. **Basic Usage:**
-  - Type `/cmdsage` for help
-  - Use `/cmdsage tutorial` for interactive guide
-  - Access settings with `/cmdsage config`
+    - Type `/cmdsage` for help
+    - Use `/cmdsage tutorial` for interactive guide
+    - Access settings with `/cmdsage config`
 
 3. **First Steps:**
-  - Try typing a partial command to see suggestions
-  - Use Tab/Arrow keys to navigate suggestions
-  - Press Enter to complete the command
+    - Try typing a partial command to see suggestions
+    - Use Tab/Arrow keys to navigate suggestions
+    - Press Enter to complete the command
 
 ## ⚙️ Configuration
 
 ### Command Line
-```
-/cmdsage config
-```
+
+`/cmdsage config`
 
 ### Key Settings
-| Setting | Values | Description |
-|---------|--------|-------------|
-| uiTheme | dark/light/classic | Interface theme |
-| uiScale | 0.8-2.0 | UI scaling factor |
-| fuzzyMatchTolerance | 0-5 | Typo tolerance |
-| animateAutoType | true/false | Typing animation |
+
+| Setting                    | Values             | Description                                          |
+|----------------------------|--------------------|------------------------------------------------------|
+| uiTheme                    | dark/light/classic | Interface theme                                      |
+| uiScale                    | 0.8-2.0            | UI scaling factor                                    |
+| fuzzyMatchTolerance        | 0-5                | Typo tolerance                                       |
+| animateAutoType            | true/false         | Typing animation                                     |
+| alwaysDisableHotkeysInChat | true/false         | **NEW**: If true, fully disable hotkeys while typing |
 
 ### GUI Configuration
-Open settings panel with:
-```
-/cmdsage gui
-```
 
-## 🔧 Advanced Features
+Open settings panel with:
+`/cmdsage gui`
+
+## 🎯 Advanced Features
 
 ### Shell Context
-```
-/cd macro # Enter macro context new test # Creates new macro 'test' /cd .. # Exit context
-```
+
+`/cd macro # Enter macro context new test # Creates new macro 'test' /cd .. # Exit context`
 
 ### Terminal Commands
+
 - `/cls` - Clear chat
 - `/pwd` - Show current zone
 - `/time` - Server time
@@ -78,12 +79,9 @@ Open settings panel with:
 ## 🎯 Performance
 
 Monitor addon performance:
-
-```
-/cmdsage perf
-```
-
+`/cmdsage perf`
 Displays:
+
 - Memory usage
 - Command count
 - Trie node stats
@@ -92,27 +90,24 @@ Displays:
 ## 🎨 Accessibility
 
 Built-in accessibility features:
+
 - High contrast mode
 - Scalable UI
 - Color customization
 - Clear, readable fonts
 
-## 📘 Documentation
+## 📖 Documentation
 
 Full documentation:
+
 - [Configuration Guide](link)
 - [Command Reference](link)
 - [API Documentation](link)
 - [Performance Tips](link)
 
 ## 🤝 Support
+
 (coming soon...)
-
-[//]: # (- Report issues on [GitHub]&#40;link&#41;)
-
-[//]: # (- Join our [Discord]&#40;link&#41;)
-
-[//]: # (- Visit the [Wiki]&#40;link&#41;)
 
 ## 📜 License
 

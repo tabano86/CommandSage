@@ -50,3 +50,15 @@ function CommandSage_Performance:CountTrieNodes()
     end
     return count(CommandSage_Trie:GetRoot())
 end
+
+function CommandSage_Performance:PrintDetailedStats()
+    print("=== CommandSage Detailed Stats ===")
+    print("Total Trie Nodes:", self:CountTrieNodes())
+    local discovered = CommandSage_Discovery:GetDiscoveredCommands()
+    local count = 0
+    for _ in pairs(discovered) do
+        count = count + 1
+    end
+    print("Discovered commands:", count)
+    print("Memory (MB):", string.format("%.2f", collectgarbage("count")/1024))
+end

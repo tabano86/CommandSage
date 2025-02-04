@@ -9,7 +9,6 @@ local knownParams = {
     ["/dance"]  = { "silly", "fancy", "epic" },
     ["/macro"]  = { "new", "delete", "edit" },
     ["/help"]   = { "advanced", "commands", "tips" },
-    -- etc.
 }
 
 local recentWhispers = {}
@@ -36,7 +35,6 @@ function CommandSage_ParameterHelper:GetParameterSuggestions(slash, partialArg)
     if slash:lower() == "/w" then
         local suggestions = {}
         local combined = {}
-
         for nameLower in pairs(recentWhispers) do
             table.insert(combined, nameLower)
         end
@@ -75,4 +73,12 @@ function CommandSage_ParameterHelper:GetInlineHint(slash)
     return table.concat(subcommands, " | ")
 end
 
-C_Timer.After(5, UpdateFriendList)  -- Delay to ensure the friend system is loaded
+C_Timer.After(5, UpdateFriendList)
+
+function CommandSage_ParameterHelper:AddKnownParam(slash, param)
+    slash = slash:lower()
+    if not knownParams[slash] then
+        knownParams[slash] = {}
+    end
+    table.insert(knownParams[slash], param)
+end

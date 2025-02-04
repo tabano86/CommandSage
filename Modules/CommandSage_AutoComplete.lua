@@ -38,8 +38,6 @@ local function ApplyStylingToAutoFrame(frame)
     end
 
     frame:SetBackdropColor(unpack(bgColor))
-
-    -- Also store highlight color so we can apply it to the highlight textures
     frame._highlightColor = highlightColor
 end
 
@@ -49,7 +47,6 @@ local function CreateAutoCompleteUI()
     end
 
     autoFrame = CreateFrame("Frame", "CommandSageAutoCompleteFrame", UIParent, "BackdropTemplate")
-
     local direction = CommandSage_Config.Get("preferences", "autocompleteOpenDirection") or "down"
     if direction == "up" then
         autoFrame:SetPoint("BOTTOMLEFT", ChatFrame1EditBox, "TOPLEFT", 0, 2)
@@ -86,8 +83,7 @@ local function CreateAutoCompleteUI()
 
         btn.highlight = btn:CreateTexture(nil, "HIGHLIGHT")
         btn.highlight:SetAllPoints()
-        local highlightColor = autoFrame._highlightColor or {0.6, 0.6, 0.6, 0.3}
-        btn.highlight:SetColorTexture(unpack(highlightColor))
+        btn.highlight:SetColorTexture(unpack(autoFrame._highlightColor))
 
         btn.text = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         btn.text:SetPoint("LEFT", 5, 0)
@@ -123,7 +119,6 @@ end
 
 local function MoveSelection(delta)
     if not content then return end
-
     local totalShown = 0
     for _, b in ipairs(content.buttons) do
         if b:IsShown() then
@@ -189,11 +184,10 @@ function CommandSage_AutoComplete:ShowSuggestions(suggestions)
         if i <= totalToShow and s then
             btn.suggestionData = s
             local usageScore = CommandSage_AdaptiveLearning:GetUsageScore(s.slash)
-            local freqDisplay = (usageScore and usageScore > 0) and ("(" .. usageScore .. ")") or ""
+            local freqDisplay = (usageScore > 0) and ("(" .. usageScore .. ")") or ""
             local cat = CommandSage_CommandOrganizer:GetCategory(s.slash)
             local desc = (s.data and s.data.description) or ""
 
-            -- param suggestion color
             if s.isParamSuggestion and CommandSage_Config.Get("preferences", "showParamSuggestionsInColor") then
                 btn.text:SetTextColor(unpack(CommandSage_Config.Get("preferences", "paramSuggestionsColor")))
             else
@@ -210,9 +204,8 @@ function CommandSage_AutoComplete:ShowSuggestions(suggestions)
                 btn.desc:SetText("")
             end
 
-            -- Usage color if used a lot
             if usageScore and usageScore > 10 then
-                btn.usage:SetTextColor(0, 1, 0, 1) -- green
+                btn.usage:SetTextColor(0, 1, 0, 1)
             else
                 btn.usage:SetTextColor(1, 1, 1, 1)
             end
@@ -242,13 +235,11 @@ end
 function CommandSage_AutoComplete:GenerateSuggestions(typedText)
     local mode = CommandSage_Config.Get("preferences", "suggestionMode") or "fuzzy"
 
-    -- shell context rewriting
     typedText = CommandSage_ShellContext:RewriteInputIfNeeded(typedText)
 
     local partialLower = typedText:lower()
     local possible = CommandSage_Trie:FindPrefix(partialLower)
 
-    -- partial fallback if no matches
     if CommandSage_Config.Get("preferences", "partialFuzzyFallback") and #possible == 0 then
         possible = CommandSage_Trie:AllCommands()
     end
@@ -265,7 +256,6 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
         end)
     end
 
-    -- snippet suggestions
     if CommandSage_Config.Get("preferences", "snippetEnabled") then
         for _, snip in ipairs(snippetTemplates) do
             if snip.slash:find(partialLower, 1, true) then
@@ -278,7 +268,6 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
         end
     end
 
-    -- filter out blacklisted or context
     local final = {}
     for _, m in ipairs(matched) do
         if (not CommandSage_Analytics:IsBlacklisted(m.slash)) and self:PassesContextFilter(m) then
@@ -304,7 +293,6 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
     return final
 end
 
--- Hook to chat
 local hookingFrame = CreateFrame("Frame")
 hookingFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 
@@ -322,14 +310,14 @@ hookingFrame:SetScript("OnEvent", function()
 
     edit:HookScript("OnKeyDown", function(self, key)
         local text = self:GetText() or ""
+        local isSlash = (text:sub(1,1) == "/")
+        local isInShellContext = CommandSage_ShellContext:IsActive()
 
         if not CommandSage_Config.Get("preferences", "advancedKeybinds") then
             self:SetPropagateKeyboardInput(true)
             return
         end
 
-        local isSlash = (text:sub(1,1) == "/")
-        local isInShellContext = CommandSage_ShellContext:IsActive()
         if isSlash or isInShellContext then
             self:SetPropagateKeyboardInput(false)
 
@@ -409,3 +397,9 @@ hookingFrame:SetScript("OnEvent", function()
         CommandSage_AutoComplete:ShowSuggestions(final)
     end)
 end)
+
+function CommandSage_AutoComplete:CloseSuggestions()
+    if autoFrame then
+        autoFrame:Hide()
+    end
+end

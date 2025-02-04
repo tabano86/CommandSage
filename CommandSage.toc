@@ -2,7 +2,7 @@
 ## Title: CommandSage
 ## Notes: Next-Gen slash command auto-completion for WoW Classic
 ## Author: Anthony Tabano
-## Version: 4.0
+## Version: 4.1
 ## SavedVariables: CommandSageDB
 
 # Core

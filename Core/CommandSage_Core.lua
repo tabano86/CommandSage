@@ -49,22 +49,19 @@ function CommandSage:RegisterSlashCommands()
 
         if cmd == "tutorial" then
             CommandSage_Tutorial:ShowTutorialPrompt()
-
         elseif cmd == "scan" then
             CommandSage_Discovery:ScanAllCommands()
             print("CommandSage: Force re-scan done.")
-
         elseif cmd == "fallback" then
             CommandSage_Fallback:EnableFallback()
             print("Fallback ON.")
-
         elseif cmd == "nofallback" then
             CommandSage_Fallback:DisableFallback()
             print("Fallback OFF.")
-
+        elseif cmd == "togglefallback" then
+            CommandSage_Fallback:ToggleFallback()
         elseif cmd == "debug" then
             CommandSage_DeveloperAPI:DebugDump()
-
         elseif cmd == "config" then
             -- e.g. /cmdsage config fuzzyMatchTolerance 3
             local key = args[2]
@@ -82,7 +79,6 @@ function CommandSage:RegisterSlashCommands()
             else
                 print("Usage: /cmdsage config <key> <value>")
             end
-
         elseif cmd == "mode" then
             -- e.g. /cmdsage mode strict|fuzzy
             local modeVal = args[2]
@@ -92,7 +88,6 @@ function CommandSage:RegisterSlashCommands()
             else
                 print("Usage: /cmdsage mode <fuzzy|strict>")
             end
-
         elseif cmd == "theme" then
             -- e.g. /cmdsage theme dark|light|classic
             local themeVal = args[2]
@@ -102,7 +97,6 @@ function CommandSage:RegisterSlashCommands()
             else
                 print("Usage: /cmdsage theme <dark|light|classic>")
             end
-
         elseif cmd == "scale" then
             -- e.g. /cmdsage scale 1.2
             local scaleVal = args[2] and tonumber(args[2])
@@ -112,25 +106,25 @@ function CommandSage:RegisterSlashCommands()
             else
                 print("Usage: /cmdsage scale <number>")
             end
-
         elseif cmd == "gui" then
-            -- Toggle or show config GUI
             if CommandSage_ConfigGUI then
                 CommandSage_ConfigGUI:Toggle()
             else
                 print("Config GUI not available.")
             end
-
+        elseif cmd == "resetprefs" then
+            CommandSage_Config:ResetPreferences()
         else
             print("|cff00ff00CommandSage Usage:|r")
             print(" /cmdsage tutorial - Show tutorial")
             print(" /cmdsage scan - Re-scan commands")
-            print(" /cmdsage fallback - On, nofallback - Off")
+            print(" /cmdsage fallback/nofallback/togglefallback")
             print(" /cmdsage debug - Show debug info")
             print(" /cmdsage config <key> <val> - Set config")
             print(" /cmdsage mode <fuzzy|strict> - Switch suggestion mode")
             print(" /cmdsage theme <dark|light|classic> - Set UI theme")
             print(" /cmdsage scale <1.0> - Set autocomplete UI scale")
+            print(" /cmdsage resetprefs - Reset all preferences to default")
             print(" /cmdsage gui - Open/close the config panel")
         end
     end
@@ -140,7 +134,9 @@ end
 local bindingManagerFrame = CreateFrame("Frame", "CommandSageBindingManagerFrame")
 
 local function DisableAllBindings()
-    if not CommandSage_Config.Get("preferences", "overrideHotkeysWhileTyping") then
+    local override = CommandSage_Config.Get("preferences", "overrideHotkeysWhileTyping")
+    local always   = CommandSage_Config.Get("preferences", "alwaysDisableHotkeysInChat")
+    if not override and not always then
         return
     end
     for i = 1, GetNumBindings() do
@@ -159,7 +155,6 @@ local chatBox = ChatFrame1EditBox
 chatBox:HookScript("OnEditFocusGained", function(self)
     DisableAllBindings()
 end)
-
 chatBox:HookScript("OnEditFocusLost", function(self)
     RestoreAllBindings()
 end)

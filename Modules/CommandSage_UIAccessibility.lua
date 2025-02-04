@@ -10,20 +10,24 @@ local largeText = false
 
 function CommandSage_UIAccessibility:EnableHighContrast()
     highContrast = true
-    -- Could do advanced restyling here
+    -- Advanced restyling could be applied here
+    print("High contrast mode enabled.")
 end
 
 function CommandSage_UIAccessibility:DisableHighContrast()
     highContrast = false
+    print("High contrast mode disabled.")
 end
 
 function CommandSage_UIAccessibility:EnableLargeText()
     largeText = true
-    -- Possibly scale up certain frames or fonts
+    -- Increase font sizes or scale up UI elements as needed
+    print("Large text mode enabled.")
 end
 
 function CommandSage_UIAccessibility:DisableLargeText()
     largeText = false
+    print("Large text mode disabled.")
 end
 
 function CommandSage_UIAccessibility:ReadBack(text)
@@ -31,5 +35,13 @@ function CommandSage_UIAccessibility:ReadBack(text)
         C_VoiceChat.SpeakText(text, Enum.VoiceTtsDestination.LocalPlayback, 0, 100)
     else
         print("(TTS not available) " .. text)
+    end
+end
+
+function CommandSage_UIAccessibility:ToggleHighContrast()
+    if highContrast then
+        self:DisableHighContrast()
+    else
+        self:EnableHighContrast()
     end
 end

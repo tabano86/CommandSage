@@ -51,3 +51,8 @@ function CommandSage_Tutorial:ShowTutorialPrompt()
 
     FadeInIfEnabled(frame)
 end
+
+function CommandSage_Tutorial:RefreshTutorialPrompt()
+    print("Refreshing tutorial prompt...")
+    self:ShowTutorialPrompt()
+end
