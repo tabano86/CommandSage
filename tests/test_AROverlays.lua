@@ -2,8 +2,8 @@
 -- 10 tests for Modules/CommandSage_AROverlays.lua
 
 require("busted.runner")()
-require("Modules.CommandSage_AROverlays")
-require("Modules.CommandSage_Config")
+require("Modules/CommandSage_AROverlays")
+require("Modules/CommandSage_Config")
 
 describe("Module: CommandSage_AROverlays", function()
 

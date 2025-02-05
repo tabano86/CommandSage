@@ -2,7 +2,7 @@
 -- 10 tests for Modules/CommandSage_KeyBlocker.lua
 
 require("busted.runner")()
-require("Modules.CommandSage_KeyBlocker")
+require("Modules/CommandSage_KeyBlocker")
 
 describe("Module: CommandSage_KeyBlocker", function()
 

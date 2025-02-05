@@ -2,14 +2,14 @@
 -- 10 tests for Modules/CommandSage_AutoComplete.lua (2nd coverage set)
 
 require("busted.runner")()
-require("Modules.CommandSage_AutoComplete")
-require("Modules.CommandSage_Trie")
-require("Modules.CommandSage_Analytics")
-require("Modules.CommandSage_AdaptiveLearning")
-require("Modules.CommandSage_HistoryPlayback")
-require("Modules.CommandSage_Fallback")
-require("Modules.CommandSage_ShellContext")
-require("Modules.CommandSage_Config")
+require("Modules/CommandSage_AutoComplete")
+require("Modules/CommandSage_Trie")
+require("Modules/CommandSage_Analytics")
+require("Modules/CommandSage_AdaptiveLearning")
+require("Modules/CommandSage_HistoryPlayback")
+require("Modules/CommandSage_Fallback")
+require("Modules/CommandSage_ShellContext")
+require("Modules/CommandSage_Config")
 
 describe("Module: CommandSage_AutoComplete (Extended)", function()
 

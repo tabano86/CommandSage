@@ -1,8 +1,6 @@
 -- tests/test_ConfigCore.lua
 -- 10 tests for CommandSage_Config.lua (Core)
-
---require("busted.runner")()
-require("Core.CommandSage_Config")
+require("Core/CommandSage_Config")
 
 describe("Core: CommandSage_Config", function()
 

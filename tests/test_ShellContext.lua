@@ -2,9 +2,9 @@
 -- 10 tests for Modules/CommandSage_ShellContext.lua
 
 require("busted.runner")()
-require("Modules.CommandSage_ShellContext")
-require("Modules.CommandSage_Config")
-require("Modules.CommandSage_Discovery")
+require("Modules/CommandSage_ShellContext")
+require("Modules/CommandSage_Config")
+require("Modules/CommandSage_Discovery")
 
 describe("Module: CommandSage_ShellContext", function()
 

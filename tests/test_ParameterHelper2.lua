@@ -2,8 +2,8 @@
 -- 10 tests for Modules/CommandSage_ParameterHelper.lua (extended)
 
 require("busted.runner")()
-require("Modules.CommandSage_ParameterHelper")
-require("Modules.CommandSage_Config")
+require("Modules/CommandSage_ParameterHelper")
+require("Modules/CommandSage_Config")
 
 describe("Module: CommandSage_ParameterHelper (Extended)", function()
 

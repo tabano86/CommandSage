@@ -2,9 +2,9 @@
 -- 10 tests for Modules/CommandSage_PersistentTrie.lua
 
 require("busted.runner")()
-require("Modules.CommandSage_PersistentTrie")
-require("Modules.CommandSage_Trie")
-require("Modules.CommandSage_Config")
+require("Modules/CommandSage_PersistentTrie")
+require("Modules/CommandSage_Trie")
+require("Modules/CommandSage_Config")
 
 describe("Module: CommandSage_PersistentTrie", function()
 

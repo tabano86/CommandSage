@@ -1,5 +1,5 @@
 -- tests\test_Trie.lua
-require("Modules.CommandSage_Trie")
+require("Modules/CommandSage_Trie")
 
 describe("CommandSage_Trie", function()
     before_each(function()
