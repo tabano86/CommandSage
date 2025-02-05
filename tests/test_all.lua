@@ -1,5 +1,6 @@
 -- tests\test_all.lua
 -- Master test runner using Busted.
+package.path = package.path .. ";./tests/?.lua"
 
 require("busted.runner")()
 
