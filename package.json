@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/tabano86/CommandSage#readme",
   "dependencies": {
+    "archiver": "^7.0.1",
     "clipboardy": "^4.0.0",
     "commander": "^13.1.0"
   }
