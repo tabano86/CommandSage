@@ -1,0 +1,26 @@
+{
+  "name": "commandsage",
+  "version": "1.0.0",
+  "description": "**CommandSage** is a powerful, next-generation addon for World of Warcraft Classic that revolutionizes your\r slash-command experience with intelligent autocompletion, fuzzy matching, advanced context logic, and visually fun\r features.",
+  "main": "cmdsage.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tabano86/CommandSage.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tabano86/CommandSage/issues"
+  },
+  "homepage": "https://github.com/tabano86/CommandSage#readme",
+  "dependencies": {
+    "clipboardy": "^4.0.0",
+    "commander": "^13.1.0"
+  }
+}

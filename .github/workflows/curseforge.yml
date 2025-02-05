@@ -7,35 +7,25 @@ on:
 
 jobs:
   build-and-upload:
-    # Matrix to test on both Linux and Windows for cross-platform verification
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Check out
+      - name: Check out repository
         uses: actions/checkout@v2
 
-      - name: Install dependencies (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y zip lua5.1 luarocks
-          luarocks install busted
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
 
-      - name: Install dependencies (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          choco install zip
-          choco install lua
-          REM If Luarocks is not installed by default:
-          luarocks install busted
+      - name: Install dependencies
+        run: npm ci
 
       - name: Run Tests
-        run: |
-          cd tests
-          busted --verbose --lpath="?;?.lua;?/init.lua"
+        run: node cmdsage.js test
 
       - name: Extract Addon Version
         id: extract_version
@@ -48,20 +38,14 @@ jobs:
           echo "Detected version: ${{ steps.extract_version.outputs.addon_version }}"
           sed -i "s/## Version: .*/## Version: ${{ steps.extract_version.outputs.addon_version }}/" CommandSage.toc
 
-      - name: Build
-        run: |
-          if [ -f scripts/build.sh ]; then
-            chmod +x scripts/build.sh
-            ./scripts/build.sh
-          else
-            echo "scripts/build.sh not found; skipping."
-          fi
+      - name: Build Addon
+        run: node cmdsage.js build
 
       - name: Package Addon
         run: |
           mkdir -p dist
           zip -r dist/CommandSage-${{ steps.extract_version.outputs.addon_version }}.zip . \
-            -x ".git*" \
+            -x "*.git*" \
             -x ".github*" \
             -x "scripts/*" \
             -x "dist/*" \
@@ -71,12 +55,13 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: CommandSage-Zip
-          path: ./dist/*.zip
+          path: dist/CommandSage-${{ steps.extract_version.outputs.addon_version }}.zip
 
-      - name: Publish to CurseForge (Example)
-        if: false  # Replace 'false' with conditions for your actual release
+      - name: Publish to CurseForge
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && contains(github.event.head_commit.message, '[release]')
         run: |
-          echo "Would publish to CurseForge using token: ${{ secrets.CURSEFORGE_TOKEN }}"
+          echo "Publishing to CurseForge..."
+          node scripts/publish-curseforge.js dist/CommandSage-${{ steps.extract_version.outputs.addon_version }}.zip ${{ secrets.CURSEFORGE_TOKEN }}
 
       - name: Publish to SourceForge (Example)
         if: false
