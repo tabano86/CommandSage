@@ -1,24 +1,31 @@
--- tests\test_all.lua
+-- tests/test_all.lua
 -- Master test runner using Busted.
+
 package.path = package.path .. ";./tests/?.lua"
 
 require("busted.runner")()
 
--- Load mocks
-dofile("tests/mocks.lua")
+-- (Optional) load your base test file that confirms Busted is working:
+dofile("tests/test.lua")
 
--- Core tests (30 total in separate files):
+-- If your code references the specialized mocks, you might do:
+dofile("tests/mocks.lua")
+-- or dofile("tests/wow_mock.lua")
+
+-- Then load your other "test_*.lua" files in any sequence you wish.
+
+-- Core tests
 dofile("tests/test_ConfigCore.lua")
 dofile("tests/test_CoreMain.lua")
 dofile("tests/test_DiscoveryCore.lua")
 
--- Module tests (10 each):
+-- Module tests
 dofile("tests/test_AdaptiveLearning.lua")
 dofile("tests/test_Analytics.lua")
 dofile("tests/test_AROverlays.lua")
 dofile("tests/test_AutoComplete2.lua")
 dofile("tests/test_AutoType.lua")
-dofile("tests/test_CommandOrganizer.lua.lua")
+dofile("tests/test_CommandOrganizer.lua")
 dofile("tests/test_ConfigGUI.lua")
 dofile("tests/test_DeveloperAPI.lua")
 dofile("tests/test_Fallback.lua")

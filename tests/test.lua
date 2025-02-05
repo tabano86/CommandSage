@@ -1,5 +1,5 @@
 -- tests/test.lua
--- A small sample Busted test file to verify the Busted framework itself.
+-- A small sample Busted test file just to verify the Busted framework itself.
 
 describe("Busted unit testing framework", function()
     describe("should be awesome", function()

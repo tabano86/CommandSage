@@ -1,5 +1,6 @@
 CommandSage_Config = {}
 local CURRENT_DB_VERSION = 5
+
 function CommandSage_Config:InitializeDefaults()
     if not CommandSageDB then
         CommandSageDB = {}
@@ -66,6 +67,7 @@ function CommandSage_Config:InitializeDefaults()
         }
         CommandSageDB.config.preferences = prefs
     end
+    -- Some optional expansions if needed
     if prefs.rainbowBorderEnabled == nil then
         prefs.rainbowBorderEnabled = false
     end
@@ -97,6 +99,7 @@ function CommandSage_Config:InitializeDefaults()
         prefs.advancedEmoteEffectsEnabled = false
     end
 end
+
 function CommandSage_Config.Get(category, key)
     if not CommandSageDB or not CommandSageDB.config then
         return nil
@@ -107,6 +110,7 @@ function CommandSage_Config.Get(category, key)
     end
     return nil
 end
+
 function CommandSage_Config.Set(category, key, value)
     if not CommandSageDB or not CommandSageDB.config then
         return
@@ -118,6 +122,7 @@ function CommandSage_Config.Set(category, key, value)
     end
     cTable[key] = value
 end
+
 function CommandSage_Config:ResetPreferences()
     CommandSageDB.config.preferences = nil
     self:InitializeDefaults()
