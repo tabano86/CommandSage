@@ -1,13 +1,14 @@
 -- tests/test_Fallback.lua
--- 10 tests for Core.CommandSage_Fallback
+-- 10 tests for Modules.CommandSage_Fallback
 
 require("busted.runner")()
+require("tests.test_helper")
+
 require("Modules.CommandSage_Fallback")
 
 describe("Module: CommandSage_Fallback", function()
 
     before_each(function()
-        -- ensure fallback is off
         CommandSage_Fallback:DisableFallback()
     end)
 
@@ -70,7 +71,6 @@ describe("Module: CommandSage_Fallback", function()
     end)
 
     it("No advanced interactions besides set/get fallbackActive", function()
-        -- basically covered
         CommandSage_Fallback:EnableFallback()
         CommandSage_Fallback:DisableFallback()
         assert.is_false(CommandSage_Fallback:IsFallbackActive())

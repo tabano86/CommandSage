@@ -1,9 +1,10 @@
 -- tests/test_Analytics.lua
--- 10 tests for Core.CommandSage_Analytics
+-- 10 tests for Modules.CommandSage_Analytics
 
 require("busted.runner")()
-require("Modules.CommandSage_Analytics")
 require("tests.test_helper")
+
+require("Modules.CommandSage_Analytics")
 require("Core.CommandSage_Config")
 
 describe("Module: CommandSage_Analytics", function()
@@ -21,6 +22,7 @@ describe("Module: CommandSage_Analytics", function()
     it("RemoveFavorite unmarks slash as favorite", function()
         CommandSage_Analytics:AddFavorite("/dance")
         CommandSage_Analytics:RemoveFavorite("/dance")
+        -- Make sure we return a boolean false instead of nil:
         assert.is_false(CommandSage_Analytics:IsFavorite("/dance"))
     end)
 

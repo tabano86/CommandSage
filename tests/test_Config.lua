@@ -1,4 +1,9 @@
--- tests\test_Config.lua
+-- tests/test_Config.lua
+-- Basic checks for Core.CommandSage_Config
+
+require("busted.runner")()
+require("tests.test_helper")
+
 require("Core.CommandSage_Config")
 
 describe("CommandSage_Config Tests", function()

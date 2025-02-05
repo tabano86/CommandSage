@@ -1,4 +1,5 @@
 -- tests/wow_mock.lua
+-- Alternate or supplementary mocks. (You may only need one or the other.)
 
 wipe = wipe or function(tbl)
     for k in pairs(tbl) do tbl[k] = nil end
@@ -75,10 +76,12 @@ C_Timer = C_Timer or { After = function(sec, func) end }
 _G.trim = _G.trim or function(s) return (s:gsub("^%s*(.-)%s*$", "%1")) end
 SLASH_HELP1 = SLASH_HELP1 or "/help"
 SlashCmdList["HELP"] = SlashCmdList["HELP"] or function(...) end
+
 C_FriendList = C_FriendList or {
     GetNumFriends = function() return 0 end,
     GetFriendInfoByIndex = function(i) return nil end
 }
+
 GetRealZoneText = GetRealZoneText or function() return "Stormwind" end
 GetSubZoneText = GetSubZoneText or function() return "Trade District" end
 WorldFrame = WorldFrame or {}

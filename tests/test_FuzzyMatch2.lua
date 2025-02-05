@@ -103,3 +103,67 @@ describe("Module: CommandSage_FuzzyMatch (Additional)", function()
         assert.equals("/zzz", res[1].slash)
     end)
 end)
+---- tests/test_FuzzyMatch2.lua
+---- Extended coverage for Modules.CommandSage_FuzzyMatch
+--
+--require("busted.runner")()
+--require("tests.test_helper")
+--
+--require("Modules.CommandSage_FuzzyMatch")
+--require("Modules.CommandSage_AdaptiveLearning")
+--require("Core.CommandSage_Config")
+--require("Core.CommandSage_Discovery")
+--require("Modules.CommandSage_Trie")
+--
+--describe("Module: CommandSage_FuzzyMatch (Additional)", function()
+--
+--    before_each(function()
+--        _G.CommandSageDB = {}
+--        CommandSage_Config:InitializeDefaults()
+--        CommandSage_Trie:Clear()
+--        CommandSage_Discovery:ScanAllCommands()
+--    end)
+--
+--    it("GetSuggestions respects fuzzyMatchTolerance", function()
+--        CommandSage_Config.Set("preferences","fuzzyMatchTolerance",1)
+--        CommandSage_Trie:InsertCommand("/dance", {})
+--        local possible = CommandSage_Trie:AllCommands()
+--        local results = CommandSage_FuzzyMatch:GetSuggestions("/danc", possible)
+--        local found = false
+--        for _,r in ipairs(results) do
+--            if r.slash == "/dance" then
+--                found = true
+--                break
+--            end
+--        end
+--        assert.is_true(found)
+--    end)
+--
+--    it("SuggestCorrections returns best match", function()
+--        CommandSage_Trie:InsertCommand("/macro", {})
+--        local best, dist = CommandSage_FuzzyMatch:SuggestCorrections("/macroa")
+--        assert.equals("/macro", best)
+--        assert.equals(1, dist)
+--    end)
+--
+--    it("GetFuzzyDistance returns integer edit distance", function()
+--        local d = CommandSage_FuzzyMatch:GetFuzzyDistance("cat", "cut")
+--        assert.equals(1, d)
+--    end)
+--
+--    it("UsageScore influences rank", function()
+--        CommandSage_Trie:InsertCommand("/test1", {})
+--        CommandSage_Trie:InsertCommand("/test2", {})
+--        CommandSage_AdaptiveLearning:IncrementUsage("/test2")  -- usage=1
+--        local possible = CommandSage_Trie:AllCommands()
+--        local res = CommandSage_FuzzyMatch:GetSuggestions("/tes", possible)
+--        assert.is_true(#res >= 2)
+--        assert.equals("/test2", res[1].slash)
+--    end)
+--
+--    it("InCombatLockdown lowers rank by 1", function()
+--        _G.InCombatLockdown = function() return true end
+--        CommandSage_Trie:InsertCommand("/abc", {})
+--        local possible = CommandSage_Trie:AllCommands()
+--        local res = CommandSage_FuzzyMatch:GetSuggestions("/abc", possible)
+--        assert.equals

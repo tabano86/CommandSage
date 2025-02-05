@@ -1,5 +1,5 @@
--- tests\mocks.lua
--- Minimal WoW API stubs for offline testing on Windows.
+-- tests/mocks.lua
+-- Minimal WoW API stubs for offline testing in Windows/etc. Enforced first.
 
 _G = _G or {}
 SlashCmdList = {}
@@ -44,7 +44,7 @@ function SetOverrideBinding(...) end
 function ClearOverrideBindings(...) end
 function GetNumBindings() return 0 end
 
--- for macros
+-- Minimal macro stubs
 function GetNumMacros() return 2, 2 end
 function GetMacroInfo(index)
     if index == 1 then return "TESTMACRO", "icon1", "/say Hello" end
@@ -55,14 +55,21 @@ function GetMacroInfo(index)
 end
 
 function collectgarbage(...) return 12345 end
-function wipe(t) for k,_ in pairs(t) do t[k] = nil end end
-function print(...) -- override for tests
-    --print(table.concat({...}, " "))
+
+function wipe(t)
+    for k,_ in pairs(t) do t[k] = nil end
+end
+
+-- Override print so tests won't spam your console
+function print(...)
+    -- comment out if you want to see all prints during tests
+    -- local txt = table.concat({...}, " ")
+    -- io.stdout:write(txt .. "\n")
 end
 
 C_Timer = { After = function(sec, func) end }
 
--- No Ace loaded
+-- No Ace loaded by default
 LibStub = function(...) return nil end
 
 -- For fallback scanning

@@ -1,3 +1,6 @@
+-- tests/test.lua
+-- A small sample Busted test file to verify the Busted framework itself.
+
 describe("Busted unit testing framework", function()
     describe("should be awesome", function()
         it("should be easy to use", function()
@@ -25,7 +28,7 @@ describe("Busted unit testing framework", function()
         end)
 
         it("should have mocks and spies for functional tests", function()
-            local thing = require("thing_module")
+            local thing = { greet = function(msg) end }
             spy.on(thing, "greet")
             thing.greet("Hi!")
 

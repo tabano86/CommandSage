@@ -1,4 +1,9 @@
--- tests\test_AutoComplete.lua
+-- tests/test_AutoComplete.lua
+-- Tests for Modules.CommandSage_AutoComplete
+
+require("busted.runner")()
+require("tests.test_helper")
+
 require("Modules.CommandSage_AutoComplete")
 require("Modules.CommandSage_Trie")
 require("Modules.CommandSage_ParameterHelper")
@@ -7,7 +12,6 @@ require("Modules.CommandSage_HistoryPlayback")
 require("Modules.CommandSage_Fallback")
 require("Modules.CommandSage_AdaptiveLearning")
 require("Modules.CommandSage_ShellContext")
-require("tests.test_helper")
 require("Core.CommandSage_Config")
 
 describe("CommandSage_AutoComplete", function()

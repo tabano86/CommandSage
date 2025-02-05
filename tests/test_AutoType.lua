@@ -1,9 +1,11 @@
 -- tests/test_AutoType.lua
--- 10 tests for Core.CommandSage_AutoType
+-- 10 tests for Modules.CommandSage_AutoType
 
 require("busted.runner")()
+require("tests.test_helper")
+
 require("Modules.CommandSage_AutoType")
-require("Modules.CommandSage_Config")
+require("Core.CommandSage_Config")
 
 describe("Module: CommandSage_AutoType", function()
 
@@ -22,15 +24,14 @@ describe("Module: CommandSage_AutoType", function()
     it("BeginAutoType with animateAutoType=true shows frame", function()
         CommandSage_Config.Set("preferences","animateAutoType",true)
         CommandSage_AutoType:BeginAutoType("/dance")
-        -- not easy to test the typed effect, but check if frame is visible
-        -- we can check if the local 'frame' is shown
+        -- not easy to test the typed effect, but no error => success
     end)
 
     it("StopAutoType hides frame", function()
         CommandSage_Config.Set("preferences","animateAutoType",true)
         CommandSage_AutoType:BeginAutoType("/dance")
         CommandSage_AutoType:StopAutoType()
-        -- no direct boolean, but no error
+        -- no error
     end)
 
     it("Incremental typing updates ChatFrame1EditBox text", function()
@@ -39,9 +40,9 @@ describe("Module: CommandSage_AutoType", function()
         CommandSage_AutoType:BeginAutoType("/macro")
         local updateFunc = f:GetScript("OnUpdate")
         assert.is_truthy(updateFunc)
-        updateFunc(f, 0.2) -- simulate passing time
-        -- text should be partially typed
+        updateFunc(f, 0.2) -- simulate some time
         local t = ChatFrame1EditBox:GetText()
+        -- partial text
         assert.is_true(#t > 0 and #t < 6)  -- /macro is 6 chars
     end)
 
@@ -49,7 +50,7 @@ describe("Module: CommandSage_AutoType", function()
         CommandSage_Config.Set("preferences","autoTypeDelay",0.05)
         CommandSage_Config.Set("preferences","animateAutoType",true)
         CommandSage_AutoType:BeginAutoType("/testcmd")
-        -- just ensure no error
+        -- no error
     end)
 
     it("Typing ends when index >= #string", function()
@@ -60,7 +61,6 @@ describe("Module: CommandSage_AutoType", function()
         for i=1,10 do
             updateFunc(f, 0.2)
         end
-        -- after enough passes, it should finish
         assert.equals("/hello", ChatFrame1EditBox:GetText())
     end)
 
@@ -68,10 +68,10 @@ describe("Module: CommandSage_AutoType", function()
         CommandSage_Config.Set("preferences","animateAutoType",true)
         CommandSage_AutoType:BeginAutoType("/dance")
         CommandSage_AutoType:StopAutoType()
-        -- next OnUpdate shouldn't do anything
         local f = select(2, debug.getinfo(CommandSage_AutoType))
         local updateFunc = f:GetScript("OnUpdate")
         updateFunc(f, 0.2)
+        -- should remain empty
         assert.equals("", ChatFrame1EditBox:GetText())
     end)
 
@@ -98,6 +98,6 @@ describe("Module: CommandSage_AutoType", function()
         CommandSage_AutoType:BeginAutoType("/first")
         CommandSage_AutoType:StopAutoType()
         CommandSage_AutoType:BeginAutoType("/second")
-        -- no error means success
+        -- no error => success
     end)
 end)

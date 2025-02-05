@@ -1,7 +1,9 @@
 -- tests/test_DiscoveryCore.lua
--- 10 tests for CommandSage_Discovery.lua (Core)
+-- 10 tests for Core.CommandSage_Discovery
 
 require("busted.runner")()
+require("tests.test_helper")
+
 require("Core.CommandSage_Discovery")
 require("Core.CommandSage_Config")
 require("Modules.CommandSage_Trie")
@@ -28,7 +30,7 @@ describe("Core: CommandSage_Discovery", function()
         assert.is_not_nil(disc["/console"])
     end)
 
-    it("scans macros from mock envi`ronment", function()
+    it("scans macros from mock environment", function()
         CommandSage_Discovery:ScanAllCommands()
         local disc = CommandSage_Discovery:GetDiscoveredCommands()
         local foundTestMacro = false
@@ -58,7 +60,7 @@ describe("Core: CommandSage_Discovery", function()
         CommandSage_Config.Set("preferences","blizzAllFallback",false)
         CommandSage_Discovery:ScanAllCommands()
         local disc = CommandSage_Discovery:GetDiscoveredCommands()
-        assert.is_nil(disc["/help"], "Should not discover /help if blizzAllFallback=false")
+        assert.is_nil(disc["/help"])
     end)
 
     it("extraCommands /gold /ping /mem are discovered", function()
@@ -77,7 +79,6 @@ describe("Core: CommandSage_Discovery", function()
         for _ in pairs(disc) do
             count = count + 1
         end
-        -- The fallback set, macros, etc. Should be stable
         assert.is_true(count > 5)
     end)
 

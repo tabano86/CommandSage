@@ -1,9 +1,11 @@
 -- tests/test_ConfigGUI.lua
--- 10 tests for Core.CommandSage_ConfigGUI
+-- 10 tests for Modules.CommandSage_ConfigGUI
 
 require("busted.runner")()
+require("tests.test_helper")
+
 require("Modules.CommandSage_ConfigGUI")
-require("Modules.CommandSage_Config")
+require("Core.CommandSage_Config")
 
 describe("Module: CommandSage_ConfigGUI", function()
 
@@ -38,8 +40,7 @@ describe("Module: CommandSage_ConfigGUI", function()
         CommandSage_ConfigGUI:InitGUI()
         local frame = _G["CommandSageConfigFrame"]
         frame:Show()
-        -- Typically we would find the checkbox by scanning children, but this is approximate
-        -- We'll just ensure no error occurs
+        -- no error => success
     end)
 
     it("Closing the GUI does not error", function()
@@ -56,7 +57,7 @@ describe("Module: CommandSage_ConfigGUI", function()
         CommandSage_Config.Set("preferences","usageChartEnabled",true)
         CommandSage_ConfigGUI:InitGUI()
         CommandSage_ConfigGUI:Toggle()
-        -- No error, subframe should appear
+        -- no error => success
     end)
 
     it("disabling usageChartEnabled hides usage chart", function()
@@ -83,6 +84,6 @@ describe("Module: CommandSage_ConfigGUI", function()
     it("CheckBoxes read from preferences to set initial .Checked", function()
         CommandSage_Config.Set("preferences","animateAutoType",false)
         CommandSage_ConfigGUI:InitGUI()
-        -- If we had direct handle to the checkbox, we'd test it; but we'll trust no error means it works
+        -- No direct check. No error => success
     end)
 end)

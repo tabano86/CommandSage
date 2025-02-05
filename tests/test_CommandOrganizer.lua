@@ -1,9 +1,11 @@
 -- tests/test_CommandOrganizer.lua
--- 10 tests for Core.CommandSage_CommandOrganizer
+-- 10 tests for Modules.CommandSage_CommandOrganizer
 
 require("busted.runner")()
+require("tests.test_helper")
+
 require("Modules.CommandSage_CommandOrganizer")
-require("Modules.CommandSage_Config")
+require("Core.CommandSage_Config")
 
 describe("Module: CommandSage_CommandOrganizer", function()
 
@@ -31,7 +33,6 @@ describe("Module: CommandSage_CommandOrganizer", function()
     end)
 
     it("can add new tags dynamically if we extend tagDB manually (not recommended)", function()
-        -- demonstration that the existing function won't handle it but let's do a direct set
         local tagDB = debug.getupvalue(CommandSage_CommandOrganizer.GetCommandTags, 1)
         tagDB["/mytest"] = {"testcat"}
         local cat = CommandSage_CommandOrganizer:GetCategory("/mytest")
@@ -40,8 +41,7 @@ describe("Module: CommandSage_CommandOrganizer", function()
 
     it("GetAllCategories returns a table of category strings", function()
         local cats = CommandSage_CommandOrganizer:GetAllCategories()
-        -- we have at least "social", "macros", "plugin"
-        assert.is_true(#cats >= 3)
+        assert.is_true(#cats >= 3)  -- e.g. "social","macros","plugin"
     end)
 
     it("Tag for /macro is 'macros'", function()
@@ -59,8 +59,7 @@ describe("Module: CommandSage_CommandOrganizer", function()
         tagDB["/dance"] = {"social", "fun"}
         local cat = CommandSage_CommandOrganizer:GetCategory("/dance")
         assert.equals("social", cat)
-        -- revert
-        tagDB["/dance"] = {"social"}
+        tagDB["/dance"] = {"social"} -- revert
     end)
 
     it("other unknown slash still returns 'other'", function()

@@ -1,7 +1,9 @@
 -- tests/test_CoreMain.lua
--- 10 tests for CommandSage_Core.lua
+-- 10 tests for Core/CommandSage_Core.lua
 
 require("busted.runner")()
+require("tests.test_helper")
+
 require("Core.CommandSage_Core")
 require("Core.CommandSage_Config")
 require("Modules.CommandSage_KeyBlocker")
@@ -21,7 +23,6 @@ describe("Core: CommandSage_Core", function()
             oldInit(...)
         end
         local frame = select(2, debug.getinfo(CommandSage.f))
-        -- simulate event
         local eventFunc = frame:GetScript("OnEvent")
         eventFunc(frame, "ADDON_LOADED", "CommandSage")
         assert.equals(1, loadedCount)
@@ -75,7 +76,6 @@ describe("Core: CommandSage_Core", function()
         CommandSage_Config.Set("preferences","overrideHotkeysWhileTyping",true)
         local mockEdit = CreateFrame("Frame","MockEditBox2")
         CommandSage:HookChatFrameEditBox(mockEdit)
-        -- simulate OnEditFocusGained
         local focusFunc = mockEdit:GetScript("OnEditFocusGained")
         assert.has_no.errors(function()
             focusFunc(mockEdit)

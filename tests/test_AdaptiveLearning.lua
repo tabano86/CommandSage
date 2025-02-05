@@ -1,11 +1,11 @@
 -- tests/test_AdaptiveLearning.lua
--- 10 tests for Core.CommandSage_AdaptiveLearning
+-- 10 tests for Modules.CommandSage_AdaptiveLearning
 
 require("busted.runner")()
-require("Modules.CommandSage_AdaptiveLearning")
 require("tests.test_helper")
-require("Core.CommandSage_Config")
 
+require("Modules.CommandSage_AdaptiveLearning")
+require("Core.CommandSage_Config")
 
 describe("Module: CommandSage_AdaptiveLearning", function()
 

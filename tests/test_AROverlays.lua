@@ -1,10 +1,10 @@
 -- tests/test_AROverlays.lua
--- 10 tests for Core.CommandSage_AROverlays
+-- 10 tests for Modules.CommandSage_AROverlays
 
 require("busted.runner")()
-require("tests.mocks")
-require("Modules.CommandSage_AROverlays")
 require("tests.test_helper")
+
+require("Modules.CommandSage_AROverlays")
 require("Core.CommandSage_Config")
 
 describe("Module: CommandSage_AROverlays", function()
@@ -40,14 +40,12 @@ describe("Module: CommandSage_AROverlays", function()
     it("Rune ring appears only if arRuneRingEnabled = true", function()
         CommandSage_Config.Set("preferences","arRuneRingEnabled",true)
         CommandSage_AROverlays:ShowOverlay()
-        -- We can't easily check the exact sub-texture, but we can check timers
         assert.is_true(CommandSageAROverlayFrame:IsShown())
     end)
 
     it("Emote sticker toggles with emoteStickersEnabled", function()
         CommandSage_Config.Set("preferences","emoteStickersEnabled",true)
         CommandSage_AROverlays:ShowOverlay()
-        -- No direct asserts possible, but no error
         assert.is_true(CommandSageAROverlayFrame:IsShown())
     end)
 

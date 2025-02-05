@@ -1,7 +1,9 @@
 -- tests/test_AutoComplete2.lua
--- 10 tests for Core.CommandSage_AutoComplete (2nd coverage set)
+-- Extended coverage for Modules.CommandSage_AutoComplete
 
 require("busted.runner")()
+require("tests.test_helper")
+
 require("Modules.CommandSage_AutoComplete")
 require("Modules.CommandSage_Trie")
 require("Modules.CommandSage_Analytics")
@@ -9,7 +11,7 @@ require("Modules.CommandSage_AdaptiveLearning")
 require("Modules.CommandSage_HistoryPlayback")
 require("Modules.CommandSage_Fallback")
 require("Modules.CommandSage_ShellContext")
-require("Modules.CommandSage_Config")
+require("Core.CommandSage_Config")
 
 describe("Module: CommandSage_AutoComplete (Extended)", function()
 
@@ -31,7 +33,7 @@ describe("Module: CommandSage_AutoComplete (Extended)", function()
         CommandSage_AutoComplete:MoveSelection(1)
         -- Should cycle around
         CommandSage_AutoComplete:MoveSelection(1)
-        -- No direct numeric assert, but no error indicates success
+        -- no error => success
     end)
 
     it("GenerateSuggestions fallback to entire list if partialFuzzyFallback = true", function()
@@ -89,7 +91,7 @@ describe("Module: CommandSage_AutoComplete (Extended)", function()
         local dummy = {{slash="/one"},{slash="/two"}}
         CommandSage_AutoComplete:ShowSuggestions(dummy)
         CommandSage_AutoComplete:CloseSuggestions()
-        -- No direct check for hidden, but no error
+        -- no error => success
     end)
 
     it("History commands are merged if partial not found in main Trie", function()
@@ -111,7 +113,7 @@ describe("Module: CommandSage_AutoComplete (Extended)", function()
         CommandSage_Trie:InsertCommand("/zzz", {})
         CommandSage_Analytics:AddFavorite("/zzz")
         local suggestions = CommandSage_AutoComplete:GenerateSuggestions("/")
-        assert.equals("/zzz", suggestions[1].slash)  -- favorite on top
+        assert.equals("/zzz", suggestions[1].slash)
     end)
 
     it("PassesContextFilter blocks /macro in combat if contextFiltering=true", function()

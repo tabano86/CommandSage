@@ -1,10 +1,12 @@
 -- tests/test_DeveloperAPI.lua
--- 10 tests for Core.CommandSage_DeveloperAPI
+-- 10 tests for Modules.CommandSage_DeveloperAPI
 
 require("busted.runner")()
+require("tests.test_helper")
+
 require("Modules.CommandSage_DeveloperAPI")
-require("Modules.CommandSage_Discovery")
-require("Modules.CommandSage_Config")
+require("Core.CommandSage_Discovery")  -- was previously "Modules.CommandSage_Discovery"
+require("Core.CommandSage_Config")
 require("Modules.CommandSage_Trie")
 
 describe("Module: CommandSage_DeveloperAPI", function()
@@ -82,7 +84,6 @@ describe("Module: CommandSage_DeveloperAPI", function()
 
     it("RegisterCommand with blank slash does nothing", function()
         CommandSage_DeveloperAPI:RegisterCommand("", function() end)
-        local all = CommandSage_DeveloperAPI:GetAllCommands()
-        -- Just ensure no error
+        -- no error => success
     end)
 end)
