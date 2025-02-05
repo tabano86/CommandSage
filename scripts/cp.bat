@@ -1,9 +1,7 @@
 @echo off
-rem Adjust the path below so that it correctly points to cp.sh in your WSL file system if needed.
-where wsl
+where wsl >nul 2>&1
 if %errorlevel%==0 (
-    wsl bash ./cp.sh ../ %*
+    wsl bash ./cp.sh -d ".." %*
 ) else (
-    echo "WSL not found. Exiting or handle fallback logic."
+    echo WSL not found.
 )
-pause

@@ -1,6 +1,5 @@
--- tests/test_ConfigCore.lua
--- 10 tests for CommandSage_Config.lua (Core)
-require("Core/CommandSage_Config")
+require("tests.test_helper")
+require("Core.CommandSage_Config")
 
 describe("Core: CommandSage_Config", function()
 
