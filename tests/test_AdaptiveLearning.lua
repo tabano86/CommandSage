@@ -2,7 +2,7 @@
 -- 10 tests for Core.CommandSage_AdaptiveLearning
 
 require("busted.runner")()
-require("CommandSage_AdaptiveLearning")
+require("Modules.CommandSage_AdaptiveLearning")
 require("tests.test_helper")
 require("Core.CommandSage_Config")
 

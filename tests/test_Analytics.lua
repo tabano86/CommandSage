@@ -2,7 +2,7 @@
 -- 10 tests for Core.CommandSage_Analytics
 
 require("busted.runner")()
-require("CommandSage_Analytics")
+require("Modules.CommandSage_Analytics")
 require("tests.test_helper")
 require("Core.CommandSage_Config")
 

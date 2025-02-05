@@ -1,7 +1,7 @@
 -- tests\test_FuzzyMatch.lua
 require("Modules.CommandSage_FuzzyMatch")
 require("Modules.CommandSage_Trie")
-require("CommandSage_AdaptiveLearning")
+require("Modules.CommandSage_AdaptiveLearning")
 require("Modules.CommandSage_Config")
 require("Modules.CommandSage_Discovery")
 

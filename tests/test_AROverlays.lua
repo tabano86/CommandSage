@@ -2,7 +2,8 @@
 -- 10 tests for Core.CommandSage_AROverlays
 
 require("busted.runner")()
-require("CommandSage_AROverlays")
+require("tests.mocks")
+require("Modules.CommandSage_AROverlays")
 require("tests.test_helper")
 require("Core.CommandSage_Config")
 
