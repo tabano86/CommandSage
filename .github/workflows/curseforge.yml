@@ -85,7 +85,17 @@ jobs:
           CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
         run: |
           echo "Publishing to CurseForge..."
+          # Read CHANGELOG.md (assumed to be at repository root)
+          CHANGELOG=$(cat CHANGELOG.md)
+          # Construct metadata JSON using jq (assumes jq is available)
+          metadata=$(jq -n --arg rt "release" \
+                        --arg cl "$CHANGELOG" \
+                        --arg ctype "markdown" \
+                        --arg dn "CommandSage-${{ steps.extract_version.outputs.addon_version }}" \
+                        --arg gv "1.13.2" \
+                        '{releaseType: $rt, changelog: $cl, changelogType: $ctype, displayName: $dn, gameVersions: [$gv]}')
+          echo "Metadata: $metadata"
           curl -v -X POST "https://api.curseforge.com/v1/projects/${CURSEFORGE_PROJECT_ID}/upload-file" \
             -H "x-api-token: ${CURSEFORGE_TOKEN}" \
-            -F "metadata={\"releaseType\":\"release\",\"changelog\":\"Automated release from GitHub Actions\",\"gameVersions\":[\"classic\"],\"displayName\":\"CommandSage-${{ steps.extract_version.outputs.addon_version }}\"}" \
+            -F "metadata=${metadata}" \
             -F "file=@dist/CommandSage-${{ steps.extract_version.outputs.addon_version }}.zip"
