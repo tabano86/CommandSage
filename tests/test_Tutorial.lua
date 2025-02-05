@@ -1,9 +1,9 @@
 -- tests/test_Tutorial.lua
--- 10 tests for Modules/CommandSage_Tutorial.lua
+-- 10 tests for Core.CommandSage_Tutorial
 
 require("busted.runner")()
-require("Modules/CommandSage_Tutorial")
-require("Modules/CommandSage_Config")
+require("Modules.CommandSage_Tutorial")
+require("Modules.CommandSage_Config")
 
 describe("Module: CommandSage_Tutorial", function()
 

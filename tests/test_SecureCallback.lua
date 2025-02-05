@@ -1,10 +1,10 @@
 -- tests/test_SecureCallback.lua
--- 10 tests for Modules/CommandSage_SecureCallback.lua
+-- 10 tests for Core.CommandSage_SecureCallback
 
 require("busted.runner")()
-require("Modules/CommandSage_SecureCallback")
-require("Modules/CommandSage_Discovery")
-require("Modules/CommandSage_Config")
+require("Modules.CommandSage_SecureCallback")
+require("Modules.CommandSage_Discovery")
+require("Modules.CommandSage_Config")
 
 describe("Module: CommandSage_SecureCallback", function()
 

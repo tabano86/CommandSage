@@ -1,12 +1,12 @@
 -- tests\test_AutoComplete.lua
-require("Modules/CommandSage_AutoComplete")
-require("Modules/CommandSage_Trie")
-require("Modules/CommandSage_ParameterHelper")
+require("Modules.CommandSage_AutoComplete")
+require("Modules.CommandSage_Trie")
+require("Modules.CommandSage_ParameterHelper")
 require("CommandSage_Analytics")
-require("Modules/CommandSage_HistoryPlayback")
-require("Modules/CommandSage_Fallback")
+require("Modules.CommandSage_HistoryPlayback")
+require("Modules.CommandSage_Fallback")
 require("CommandSage_AdaptiveLearning")
-require("Modules/CommandSage_ShellContext")
+require("Modules.CommandSage_ShellContext")
 require("tests.test_helper")
 require("Core.CommandSage_Config")
 

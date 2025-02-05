@@ -1,10 +1,10 @@
 -- tests/test_PersistentTrie.lua
--- 10 tests for Modules/CommandSage_PersistentTrie.lua
+-- 10 tests for Core.CommandSage_PersistentTrie
 
 require("busted.runner")()
-require("Modules/CommandSage_PersistentTrie")
-require("Modules/CommandSage_Trie")
-require("Modules/CommandSage_Config")
+require("Modules.CommandSage_PersistentTrie")
+require("Modules.CommandSage_Trie")
+require("Modules.CommandSage_Config")
 
 describe("Module: CommandSage_PersistentTrie", function()
 

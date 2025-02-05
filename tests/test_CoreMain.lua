@@ -2,9 +2,9 @@
 -- 10 tests for CommandSage_Core.lua
 
 require("busted.runner")()
-require("Core/CommandSage_Core")
-require("Core/CommandSage_Config")
-require("Modules/CommandSage_KeyBlocker")
+require("Core.CommandSage_Core")
+require("Core.CommandSage_Config")
+require("Modules.CommandSage_KeyBlocker")
 
 describe("Core: CommandSage_Core", function()
 

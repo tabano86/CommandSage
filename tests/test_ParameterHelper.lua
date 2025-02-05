@@ -1,6 +1,6 @@
 -- tests\test_ParameterHelper.lua
-require("Modules/CommandSage_ParameterHelper")
-require("Modules/CommandSage_Config")
+require("Modules.CommandSage_ParameterHelper")
+require("Modules.CommandSage_Config")
 
 describe("CommandSage_ParameterHelper", function()
     before_each(function()

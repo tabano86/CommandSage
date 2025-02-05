@@ -1,5 +1,5 @@
 -- tests/test_AdaptiveLearning.lua
--- 10 tests for Modules/CommandSage_AdaptiveLearning.lua
+-- 10 tests for Core.CommandSage_AdaptiveLearning
 
 require("busted.runner")()
 require("CommandSage_AdaptiveLearning")

@@ -1,5 +1,5 @@
 -- tests/test_AROverlays.lua
--- 10 tests for Modules/CommandSage_AROverlays.lua
+-- 10 tests for Core.CommandSage_AROverlays
 
 require("busted.runner")()
 require("CommandSage_AROverlays")

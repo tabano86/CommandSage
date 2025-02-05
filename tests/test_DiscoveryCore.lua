@@ -2,9 +2,9 @@
 -- 10 tests for CommandSage_Discovery.lua (Core)
 
 require("busted.runner")()
-require("Core/CommandSage_Discovery")
-require("Core/CommandSage_Config")
-require("Modules/CommandSage_Trie")
+require("Core.CommandSage_Discovery")
+require("Core.CommandSage_Config")
+require("Modules.CommandSage_Trie")
 
 describe("Core: CommandSage_Discovery", function()
 
@@ -28,7 +28,7 @@ describe("Core: CommandSage_Discovery", function()
         assert.is_not_nil(disc["/console"])
     end)
 
-    it("scans macros from mock environment", function()
+    it("scans macros from mock envi`ronment", function()
         CommandSage_Discovery:ScanAllCommands()
         local disc = CommandSage_Discovery:GetDiscoveredCommands()
         local foundTestMacro = false

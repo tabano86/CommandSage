@@ -1,5 +1,5 @@
 -- tests/test_Analytics.lua
--- 10 tests for Modules/CommandSage_Analytics.lua
+-- 10 tests for Core.CommandSage_Analytics
 
 require("busted.runner")()
 require("CommandSage_Analytics")

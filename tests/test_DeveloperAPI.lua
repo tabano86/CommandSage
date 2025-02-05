@@ -1,11 +1,11 @@
 -- tests/test_DeveloperAPI.lua
--- 10 tests for Modules/CommandSage_DeveloperAPI.lua
+-- 10 tests for Core.CommandSage_DeveloperAPI
 
 require("busted.runner")()
-require("Modules/CommandSage_DeveloperAPI")
-require("Modules/CommandSage_Discovery")
-require("Modules/CommandSage_Config")
-require("Modules/CommandSage_Trie")
+require("Modules.CommandSage_DeveloperAPI")
+require("Modules.CommandSage_Discovery")
+require("Modules.CommandSage_Config")
+require("Modules.CommandSage_Trie")
 
 describe("Module: CommandSage_DeveloperAPI", function()
 
