@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '16'
+          node-version: '22'
 
       - name: Install dependencies
         run: npm ci
@@ -59,11 +59,12 @@ jobs:
 
       - name: Publish to CurseForge
         if: github.ref == 'refs/heads/main' && github.event_name == 'push' && contains(github.event.head_commit.message, '[release]')
+        env:
+          CURSEFORGE_PROJECT_ID: ${{ secrets.CURSEFORGE_PROJECT_ID }}
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
         run: |
           echo "Publishing to CurseForge..."
-          node scripts/publish-curseforge.js dist/CommandSage-${{ steps.extract_version.outputs.addon_version }}.zip ${{ secrets.CURSEFORGE_TOKEN }}
-
-      - name: Publish to SourceForge (Example)
-        if: false
-        run: |
-          echo "Would upload to SourceForge with credentials."
+          curl -v -X POST "https://api.curseforge.com/v1/projects/${CURSEFORGE_PROJECT_ID}/upload-file" \
+            -H "x-api-token: ${CURSEFORGE_TOKEN}" \
+            -F "metadata={\"releaseType\":\"release\",\"changelog\":\"Automated release from GitHub Actions\",\"gameVersions\":[\"classic\"],\"displayName\":\"CommandSage-${{ steps.extract_version.outputs.addon_version }}\"}" \
+            -F "file=@dist/CommandSage-${{ steps.extract_version.outputs.addon_version }}.zip"
