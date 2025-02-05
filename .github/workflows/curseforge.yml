@@ -7,23 +7,35 @@ on:
 
 jobs:
   build-and-upload:
-    runs-on: ubuntu-latest
+    # Matrix to test on both Linux and Windows for cross-platform verification
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
     steps:
       - name: Check out
         uses: actions/checkout@v2
 
-      - name: Install zip
-        run: sudo apt-get install -y zip
-
-      - name: Setup Lua + Luarocks
+      - name: Install dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install lua5.1 luarocks
+          sudo apt-get install -y zip lua5.1 luarocks
           luarocks install busted
+
+      - name: Install dependencies (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install zip
+          choco install lua
+          REM If Luarocks is not installed by default:
+          luarocks install busted
+
       - name: Run Tests
         run: |
           cd tests
-          busted test_all.lua
+          busted --verbose --lpath="?;?.lua;?/init.lua"
 
       - name: Extract Addon Version
         id: extract_version
@@ -38,8 +50,12 @@ jobs:
 
       - name: Build
         run: |
-          chmod +x scripts/build.sh
-          ./scripts/build.sh
+          if [ -f scripts/build.sh ]; then
+            chmod +x scripts/build.sh
+            ./scripts/build.sh
+          else
+            echo "scripts/build.sh not found; skipping."
+          fi
 
       - name: Package Addon
         run: |
@@ -48,7 +64,8 @@ jobs:
             -x ".git*" \
             -x ".github*" \
             -x "scripts/*" \
-            -x "dist/*"
+            -x "dist/*" \
+            -x "tests/*"
 
       - name: Upload artifact to GitHub
         uses: actions/upload-artifact@v2

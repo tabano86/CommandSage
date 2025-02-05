@@ -14,9 +14,6 @@ local snippetTemplates = {
     { slash = "/dance", desc = "Fancy dance snippet", snippet = "/dance fancy" },
 }
 
-----------------------------------------------------------------
--- Additional Public Methods for easier hooking:
-----------------------------------------------------------------
 function CommandSage_AutoComplete:MoveSelection(delta)
     if not content then return end
     local totalShown = 0
@@ -51,18 +48,16 @@ function CommandSage_AutoComplete:AcceptOrAdvance()
     if selectedIndex > 0 and content.buttons[selectedIndex]:IsShown() then
         self:AcceptSuggestion(content.buttons[selectedIndex].suggestionData)
     else
-        -- If none selected, we move by 1
         self:MoveSelection(1)
     end
 end
 
-----------------------------------------------------------------
-
 local function ApplyStylingToAutoFrame(frame)
-    local advancedStyling  = CommandSage_Config.Get("preferences", "advancedStyling")
-    local bgColor          = CommandSage_Config.Get("preferences", "autocompleteBgColor") or {0, 0, 0, 0.85}
-    local scale            = CommandSage_Config.Get("preferences", "uiScale") or 1.0
-    local highlightColor   = CommandSage_Config.Get("preferences", "autocompleteHighlightColor") or {0.6, 0.6, 0.6, 0.3}
+    local prefs = CommandSage_Config.Get("preferences")
+    local advancedStyling  = prefs.advancedStyling
+    local bgColor          = prefs.autocompleteBgColor or {0, 0, 0, 0.85}
+    local scale            = prefs.uiScale or 1.0
+    local highlightColor   = prefs.autocompleteHighlightColor or {0.6, 0.6, 0.6, 0.3}
 
     frame:SetScale(scale)
 
@@ -80,9 +75,43 @@ local function ApplyStylingToAutoFrame(frame)
             tile     = false, tileSize = 0, edgeSize = 0,
         })
     end
-
     frame:SetBackdropColor(unpack(bgColor))
-    frame._highlightColor = highlightColor
+
+    -- 1) Rainbow border
+    if prefs.rainbowBorderEnabled then
+        frame.rainbowTex = frame.rainbowTex or frame:CreateTexture(nil, "OVERLAY")
+        frame.rainbowTex:SetAllPoints()
+        frame.rainbowTex:SetTexture("Interface\\AddOns\\CommandSage\\Media\\RainbowBorder")
+        frame.rainbowTex:SetBlendMode("ADD")
+        frame:SetScript("OnUpdate", function(self, elapsed)
+            self._rainbowOffset = (self._rainbowOffset or 0) + elapsed * 0.5
+            local offset = math.abs(math.sin(self._rainbowOffset)) -- 0..1
+            frame.rainbowTex:SetAlpha(offset)
+        end)
+    else
+        if frame.rainbowTex then
+            frame.rainbowTex:Hide()
+        end
+        frame:SetScript("OnUpdate", nil)
+    end
+
+    -- 2) Spinning icon
+    if prefs.spinningIconEnabled then
+        frame.spinIcon = frame.spinIcon or frame:CreateTexture(nil, "ARTWORK")
+        frame.spinIcon:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -5, -5)
+        frame.spinIcon:SetTexture("Interface\\AddOns\\CommandSage\\Media\\SpinIcon")
+        frame.spinIcon:SetSize(24, 24)
+        frame.spinIcon:Show()
+        frame._spinTime = 0
+        frame:HookScript("OnUpdate", function(self, elapsed)
+            self._spinTime = (self._spinTime or 0) + elapsed
+            frame.spinIcon:SetRotation(self._spinTime)
+        end)
+    else
+        if frame.spinIcon then
+            frame.spinIcon:Hide()
+        end
+    end
 end
 
 local function CreateAutoCompleteUI()
@@ -211,6 +240,8 @@ end
 
 function CommandSage_AutoComplete:ShowSuggestions(suggestions)
     local frame = CreateAutoCompleteUI()
+    ApplyStylingToAutoFrame(frame)  -- re-apply in case toggles changed
+
     if #suggestions == 0 then
         frame:Hide()
         return
@@ -223,6 +254,8 @@ function CommandSage_AutoComplete:ShowSuggestions(suggestions)
     local totalHeight = totalToShow * btnHeight
     content:SetHeight(totalHeight)
 
+    local paramGlowEnabled = CommandSage_Config.Get("preferences", "paramGlowEnabled")
+
     for i, btn in ipairs(content.buttons) do
         local s = suggestions[i]
         if i <= totalToShow and s then
@@ -234,8 +267,12 @@ function CommandSage_AutoComplete:ShowSuggestions(suggestions)
 
             if s.isParamSuggestion and CommandSage_Config.Get("preferences", "showParamSuggestionsInColor") then
                 btn.text:SetTextColor(unpack(CommandSage_Config.Get("preferences", "paramSuggestionsColor")))
+                if paramGlowEnabled then
+                    btn.highlight:SetColorTexture(1, 0, 0, 0.4)
+                end
             else
                 btn.text:SetTextColor(1, 1, 1, 1)
+                btn.highlight:SetColorTexture(0.6, 0.6, 0.6, 0.3)
             end
 
             btn.text:SetText(s.slash)
@@ -282,28 +319,20 @@ function CommandSage_AutoComplete:PassesContextFilter(sugg)
     return true
 end
 
---------------------------------------------------------------------------------
--- Merges command history items with discovered slash commands for extra coverage
---------------------------------------------------------------------------------
 local function MergeHistoryWithCommands(typedLower, possible)
     local hist = CommandSage_HistoryPlayback:GetHistory()
     local merged = {}
     local existing = {}
-    -- Mark existing slash commands in a set
     for _, cmdObj in ipairs(possible) do
         existing[cmdObj.slash] = true
     end
-
-    -- Convert all slash commands to merged
     for _, cmdObj in ipairs(possible) do
         table.insert(merged, cmdObj)
     end
 
-    -- Also add from history if partial match
     for _, hcmd in ipairs(hist) do
         local lower = hcmd:lower()
         if lower:find(typedLower, 1, true) or (CommandSage_Config.Get("preferences", "partialFuzzyFallback")) then
-            -- only if not already in discovered
             if not existing[lower] then
                 table.insert(merged, {
                     slash = hcmd,
@@ -322,19 +351,14 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
     typedText = CommandSage_ShellContext:RewriteInputIfNeeded(typedText)
     local partialLower = typedText:lower()
 
-    -- If the user typed something like "cmds" without a slash, we can forcibly prepend slash if not in shell context
     if partialLower:sub(1,1) ~= "/" and not CommandSage_ShellContext:IsActive() then
         partialLower = "/"..partialLower
     end
 
     local possible = CommandSage_Trie:FindPrefix(partialLower)
-
-    -- If no direct prefix matches, fallback to entire command list
     if CommandSage_Config.Get("preferences", "partialFuzzyFallback") and #possible == 0 then
         possible = CommandSage_Trie:AllCommands()
     end
-
-    -- Also merge prior history to catch commands that might not be in the main Trie
     possible = MergeHistoryWithCommands(partialLower, possible)
 
     local matched = {}
@@ -349,7 +373,6 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
         end)
     end
 
-    -- Insert snippet expansions if partial match
     if CommandSage_Config.Get("preferences", "snippetEnabled") then
         for _, snip in ipairs(snippetTemplates) do
             if snip.slash:find(partialLower, 1, true) then
@@ -369,7 +392,6 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
         end
     end
 
-    -- Sort favorites up
     if CommandSage_Config.Get("preferences", "favoritesSortingEnabled") then
         table.sort(final, function(a, b)
             local aFav = CommandSage_Analytics:IsFavorite(a.slash) and 1 or 0
@@ -413,7 +435,6 @@ hookingFrame:SetScript("OnEvent", function()
             return
         end
 
-        -- If user typed slash or is in shell context, handle special keys:
         if isSlash or isInShellContext then
             self:SetPropagateKeyboardInput(false)
 
@@ -474,7 +495,6 @@ hookingFrame:SetScript("OnEvent", function()
 
         local firstChar = text:sub(1,1)
         if firstChar ~= "/" and not CommandSage_ShellContext:IsActive() then
-            -- Not a slash command and not in shell mode; hide suggestions
             if autoFrame then
                 autoFrame:Hide()
             end
@@ -508,4 +528,3 @@ function CommandSage_AutoComplete:CloseSuggestions()
         autoFrame:Hide()
     end
 end
-

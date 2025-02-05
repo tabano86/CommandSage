@@ -5,12 +5,21 @@
 
 CommandSage_FuzzyMatch = {}
 
+local cache = {}  -- naive cache for Levenshtein calls
+
 local function Levenshtein(a, b)
+    local key = a.."|"..b
+    if cache[key] then
+        return cache[key]
+    end
+
     local la, lb = #a, #b
     if la == 0 then
+        cache[key] = lb
         return lb
     end
     if lb == 0 then
+        cache[key] = la
         return la
     end
 
@@ -33,7 +42,9 @@ local function Levenshtein(a, b)
             )
         end
     end
-    return matrix[la][lb]
+    local dist = matrix[la][lb]
+    cache[key] = dist
+    return dist
 end
 
 local function getContextBonus()
@@ -87,4 +98,3 @@ end
 function CommandSage_FuzzyMatch:GetFuzzyDistance(strA, strB)
     return Levenshtein(strA:lower(), strB:lower())
 end
-

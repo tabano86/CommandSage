@@ -1,6 +1,6 @@
 -- =============================================================================
 -- CommandSage_Discovery.lua
--- Extended dynamic scanning for 100% command discovery:
+-- Extended scanning for 100% command discovery + bugfix re macros
 -- =============================================================================
 
 CommandSage_Discovery = {}
@@ -12,7 +12,6 @@ local forcedFallback = {
     "/afk", "/dnd", "/camp", "/logout", "/played", "/time", "/script"
 }
 
--- Extra commands defined by the addon developer
 local extraCommands = {
     { slash = "/gold", source = "Extra", description = "Display gold across characters",
       callback = function(msg) print("Gold: Feature not implemented yet.") end },
@@ -22,7 +21,6 @@ local extraCommands = {
       callback = function(msg) print("Memory (KB): " .. collectgarbage("count")) end },
 }
 
--- Helper: insert a discovered command if not already present.
 local function addCommand(slash, data)
     local lower = slash:lower()
     if not discoveredCommands[lower] then
@@ -35,7 +33,6 @@ local function addCommand(slash, data)
     end
 end
 
--- Forced fallback: add any missing commands from our fallback list.
 local function ForceFallbacks()
     for _, slash in ipairs(forcedFallback) do
         local lower = slash:lower()
@@ -63,7 +60,6 @@ local function ForceFallbacks()
     end
 end
 
--- Scan built-in Blizzard commands by iterating over SlashCmdList.
 local function ScanBuiltIn()
     for key, func in pairs(SlashCmdList) do
         local i = 1
@@ -76,12 +72,13 @@ local function ScanBuiltIn()
     end
 end
 
--- Scan macros: global and character macros.
 local function ScanMacros()
     local global, char = GetNumMacros()
+    local seen = {}
     for i = 1, global do
         local name, icon, body = GetMacroInfo(i)
-        if name then
+        if name and not seen[name:lower()] then
+            seen[name:lower()] = true
             addCommand("/" .. name, {
                 callback = function(msg)
                     print("Macro: ", name, "body:", body)
@@ -93,7 +90,8 @@ local function ScanMacros()
     end
     for i = 1, char do
         local name, icon, body = GetMacroInfo(global + i)
-        if name then
+        if name and not seen[name:lower()] then
+            seen[name:lower()] = true
             addCommand("/" .. name, {
                 callback = function(msg)
                     print("Character macro: ", name, "body:", body)
@@ -105,12 +103,10 @@ local function ScanMacros()
     end
 end
 
--- Scan Ace (or similar library) registered commands.
 local function ScanAce()
     if not CommandSage_Config.Get("preferences", "macroInclusion") then
         return
     end
-    -- Reuse macro scan if macroInclusion = true; we also do...
     if CommandSage_Config.Get("preferences", "aceConsoleInclusion") then
         local AceConsole = LibStub and LibStub("AceConsole-3.0", true)
         if AceConsole and AceConsole.GetCommands then
@@ -122,12 +118,9 @@ local function ScanAce()
             end
         end
     end
-
-    -- Also scan macros if included:
     ScanMacros()
 end
 
--- Scan for emote commands.
 local function ScanEmotes()
     local hardcodedEmotes = { "/dance", "/cheer", "/wave", "/laugh", "/cry", "/roar", "/salute", "/smile", "/frown" }
     for _, e in ipairs(hardcodedEmotes) do
@@ -142,7 +135,6 @@ local function ScanEmotes()
     end
 end
 
--- Scan for help commands.
 local function ScanHelp()
     if SlashCmdList["HELP"] then
         local helpSlash = _G["SLASH_HELP1"]
@@ -158,14 +150,12 @@ local function ScanHelp()
     end
 end
 
--- Scan extra commands defined in our extraCommands table.
 local function ScanExtra()
     for _, cmd in ipairs(extraCommands) do
         addCommand(cmd.slash, { callback = cmd.callback, source = cmd.source, description = cmd.description })
     end
 end
 
--- Scan the global environment for slash commands (SLASH_...).
 local function ScanGlobalSlashCommands()
     for k, v in pairs(_G) do
         if type(k) == "string" and k:sub(1,6) == "SLASH_" and type(v) == "string" then
@@ -181,7 +171,6 @@ local function ScanGlobalSlashCommands()
     end
 end
 
--- Main scan function: clear discoveredCommands, then call all scans.
 function CommandSage_Discovery:ScanAllCommands()
     wipe(discoveredCommands)
     if CommandSage_Config.Get("preferences", "blizzAllFallback") then
@@ -195,7 +184,7 @@ function CommandSage_Discovery:ScanAllCommands()
     ScanGlobalSlashCommands()
     ForceFallbacks()
 
-    -- Insert all discovered commands into the Trie.
+    -- Insert discovered into Trie
     for slash, data in pairs(discoveredCommands) do
         CommandSage_Trie:InsertCommand(slash, data)
     end
@@ -215,4 +204,3 @@ function CommandSage_Discovery:ForceAllFallbacks(newFallbacks)
         print("CommandSage: Additional fallback commands added.")
     end
 end
-

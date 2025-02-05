@@ -1,11 +1,11 @@
 -- =============================================================================
 -- CommandSage_Config.lua
--- ...
+-- Core config with DB versioning + new visual feature toggles
 -- =============================================================================
 
 CommandSage_Config = {}
 
-local CURRENT_DB_VERSION = 4
+local CURRENT_DB_VERSION = 5  -- Bumped to 5 to incorporate new toggles
 
 function CommandSage_Config:InitializeDefaults()
     if not CommandSageDB then
@@ -24,70 +24,93 @@ function CommandSage_Config:InitializeDefaults()
     local prefs = CommandSageDB.config.preferences
     if not prefs then
         prefs = {
-            fuzzyMatchEnabled          = true,
-            fuzzyMatchTolerance        = 2,
-            maxSuggestions             = 12,
-            animateAutoType            = true,
-            showTutorialOnStartup      = true,
-            usageAnalytics             = true,
-            contextAwareness           = true,
-            voiceCommandEnabled        = false,
-            fallbackEnabled            = false,
-            autoTypeDelay              = 0.08,
-            persistHistory             = true,
-            snippetEnabled             = true,
-            contextFiltering           = true,
-            typeAheadPrediction        = true,
-            suggestionMode             = "fuzzy",
-            overrideHotkeysWhileTyping = true,
-            favoritesSortingEnabled    = true,
-            autocompleteOpenDirection  = "down",
-            maxSuggestionsOverride     = nil,
-            showParamSuggestionsInColor= true,
-            paramSuggestionsColor      = { 1.0, 0.8, 0.0 },
-            showDescriptionsInAutocomplete = true,
-            terminalNavigationEnabled  = true,
-            advancedStyling            = true,
-            enableTerminalGoodies      = true,
-            advancedKeybinds           = true,
-            partialFuzzyFallback       = true,
-            shellContextEnabled        = true,
-            monetizationEnabled        = false,
-            macroInclusion             = true,
-            aceConsoleInclusion        = true,
-            blizzAllFallback           = true,
-            userCustomFallbackEnabled  = false,
-            uiTheme                    = "dark",
-            uiScale                    = 1.0,
-            autocompleteBgColor        = { 0, 0, 0, 0.85 },
-            autocompleteHighlightColor = { 0.6, 0.6, 0.6, 0.3 },
-            tutorialFadeIn             = true,
-            configGuiEnabled           = true,
-            alwaysDisableHotkeysInChat = true,
+            -- Existing
+            fuzzyMatchEnabled             = true,
+            fuzzyMatchTolerance           = 2,
+            maxSuggestions                = 12,
+            animateAutoType               = true,
+            showTutorialOnStartup         = true,
+            usageAnalytics                = true,
+            contextAwareness              = true,
+            voiceCommandEnabled           = false,
+            fallbackEnabled               = false,
+            autoTypeDelay                 = 0.08,
+            persistHistory                = true,
+            snippetEnabled                = true,
+            contextFiltering              = true,
+            typeAheadPrediction           = true,
+            suggestionMode                = "fuzzy",
+            overrideHotkeysWhileTyping    = true,
+            favoritesSortingEnabled       = true,
+            autocompleteOpenDirection     = "down",
+            maxSuggestionsOverride        = nil,
+            showParamSuggestionsInColor   = true,
+            paramSuggestionsColor         = { 1.0, 0.8, 0.0 },
+            showDescriptionsInAutocomplete= true,
+            terminalNavigationEnabled     = true,
+            advancedStyling               = true,
+            enableTerminalGoodies         = true,
+            advancedKeybinds              = true,
+            partialFuzzyFallback          = true,
+            shellContextEnabled           = true,
+            monetizationEnabled           = false,
+            macroInclusion                = true,
+            aceConsoleInclusion           = true,
+            blizzAllFallback              = true,
+            userCustomFallbackEnabled     = false,
+            uiTheme                       = "dark",
+            uiScale                       = 1.0,
+            autocompleteBgColor           = { 0, 0, 0, 0.85 },
+            autocompleteHighlightColor    = { 0.6, 0.6, 0.6, 0.3 },
+            tutorialFadeIn                = true,
+            configGuiEnabled              = true,
+            alwaysDisableHotkeysInChat    = true,
+
+            -- NEW toggles for 10 visually distinctive features:
+            rainbowBorderEnabled          = false,
+            spinningIconEnabled           = false,
+            emoteStickersEnabled          = false,
+            usageChartEnabled             = false,
+            paramGlowEnabled              = false,
+            chatInputHaloEnabled          = false,
+            colorCommandEnabled           = false,
+            spin3DEnabled                 = false,
+            arRuneRingEnabled             = false,
+            advancedEmoteEffectsEnabled   = false,
         }
         CommandSageDB.config.preferences = prefs
     end
 
-    if prefs.uiTheme == nil then
-        prefs.uiTheme = "dark"
+    -- Ensure every new key is present
+    if prefs.rainbowBorderEnabled == nil then
+        prefs.rainbowBorderEnabled = false
     end
-    if prefs.uiScale == nil then
-        prefs.uiScale = 1.0
+    if prefs.spinningIconEnabled == nil then
+        prefs.spinningIconEnabled = false
     end
-    if prefs.autocompleteBgColor == nil then
-        prefs.autocompleteBgColor = {0, 0, 0, 0.85}
+    if prefs.emoteStickersEnabled == nil then
+        prefs.emoteStickersEnabled = false
     end
-    if prefs.autocompleteHighlightColor == nil then
-        prefs.autocompleteHighlightColor = {0.6, 0.6, 0.6, 0.3}
+    if prefs.usageChartEnabled == nil then
+        prefs.usageChartEnabled = false
     end
-    if prefs.tutorialFadeIn == nil then
-        prefs.tutorialFadeIn = true
+    if prefs.paramGlowEnabled == nil then
+        prefs.paramGlowEnabled = false
     end
-    if prefs.configGuiEnabled == nil then
-        prefs.configGuiEnabled = true
+    if prefs.chatInputHaloEnabled == nil then
+        prefs.chatInputHaloEnabled = false
     end
-    if prefs.alwaysDisableHotkeysInChat == nil then
-        prefs.alwaysDisableHotkeysInChat = true
+    if prefs.colorCommandEnabled == nil then
+        prefs.colorCommandEnabled = false
+    end
+    if prefs.spin3DEnabled == nil then
+        prefs.spin3DEnabled = false
+    end
+    if prefs.arRuneRingEnabled == nil then
+        prefs.arRuneRingEnabled = false
+    end
+    if prefs.advancedEmoteEffectsEnabled == nil then
+        prefs.advancedEmoteEffectsEnabled = false
     end
 end
 

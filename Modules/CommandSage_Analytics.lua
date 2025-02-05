@@ -48,8 +48,8 @@ end
 function CommandSage_Analytics:ListFavorites()
     EnsureAnalytics()
     local favs = {}
-    for cmd, _ in pairs(CommandSageDB.analytics.favorites) do
-        table.insert(favs, cmd)
+    for c,_ in pairs(CommandSageDB.analytics.favorites) do
+        table.insert(favs, c)
     end
     return favs
 end

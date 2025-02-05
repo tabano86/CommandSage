@@ -9,6 +9,7 @@ mkdir -p dist build
 
 mkdir -p build/$ADDON_NAME
 
+# Include everything except .git, .github, dist, build, scripts, hidden files, markdown, and LICENSE
 rsync -av --exclude='.git' --exclude='.github' --exclude='dist' --exclude='build' \
   --exclude='scripts' --exclude='.*' --exclude='*.md' --exclude='LICENSE' . build/$ADDON_NAME
 

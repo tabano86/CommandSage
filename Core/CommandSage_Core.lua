@@ -10,6 +10,7 @@ _G["CommandSage"] = CommandSage
 local f = CreateFrame("Frame")
 f:RegisterEvent("ADDON_LOADED")
 f:RegisterEvent("PLAYER_LOGIN")
+f:RegisterEvent("ADDON_UNLOADED") -- to fix bug where shell might stay stuck
 
 local function OnEvent(self, event, ...)
     if event == "ADDON_LOADED" then
@@ -34,14 +35,18 @@ local function OnEvent(self, event, ...)
 
             -- Hook to *all* chat frames
             CommandSage:HookAllChatFrames()
-
         end
 
     elseif event == "PLAYER_LOGIN" then
         if CommandSage_Config.Get("preferences", "showTutorialOnStartup") then
             CommandSage_Tutorial:ShowTutorialPrompt()
-            -- Optionally disable so it won't spam every login
-            -- CommandSage_Config.Set("preferences", "showTutorialOnStartup", false)
+        end
+
+    elseif event == "ADDON_UNLOADED" then
+        local unloadedAddon = ...
+        if unloadedAddon == addonName then
+            -- Clear shell context if stuck
+            CommandSage_ShellContext:HandleCd("clear")
         end
     end
 end
@@ -115,6 +120,8 @@ function CommandSage:RegisterSlashCommands()
             end
         elseif cmd == "resetprefs" then
             CommandSage_Config:ResetPreferences()
+        elseif cmd == "perf" then
+            CommandSage_Performance:ShowDashboard()
         else
             print("|cff00ff00CommandSage Usage:|r")
             print(" /cmdsage tutorial - Show tutorial")
@@ -127,13 +134,13 @@ function CommandSage:RegisterSlashCommands()
             print(" /cmdsage scale <1.0> - Set autocomplete UI scale")
             print(" /cmdsage resetprefs - Reset all preferences to default")
             print(" /cmdsage gui - Open/close the config panel")
+            print(" /cmdsage perf - Show performance dashboard")
         end
     end
 end
 
--- Hook function for each chat frame's edit box
 function CommandSage:HookChatFrameEditBox(editBox)
-    if not editBox or editBox.CommandSageHooked then return end  -- avoid double hooking
+    if not editBox or editBox.CommandSageHooked then return end
 
     local bindingManagerFrame = CreateFrame("Frame", nil)
 
@@ -158,15 +165,22 @@ function CommandSage:HookChatFrameEditBox(editBox)
         DisableAllBindings()
         self:SetPropagateKeyboardInput(false)
         CommandSage_KeyBlocker:BlockKeys()
+
+        -- Chat halo if enabled
+        if CommandSage_Config.Get("preferences", "chatInputHaloEnabled") then
+            self:SetBackdropColor(1, 1, 0, 0.2) -- simple halo
+        end
     end)
+
     editBox:HookScript("OnEditFocusLost", function(self)
         RestoreAllBindings()
         self:SetPropagateKeyboardInput(true)
         CommandSage_KeyBlocker:UnblockKeys()
-    end)
 
-    -- The code for OnKeyDown / OnTextChanged hooking is the same as in AutoComplete
-    -- but repeated to ensure it works for each editBox instance.
+        if CommandSage_Config.Get("preferences", "chatInputHaloEnabled") then
+            self:SetBackdropColor(0,0,0,0)
+        end
+    end)
 
     local function CloseAutoCompleteOnChatDeactivate()
         CommandSage_AutoComplete:CloseSuggestions()
@@ -265,7 +279,6 @@ function CommandSage:HookChatFrameEditBox(editBox)
     editBox.CommandSageHooked = true
 end
 
--- Hooks all chat frames’ edit boxes
 function CommandSage:HookAllChatFrames()
     for i = 1, NUM_CHAT_WINDOWS do
         local cf = _G["ChatFrame"..i]

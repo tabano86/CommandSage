@@ -43,4 +43,3 @@ function CommandSage_UIAccessibility:ToggleHighContrast()
         self:EnableHighContrast()
     end
 end
-
