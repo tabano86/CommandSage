@@ -1,11 +1,53 @@
+require("Modules.CommandSage_FuzzyMatch")
+require("Modules.CommandSage_AutoType")
+
 CommandSage_AutoComplete = {}
 local autoFrame, scrollFrame, content
-local selectedIndex=0
-local DEFAULT_MAX_SUGGEST=20
-local snippetTemplates={
+local selectedIndex = 0
+local DEFAULT_MAX_SUGGEST = 20
+local snippetTemplates = {
     { slash="/macro", desc="Create a macro", snippet="/macro new <macroName>" },
-    { slash="/dance", desc="Fancy dance", snippet="/dance fancy" }
+    { slash="/dance", desc="Fancy dance", snippet="/dance fancy" },
+    { slash="/thanks", desc="Express gratitude", snippet="/thanks" },
+    { slash="/sorry", desc="Apologize", snippet="/sorry" },
+    { slash="/hello", desc="Say hello", snippet="/hello" },
+    { slash="/cheer", desc="Cheer", snippet="/cheer" },
+    { slash="/wave", desc="Wave", snippet="/wave" },
+    { slash="/point", desc="Point", snippet="/point" },
+    { slash="/sit", desc="Sit down", snippet="/sit" },
+    { slash="/stand", desc="Stand up", snippet="/stand" },
+    { slash="/roar", desc="Roar", snippet="/roar" },
+    { slash="/laugh", desc="Laugh", snippet="/laugh" },
+    { slash="/cry", desc="Cry", snippet="/cry" },
+    { slash="/flirt", desc="Flirt", snippet="/flirt" },
+    { slash="/kiss", desc="Blow a kiss", snippet="/kiss" },
+    { slash="/bow", desc="Bow", snippet="/bow" },
+    { slash="/kneel", desc="Kneel", snippet="/kneel" },
+    { slash="/beg", desc="Beg", snippet="/beg" },
+    { slash="/yell", desc="Yell", snippet="/yell" },
+    { slash="/dance", desc="Perform a dance", snippet="/dance" },
+    { slash="/sleep", desc="Sleep", snippet="/sleep" },
+    { slash="/cower", desc="Cower", snippet="/cower" },
+    { slash="/shoo", desc="Shoo", snippet="/shoo" },
+    { slash="/thank", desc="Thank someone", snippet="/thank" },
+    { slash="/whistle", desc="Whistle", snippet="/whistle" },
+    { slash="/clap", desc="Clap", snippet="/clap" },
+    { slash="/no", desc="Shake head no", snippet="/no" },
+    { slash="/yes", desc="Shake head yes", snippet="/yes" },
+    { slash="/rude", desc="Be rude", snippet="/rude" },
+    { slash="/sad", desc="Show sadness", snippet="/sad" },
+    { slash="/angry", desc="Show anger", snippet="/angry" },
+    { slash="/facepalm", desc="Facepalm", snippet="/facepalm" },
+    { slash="/confused", desc="Express confusion", snippet="/confused" },
+    { slash="/laugh", desc="Laugh loudly", snippet="/laugh" },
+    { slash="/gasp", desc="Gasp", snippet="/gasp" },
+    { slash="/grin", desc="Grin", snippet="/grin" },
+    { slash="/wink", desc="Wink", snippet="/wink" },
+    { slash="/bow", desc="Bow respectfully", snippet="/bow" },
+    { slash="/hug", desc="Hug someone", snippet="/hug" },
+    { slash="/applaud", desc="Applaud", snippet="/applaud" }
 }
+
 function CommandSage_AutoComplete:MoveSelection(delta)
     if not content then return end
     local totalShown=0

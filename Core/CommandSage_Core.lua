@@ -248,3 +248,4 @@ function CommandSage:HookAllChatFrames()
     end
 end
 f:SetScript("OnEvent", OnEvent)
+CommandSage.frame = f

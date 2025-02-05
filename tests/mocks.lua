@@ -6,33 +6,99 @@ SlashCmdList = {}
 BINDING_HEADER = {}
 
 function CreateFrame(frameType, name, parent, template)
-    -- Return a table simulating a WoW UI Frame
-    return {
-        SetScript = function() end,
-        RegisterEvent = function() end,
-        HookScript = function() end,
-        IsShown = function() return false end,
-        Show = function() end,
-        Hide = function() end,
-        SetSize = function() end,
-        SetPoint = function() end,
-        EnableMouse = function() end,
-        SetMovable = function() end,
-        RegisterForDrag = function() end,
-        SetBackdrop = function() end,
-        SetBackdropColor = function() end,
-        SetAlpha = function() end,
-        SetText = function() end,
-        SetCursorPosition = function() end,
-        GetText = function() return "" end,
-        SetPropagateKeyboardInput = function() end,
-        Name = name or "MockFrame",
-    }
+    local frame = {}
+    frame.name = name or "MockFrame"
+    frame.scripts = {}
+    frame.text = ""
+    frame.hidden = true
+    frame.alpha = 1
+    frame.SetScript = function(self, script, func)
+        self.scripts[script] = func
+    end
+    frame.GetScript = function(self, script)
+        return self.scripts[script]
+    end
+    frame.RegisterEvent = function() end
+    frame.HookScript = function(self, script, func)
+        local orig = self.scripts[script] or function() end
+        self.scripts[script] = function(...)
+            orig(...)
+            func(...)
+        end
+    end
+    frame.IsShown = function(self)
+        return not self.hidden
+    end
+    frame.Show = function(self)
+        self.hidden = false
+    end
+    frame.Hide = function(self)
+        self.hidden = true
+    end
+    frame.SetSize = function() end
+    frame.SetPoint = function() end
+    frame.EnableMouse = function() end
+    frame.SetMovable = function() end
+    frame.RegisterForDrag = function() end
+    frame.SetBackdrop = function() end
+    frame.SetBackdropColor = function() end
+    frame.SetAlpha = function(self, alpha)
+        self.alpha = alpha
+    end
+    frame.GetAlpha = function(self)
+        return self.alpha
+    end
+    frame.SetText = function(self, txt)
+        self.text = txt
+    end
+    frame.GetText = function(self)
+        return self.text
+    end
+    frame.SetCursorPosition = function(self, pos)
+        self.cursorPos = pos
+    end
+    frame.SetPropagateKeyboardInput = function() end
+    frame.CreateFontString = function(self, ...)
+        local fontStr = {}
+        fontStr.text = ""
+        fontStr.SetPoint = function() end
+        fontStr.SetWidth = function() end
+        fontStr.SetText = function(self, txt)
+            self.text = txt
+        end
+        fontStr.SetJustifyH = function() end
+        return fontStr
+    end
+    frame.CreateTexture = function(self, ...)
+        local tex = {}
+        tex.SetAllPoints = function() end
+        tex.SetTexture = function(self, texture) self.texture = texture end
+        tex.SetAlpha = function(self, alpha) self.alpha = alpha end
+        tex.SetRotation = function(self, rot) self.rotation = rot end
+        tex.SetSize = function() end
+        tex.SetColorTexture = function(self, r, g, b, a) self.color = {r, g, b, a} end
+        tex.Hide = function(self) self.hidden = true end
+        tex.Show = function(self) self.hidden = false end
+        return tex
+    end
+    -- For frames using the BasicFrameTemplate, add a TitleText field:
+    if template and template:find("BasicFrameTemplate") then
+        frame.TitleText = {
+            SetText = function(self, txt) self.text = txt end,
+            text = ""
+        }
+    end
+    return frame
 end
 
 UIParent = CreateFrame("Frame", "UIParent")
 ChatFrame1 = CreateFrame("Frame", "ChatFrame1")
 ChatFrame1EditBox = CreateFrame("Frame", "ChatFrame1EditBox")
+-- Implement ChatFrame1EditBox to store text.
+ChatFrame1EditBox.text = ""
+ChatFrame1EditBox.SetText = function(self, txt) self.text = txt end
+ChatFrame1EditBox.GetText = function(self) return self.text end
+ChatFrame1EditBox.SetCursorPosition = function(self, pos) self.cursorPos = pos end
 
 NUM_CHAT_WINDOWS = 1
 
@@ -62,17 +128,15 @@ end
 
 -- Override print so tests won't spam your console
 function print(...)
-    -- comment out if you want to see all prints during tests
+    -- Uncomment to see output:
     -- local txt = table.concat({...}, " ")
     -- io.stdout:write(txt .. "\n")
 end
 
 C_Timer = { After = function(sec, func) end }
 
--- No Ace loaded by default
 LibStub = function(...) return nil end
 
--- For fallback scanning
 SlashCmdList["HELP"] = function(...) end
 _G["SLASH_HELP1"] = "/help"
 

@@ -47,22 +47,22 @@ local function ScanBuiltIn()
         while true do
             local slash = _G["SLASH_"..key..i]
             if not slash then break end
-            addCommand(slash, { callback=func, source="Blizzard", description="<No description>"})
-            i=i+1
+            addCommand(slash, { callback=func, source="Blizzard", description="<No description>"} )
+            i = i + 1
         end
     end
 end
 local function ScanMacros()
     local global, char = GetNumMacros()
     local seen = {}
-    for i=1, global do
+    for i = 1, global do
         local name, icon, body = GetMacroInfo(i)
         if name and not seen[name:lower()] then
             seen[name:lower()] = true
             addCommand("/"..name, { callback=function(msg) end, source="Macro", description="Macro: "..name })
         end
     end
-    for i=1, char do
+    for i = 1, char do
         local name, icon, body = GetMacroInfo(global+i)
         if name and not seen[name:lower()] then
             seen[name:lower()] = true
@@ -71,16 +71,16 @@ local function ScanMacros()
     end
 end
 local function ScanAce()
-    if not CommandSage_Config.Get("preferences","macroInclusion") then
+    if not CommandSage_Config.Get("preferences", "macroInclusion") then
         return
     end
-    if CommandSage_Config.Get("preferences","aceConsoleInclusion") then
+    if CommandSage_Config.Get("preferences", "aceConsoleInclusion") then
         local AceConsole = LibStub and LibStub("AceConsole-3.0", true)
         if AceConsole and AceConsole.GetCommands then
             local cmds = AceConsole:GetCommands()
             if cmds and type(cmds)=="table" then
-                for cmd,func in pairs(cmds) do
-                    addCommand(cmd, { callback=func, source="AceConsole", description="AceConsole command: "..cmd})
+                for cmd, func in pairs(cmds) do
+                    addCommand(cmd, { callback=func, source="AceConsole", description="AceConsole command: "..cmd })
                 end
             end
         end
@@ -88,7 +88,7 @@ local function ScanAce()
     ScanMacros()
 end
 local function ScanEmotes()
-    local hardcodedEmotes = { "/dance","/cheer","/wave" }
+    local hardcodedEmotes = { "/dance", "/cheer", "/wave" }
     for _, e in ipairs(hardcodedEmotes) do
         addCommand(e, { callback=function(msg) end, source="Emote", description="Emote "..e })
     end
@@ -120,7 +120,7 @@ local function ScanExtra()
     end
 end
 local function ScanGlobalSlashCommands()
-    for k,v in pairs(_G) do
+    for k, v in pairs(_G) do
         if type(k)=="string" and k:sub(1,6)=="SLASH_" and type(v)=="string" then
             local lower = v:lower()
             if not discoveredCommands[lower] then
@@ -135,7 +135,7 @@ local function ScanGlobalSlashCommands()
 end
 function CommandSage_Discovery:ScanAllCommands()
     wipe(discoveredCommands)
-    if CommandSage_Config.Get("preferences","blizzAllFallback") then
+    if CommandSage_Config.Get("preferences", "blizzAllFallback") then
         ScanBuiltIn()
     end
     ScanMacros()
@@ -148,7 +148,9 @@ function CommandSage_Discovery:ScanAllCommands()
     for slash, data in pairs(discoveredCommands) do
         CommandSage_Trie:InsertCommand(slash, data)
     end
-    CommandSage_DeveloperAPI:FireEvent("COMMANDS_UPDATED")
+    if CommandSage_DeveloperAPI and CommandSage_DeveloperAPI.FireEvent then
+        CommandSage_DeveloperAPI:FireEvent("COMMANDS_UPDATED")
+    end
 end
 function CommandSage_Discovery:GetDiscoveredCommands()
     return discoveredCommands
