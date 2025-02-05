@@ -2,10 +2,10 @@
 -- 10 tests for Modules/CommandSage_MultiModal.lua
 
 require("busted.runner")()
-require("Modules/CommandSage_MultiModal")
-require("Modules/CommandSage_Trie")
-require("Modules/CommandSage_FuzzyMatch")
-require("Modules/CommandSage_Config")
+require("Modules.CommandSage_MultiModal")
+require("Modules.CommandSage_Trie")
+require("Modules.CommandSage_FuzzyMatch")
+require("Modules.CommandSage_Config")
 
 describe("Module: CommandSage_MultiModal", function()
 

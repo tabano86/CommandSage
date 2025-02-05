@@ -2,7 +2,7 @@
 -- 10 tests for Modules/CommandSage_Fallback.lua
 
 require("busted.runner")()
-require("Modules/CommandSage_Fallback")
+require("Modules.CommandSage_Fallback")
 
 describe("Module: CommandSage_Fallback", function()
 

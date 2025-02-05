@@ -1,5 +1,5 @@
 -- tests\test_Config.lua
-require("Core/CommandSage_Config")
+require("Core.CommandSage_Config")
 
 describe("CommandSage_Config Tests", function()
     before_each(function()

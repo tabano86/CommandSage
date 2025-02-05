@@ -2,10 +2,10 @@
 -- 10 tests for Modules/CommandSage_DeveloperAPI.lua
 
 require("busted.runner")()
-require("Modules/CommandSage_DeveloperAPI")
-require("Modules/CommandSage_Discovery")
-require("Modules/CommandSage_Config")
-require("Modules/CommandSage_Trie")
+require("Modules.CommandSage_DeveloperAPI")
+require("Modules.CommandSage_Discovery")
+require("Modules.CommandSage_Config")
+require("Modules.CommandSage_Trie")
 
 describe("Module: CommandSage_DeveloperAPI", function()
 

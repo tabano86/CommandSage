@@ -2,8 +2,8 @@
 -- 10 tests for Modules/CommandSage_Terminal.lua
 
 require("busted.runner")()
-require("Modules/CommandSage_Terminal")
-require("Modules/CommandSage_Config")
+require("Modules.CommandSage_Terminal")
+require("Modules.CommandSage_Config")
 
 describe("Module: CommandSage_Terminal", function()
 

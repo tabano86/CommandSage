@@ -2,7 +2,7 @@
 -- 10 tests for Modules/CommandSage_UIAccessibility.lua
 
 require("busted.runner")()
-require("Modules/CommandSage_UIAccessibility")
+require("Modules.CommandSage_UIAccessibility")
 
 describe("Module: CommandSage_UIAccessibility", function()
 

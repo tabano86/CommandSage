@@ -2,11 +2,11 @@
 -- 10 tests for Modules/CommandSage_FuzzyMatch.lua (second coverage set)
 
 require("busted.runner")()
-require("Modules/CommandSage_FuzzyMatch")
-require("Modules/CommandSage_AdaptiveLearning")
-require("Modules/CommandSage_Config")
-require("Modules/CommandSage_Discovery")
-require("Modules/CommandSage_Trie")
+require("Modules.CommandSage_FuzzyMatch")
+require("Modules.CommandSage_AdaptiveLearning")
+require("Modules.CommandSage_Config")
+require("Modules.CommandSage_Discovery")
+require("Modules.CommandSage_Trie")
 
 describe("Module: CommandSage_FuzzyMatch (Additional)", function()
 

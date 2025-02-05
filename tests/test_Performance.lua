@@ -2,9 +2,9 @@
 -- 10 tests for Modules/CommandSage_Performance.lua
 
 require("busted.runner")()
-require("Modules/CommandSage_Performance")
-require("Modules/CommandSage_Discovery")
-require("Modules/CommandSage_Trie")
+require("Modules.CommandSage_Performance")
+require("Modules.CommandSage_Discovery")
+require("Modules.CommandSage_Trie")
 
 describe("Module: CommandSage_Performance", function()
 
