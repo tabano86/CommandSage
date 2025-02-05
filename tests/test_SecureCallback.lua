@@ -4,7 +4,7 @@
 require("busted.runner")()
 require("Modules.CommandSage_SecureCallback")
 require("Modules.CommandSage_Discovery")
-require("Modules.CommandSage_Config")
+require("Core.CommandSage_Config")
 
 describe("Module: CommandSage_SecureCallback", function()
 

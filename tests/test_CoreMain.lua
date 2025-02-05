@@ -26,8 +26,8 @@ describe("Core: CommandSage_Core", function()
         local eventFunc = frame:GetScript("OnEvent")
         eventFunc(frame, "ADDON_LOADED", "CommandSage")
         assert.equals(1, loadedCount)
-        CommandSage_Config.InitializeDefaults = oldInit
     end)
+
 
     it("PLAYER_LOGIN event shows tutorial if enabled", function()
         local oldFunc = CommandSage_Tutorial.ShowTutorialPrompt

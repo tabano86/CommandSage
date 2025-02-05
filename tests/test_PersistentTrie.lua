@@ -4,7 +4,7 @@
 require("busted.runner")()
 require("Modules.CommandSage_PersistentTrie")
 require("Modules.CommandSage_Trie")
-require("Modules.CommandSage_Config")
+require("Core.CommandSage_Config")
 
 describe("Module: CommandSage_PersistentTrie", function()
 

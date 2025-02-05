@@ -3,7 +3,7 @@
 
 require("busted.runner")()
 require("Modules.CommandSage_ParameterHelper")
-require("Modules.CommandSage_Config")
+require("Core.CommandSage_Config")
 
 describe("Module: CommandSage_ParameterHelper (Extended)", function()
 

@@ -3,7 +3,7 @@
 
 require("busted.runner")()
 require("Modules.CommandSage_HistoryPlayback")
-require("Modules.CommandSage_Config")
+require("Core.CommandSage_Config")
 
 describe("Module: CommandSage_HistoryPlayback", function()
 

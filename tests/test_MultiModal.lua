@@ -5,7 +5,7 @@ require("busted.runner")()
 require("Modules.CommandSage_MultiModal")
 require("Modules.CommandSage_Trie")
 require("Modules.CommandSage_FuzzyMatch")
-require("Modules.CommandSage_Config")
+require("Core.CommandSage_Config")
 
 describe("Module: CommandSage_MultiModal", function()
 
