@@ -9,55 +9,76 @@ const { spawnSync, spawn } = require("child_process");
 const clipboardy = require("clipboardy");
 const archiver = require("archiver");
 
-function toolExists(toolName) {
-    const check = spawnSync(isWindows() ? "where" : "which", [toolName], { encoding: "utf-8" });
-    return check.status === 0;
-}
-
 function isWindows() {
     return os.platform() === "win32";
 }
 
-// Detect if running in WSL by checking os.release()
 function isWSL() {
     return process.platform === "linux" && os.release().toLowerCase().includes("microsoft");
 }
 
-function runTests(options) {
+function toolExists(toolName) {
+    const cmd = isWindows() ? "where" : "which";
+    const check = spawnSync(cmd, [toolName], { encoding: "utf-8" });
+    return check.status === 0;
+}
+
+function runCommand(command, args, options = {}) {
+    return new Promise((resolve, reject) => {
+        const proc = spawn(command, args, { stdio: "inherit", shell: true, ...options });
+        proc.on("error", reject);
+        proc.on("exit", code => {
+            if (code !== 0) {
+                reject(new Error(`${command} exited with code ${code}`));
+            } else {
+                resolve();
+            }
+        });
+    });
+}
+
+async function runTests(options) {
     if (!toolExists("busted")) {
         console.error("Error: 'busted' is not installed or not in PATH.");
         process.exit(1);
     }
     const args = ["--pattern=test_.*\\.lua", "tests"];
     if (options.grep) args.push("--filter=" + options.grep);
-    const proc = spawn("busted", args, { stdio: "inherit", shell: true });
-    proc.on("exit", code => process.exit(code));
+    await runCommand("busted", args);
 }
 
-function buildAddon(outputPath) {
+async function lintLua() {
+    if (!toolExists("luacheck")) {
+        console.error("Error: 'luacheck' is not installed or not in PATH.");
+        process.exit(1);
+    }
+    await runCommand("luacheck", [".", "--exclude-files", "**/Libs/**"]);
+}
+
+async function buildAddon(outputName) {
     const distDir = path.join(process.cwd(), "dist");
     if (!fs.existsSync(distDir)) fs.mkdirSync(distDir, { recursive: true });
-    const zipName = outputPath || "CommandSage.zip";
+    const zipName = outputName || "CommandSage.zip";
     const zipPath = path.join(distDir, zipName);
     if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
-    const output = fs.createWriteStream(zipPath);
-    const archive = archiver("zip", { zlib: { level: 9 } });
-    output.on("close", () => {
-        console.log(`Build complete. ${archive.pointer()} total bytes written.`);
+    await new Promise((resolve, reject) => {
+        const output = fs.createWriteStream(zipPath);
+        const archive = archiver("zip", { zlib: { level: 9 } });
+        output.on("close", () => {
+            console.log(`Build complete. ${archive.pointer()} total bytes written to ${zipPath}.`);
+            resolve();
+        });
+        archive.on("error", err => reject(err));
+        archive.pipe(output);
+        archive.glob("**/*", {
+            cwd: process.cwd(),
+            ignore: ["**/.git/**", "dist/**", "tests/**", "scripts/**", "**/.*"]
+        });
+        archive.finalize();
     });
-    archive.on("error", err => {
-        console.error("Build failed:", err);
-        process.exit(1);
-    });
-    archive.pipe(output);
-    archive.glob("**/*", {
-        cwd: process.cwd(),
-        ignore: ["**/.git/**", "dist/**", "tests/**", "scripts/**", "**/.*"]
-    });
-    archive.finalize();
 }
 
-function copyFiles(excludePatterns, exts) {
+async function copyFiles(excludePatterns, exts) {
     const sourceDir = process.cwd();
     const extensions = (exts && exts.length)
         ? exts.map(ext => (ext.startsWith(".") ? ext.toLowerCase() : "." + ext.toLowerCase()))
@@ -89,15 +110,11 @@ function copyFiles(excludePatterns, exts) {
         }
     }
     walk(sourceDir);
-
     if (clipboardContent) {
         try {
-            // On WSL, use clip.exe from Windows; otherwise, use clipboardy.
             if (isWSL()) {
                 const proc = spawnSync("clip.exe", { input: clipboardContent });
-                if (proc.status !== 0) {
-                    throw new Error("clip.exe failed");
-                }
+                if (proc.status !== 0) throw new Error("clip.exe failed");
                 console.log("Content copied to clipboard (via clip.exe).");
             } else {
                 clipboardy.writeSync(clipboardContent);
@@ -112,16 +129,7 @@ function copyFiles(excludePatterns, exts) {
     }
 }
 
-function lintLua() {
-    if (!toolExists("luacheck")) {
-        console.error("Error: 'luacheck' is not installed or not in PATH.");
-        process.exit(1);
-    }
-    const proc = spawn("luacheck", [".", "--exclude-files", "**/Libs/**"], { stdio: "inherit", shell: true });
-    proc.on("exit", code => process.exit(code));
-}
-
-function clean() {
+async function clean() {
     const distDir = path.join(process.cwd(), "dist");
     if (fs.existsSync(distDir)) {
         fs.rmSync(distDir, { recursive: true, force: true });
@@ -131,44 +139,111 @@ function clean() {
     }
 }
 
+// Consolidated CI command: lint, test, then build.
+async function ci() {
+    try {
+        console.log("Running Lua lint...");
+        await lintLua();
+        console.log("Running tests...");
+        await runTests({});
+        console.log("Building addon...");
+        await buildAddon();
+        console.log("CI pipeline complete.");
+    } catch (err) {
+        console.error("CI pipeline failed:", err);
+        process.exit(1);
+    }
+}
+
+// Release command: runs CI then builds final package.
+async function release(options) {
+    try {
+        await ci();
+        await buildAddon(options.output);
+        console.log("Release complete.");
+    } catch (err) {
+        console.error("Release failed:", err);
+        process.exit(1);
+    }
+}
+
 const program = new Command();
 
 program
     .name("cmdsage")
     .description("Enhanced WoW plugin CLI for testing, building, linting, copying, and more.")
-    .version("1.0.0");
+    .version("2.0.0");
 
 program
     .command("test")
-    .description("Run Lua tests with busted")
-    .option("-g, --grep <pattern>", "Run tests matching pattern")
-    .action(options => runTests(options));
-
-program
-    .command("build")
-    .description("Build the addon into dist/CommandSage.zip (or specified filename)")
-    .option("-o, --output <file>", "Name of the output zip file")
-    .action(options => buildAddon(options.output));
-
-program
-    .command("copy")
-    .description("Copy file contents to clipboard with specified extensions")
-    .option("-e, --exclude <patterns...>", "Exclude files with matching patterns")
-    .option("-x, --extensions <extensions...>", "File extensions to include (default: .lua, .toc)")
-    .action(options => copyFiles(options.exclude, options.extensions));
+    .description("Run Lua tests using busted")
+    .option("-g, --grep <pattern>", "Filter tests by pattern")
+    .action(options => {
+        runTests(options).catch(err => {
+            console.error(err);
+            process.exit(1);
+        });
+    });
 
 program
     .command("lint")
     .description("Lint Lua files using luacheck")
-    .action(() => lintLua());
+    .action(() => {
+        lintLua().catch(err => {
+            console.error(err);
+            process.exit(1);
+        });
+    });
+
+program
+    .command("build")
+    .description("Build the addon into a zip file in dist/")
+    .option("-o, --output <file>", "Name of the output zip file")
+    .action(options => {
+        buildAddon(options.output).catch(err => {
+            console.error(err);
+            process.exit(1);
+        });
+    });
+
+program
+    .command("copy")
+    .description("Copy contents of .lua and .toc files to clipboard")
+    .option("-e, --exclude <patterns...>", "Exclude files matching these patterns")
+    .option("-x, --extensions <extensions...>", "File extensions to include (default: .lua, .toc)")
+    .action(options => {
+        copyFiles(options.exclude, options.extensions).catch(err => {
+            console.error(err);
+            process.exit(1);
+        });
+    });
 
 program
     .command("clean")
-    .description("Remove dist/ directory")
-    .action(() => clean());
+    .description("Remove the dist/ directory")
+    .action(() => {
+        clean().catch(err => {
+            console.error(err);
+            process.exit(1);
+        });
+    });
 
-program.parse(process.argv);
+program
+    .command("ci")
+    .description("Run lint, tests, and build (CI pipeline)")
+    .action(() => {
+        ci();
+    });
 
-if (!process.argv.slice(2).length) {
-    program.outputHelp();
-}
+program
+    .command("release")
+    .description("Run CI pipeline and perform release packaging")
+    .option("-o, --output <file>", "Name of the output zip file for release")
+    .action(options => {
+        release(options);
+    });
+
+program.parseAsync(process.argv).catch(err => {
+    console.error(err);
+    process.exit(1);
+});

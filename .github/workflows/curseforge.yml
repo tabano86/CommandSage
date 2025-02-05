@@ -1,64 +1,85 @@
-name: Build and Publish CommandSage
+name: Release Pipeline
 
 on:
   push:
     branches:
       - main
+    tags:
+      - 'v*'
 
 jobs:
-  build-and-upload:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-
+  semantic-release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
+      - name: Checkout Code
         uses: actions/checkout@v3
-
+        with:
+          fetch-depth: 0
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '22'
-
       - name: Install dependencies
         run: npm ci
-
-      - name: Run Tests
+      - name: Install test dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update && sudo apt-get install -y luarocks lua5.3
+          luarocks install busted
+      - name: Run tests
         run: node cmdsage.js test
+      - name: Run semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
 
-      - name: Extract Addon Version
+  build-and-publish:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: semantic-release
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm ci
+      - name: Install test dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update && sudo apt-get install -y luarocks lua5.3
+          luarocks install busted
+      - name: Run tests
+        run: node cmdsage.js test
+      - name: Extract Version from Tag
         id: extract_version
         run: |
-          VERSION_LINE=$(grep -m1 -oP '(?<=Version-).*(?=-blue)' README.md || echo "4.3")
-          echo "addon_version=$VERSION_LINE" >> $GITHUB_OUTPUT
-
+          # Remove the leading "v" (e.g. "v1.2.3" → "1.2.3")
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "addon_version=$VERSION" >> $GITHUB_OUTPUT
       - name: Update TOC Version
         run: |
           echo "Detected version: ${{ steps.extract_version.outputs.addon_version }}"
           sed -i "s/## Version: .*/## Version: ${{ steps.extract_version.outputs.addon_version }}/" CommandSage.toc
-
       - name: Build Addon
         run: node cmdsage.js build
-
       - name: Package Addon
         run: |
           mkdir -p dist
           zip -r dist/CommandSage-${{ steps.extract_version.outputs.addon_version }}.zip . \
-            -x "*.git*" \
-            -x ".github*" \
-            -x "scripts/*" \
-            -x "dist/*" \
-            -x "tests/*"
-
-      - name: Upload artifact to GitHub
-        uses: actions/upload-artifact@v4
+            -x "*.git*" -x ".github*" -x "scripts/*" -x "dist/*" -x "tests/*"
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
         with:
           name: CommandSage-Zip
           path: dist/CommandSage-${{ steps.extract_version.outputs.addon_version }}.zip
-
       - name: Publish to CurseForge
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && contains(github.event.head_commit.message, '[release]')
         env:
           CURSEFORGE_PROJECT_ID: ${{ secrets.CURSEFORGE_PROJECT_ID }}
           CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
