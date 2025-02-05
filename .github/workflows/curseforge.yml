@@ -25,7 +25,7 @@ jobs:
       - name: Install test dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get update && sudo apt-get install -y luarocks lua5.3
+          sudo apt-get update && sudo apt-get install -y luarocks lua5.3 lua5.3-dev
           luarocks install busted --local
       - name: Run tests
         run: node cmdsage.js test
@@ -53,7 +53,7 @@ jobs:
       - name: Install test dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get update && sudo apt-get install -y luarocks lua5.3
+          sudo apt-get update && sudo apt-get install -y luarocks lua5.3 lua5.3-dev
           luarocks install busted --local
       - name: Run tests
         run: node cmdsage.js test
