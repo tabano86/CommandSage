@@ -115,6 +115,11 @@ function CreateFrame(frameType, name, parent, template)
         _G[name] = frame
     end
 
+    -- Provide a SetScale method so things like autoFrame:SetScale(...) won't error
+    function frame:SetScale(scale)
+        self.scale = scale
+    end
+
     -- Basic methods
     function frame:SetPoint(point, a1, a2, a3, a4)
         -- Some tests do: SetPoint("TOP", 0, -10)
@@ -176,6 +181,14 @@ function CreateFrame(frameType, name, parent, template)
         frame.TitleText = { text = "", SetText = function(self, txt) self.text = txt end, GetText = function(self) return self.text or "" end }
     end
     if template and template:find("InterfaceOptionsCheckButtonTemplate") then
+        -- Provide SetChecked / GetChecked for checkboxes
+        frame.SetChecked = function(self, val)
+            self.checkedState = (val == true)
+        end
+        frame.GetChecked = function(self)
+            return self.checkedState == true
+        end
+
         frame.Text = { text = "", SetText = function(self, txt) self.text = txt end }
     end
     if template and template:find("UIPanelButtonTemplate") then
@@ -254,7 +267,7 @@ InCombatLockdown = InCombatLockdown or function() return false end
 -----------------------------------------
 GetNumMacros = GetNumMacros or function() return 2, 2 end
 GetMacroInfo = GetMacroInfo or function(i)
-    if i == 1 then return "macro", "icon1", "/say Hello" end
+    if i == 1 then return "testmacro", "icon1", "/say Hello" end
     if i == 2 then return "WORLD", "icon2", "/wave" end
     return nil
 end

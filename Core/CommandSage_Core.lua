@@ -47,7 +47,6 @@ local function OnEvent(self, event, ...)
     elseif event == "ADDON_UNLOADED" then
         local unloadedAddon = ...
         if unloadedAddon == addonName then
-            CommandSage_ShellContext:HandleCd("clear")
         end
     end
 end
