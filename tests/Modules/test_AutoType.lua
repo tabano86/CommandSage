@@ -124,4 +124,29 @@ describe("Module: CommandSage_AutoType", function()
         local t = ChatFrame1EditBox:GetText()
         assert.is_true(#t > 0 and #t < #"/second")
     end)
+
+    it("Re-typing after StopAutoType resets properly", function()
+        -- Set animate on
+        CommandSage_Config.Set("preferences", "animateAutoType", true)
+
+        -- Start first auto-type
+        CommandSage_AutoType:BeginAutoType("/hello1")
+        local f = CommandSage_AutoType.frame
+        local updateFunc = f:GetScript("OnUpdate")
+        -- Simulate half a second total => enough to type maybe 5 chars with default 0.1 delay
+        for i = 1, 5 do
+            updateFunc(f, 0.1)
+        end
+        -- We'll forcibly stop
+        CommandSage_AutoType:StopAutoType()
+
+        -- Now do a new auto-type
+        ChatFrame1EditBox:SetText("")
+        CommandSage_AutoType:BeginAutoType("/hello2")
+        for i = 1, 3 do
+            updateFunc(f, 0.1)
+        end
+        local partial = ChatFrame1EditBox:GetText()
+        assert.matches("^/he", partial)
+    end)
 end)

@@ -34,10 +34,18 @@ describe("Module: CommandSage_UIAccessibility", function()
     it("ReadBack prints text if TTS not available", function()
         local oldPrint = print
         local output = {}
-        print = function(...) table.insert(output, table.concat({...}, " ")) end
+        print = function(...)
+            table.insert(output, table.concat({...}, " "))
+        end
+
+        -- Now call the readback:
         CommandSage_UIAccessibility:ReadBack("Hello test")
+
+        -- Restore print:
         print = oldPrint
+
         local joined = table.concat(output, "\n")
+        -- Our code calls plain 'print(text)' so we expect "Hello test" in joined:
         assert.matches("Hello test", joined)
     end)
 

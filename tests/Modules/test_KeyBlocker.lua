@@ -53,9 +53,9 @@ describe("Module: CommandSage_KeyBlocker", function()
         assert.is_false(b:IsShown())
     end)
 
+    -- Use the publicly exposed .allKeys instead of debug.getupvalue
     it("allKeys list has typical keys", function()
-        local keyList = debug.getupvalue(CommandSage_KeyBlocker.BlockKeys, 1)
-        -- If you want to test for at least 30 keys:
-        assert.is_true(#keyList >= 30)
+        local keyList = CommandSage_KeyBlocker.allKeys
+        assert.is_true(#keyList >= 30, "Expected >=30 keys; got " .. #keyList)
     end)
 end)

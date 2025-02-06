@@ -1,16 +1,17 @@
--- CommandSage_Config.lua
+-- File: Core/CommandSage_Config.lua
 local CommandSage_Config = {}
+local CURRENT_DB_VERSION = 1
 
 -- Initializes default configuration values.
 function CommandSage_Config:InitializeDefaults()
     if not CommandSageDB then
         CommandSageDB = {
             preferences = {
-                animateAutoType = true, -- Enable incremental typing by default.
-                autoTypeDelay = 0.1, -- Default delay between characters.
-                suggestionMode = "fuzzy", -- Default suggestion mode.
-                fuzzyMatchEnabled = true, -- Fuzzy matching enabled.
-                uiTheme = "dark", -- Default UI theme.
+                animateAutoType = true, -- Enable incremental typing by default
+                autoTypeDelay = 0.1,
+                suggestionMode = "fuzzy",
+                fuzzyMatchEnabled = true,
+                uiTheme = "dark",
                 enableTerminalGoodies = false,
                 chatInputHaloEnabled = false,
                 overrideHotkeysWhileTyping = false,
@@ -19,12 +20,15 @@ function CommandSage_Config:InitializeDefaults()
             }
         }
     end
+
     if not CommandSageDB.dbVersion or CommandSageDB.dbVersion < CURRENT_DB_VERSION then
         CommandSageDB.dbVersion = CURRENT_DB_VERSION
     end
+
     if not CommandSageDB.config then
         CommandSageDB.config = {}
     end
+
     local prefs = CommandSageDB.config.preferences
     if not prefs then
         prefs = {
@@ -84,7 +88,8 @@ function CommandSage_Config:InitializeDefaults()
         }
         CommandSageDB.config.preferences = prefs
     end
-    -- Some optional expansions if needed
+
+    -- Example expansions if needed (safe-guard fields)
     if prefs.rainbowBorderEnabled == nil then
         prefs.rainbowBorderEnabled = false
     end
@@ -116,17 +121,16 @@ function CommandSage_Config:InitializeDefaults()
         prefs.advancedEmoteEffectsEnabled = false
     end
 
-    -- Also cache the preferences locally in the module for quick access.
-    CommandSage_Config.preferences = _G.CommandSageDB.config.preferences
+    self.preferences = CommandSageDB.config.preferences
 end
 
 -- Sets a configuration value.
 function CommandSage_Config.Set(section, key, value)
     if section == "preferences" then
-        if not _G.CommandSageDB.config or not _G.CommandSageDB.config.preferences then
+        if not CommandSageDB.config or not CommandSageDB.config.preferences then
             error("Configuration not initialized. Call InitializeDefaults() first.")
         end
-        _G.CommandSageDB.config.preferences[key] = value
+        CommandSageDB.config.preferences[key] = value
     else
         error("Unknown configuration section: " .. tostring(section))
     end
@@ -135,10 +139,10 @@ end
 -- Retrieves a configuration value.
 function CommandSage_Config.Get(section, key)
     if section == "preferences" then
-        if not _G.CommandSageDB.config or not _G.CommandSageDB.config.preferences then
+        if not CommandSageDB.config or not CommandSageDB.config.preferences then
             error("Configuration not initialized. Call InitializeDefaults() first.")
         end
-        return _G.CommandSageDB.config.preferences[key]
+        return CommandSageDB.config.preferences[key]
     else
         error("Unknown configuration section: " .. tostring(section))
     end
@@ -148,5 +152,8 @@ end
 function CommandSage_Config:ResetPreferences()
     self:InitializeDefaults()
 end
+
+-- Expose globally so tests and other modules can see it:
+_G.CommandSage_Config = CommandSage_Config
 
 return CommandSage_Config
