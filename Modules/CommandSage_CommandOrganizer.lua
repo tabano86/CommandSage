@@ -8,6 +8,9 @@ CommandSage_CommandOrganizer.tagDB = tagDB
 function CommandSage_CommandOrganizer:GetCommandTags(slash)
     return tagDB[slash] or {}
 end
+function CommandSage_CommandOrganizer:ExposeTagDB()
+    return tagDB
+end
 function CommandSage_CommandOrganizer:GetCategory(slash)
     local t = self:GetCommandTags(slash)
     if #t > 0 then

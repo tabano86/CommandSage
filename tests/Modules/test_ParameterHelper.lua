@@ -55,7 +55,7 @@ describe("CommandSage_ParameterHelper", function()
         -- If you prefer to skip:
         -- SKIP("Skipping internal upvalue test for UpdateFriendList")
 
-        local func = debug.getupvalue(CommandSage_ParameterHelper.GetParameterSuggestions, 2)
+        local func = CommandSage_ParameterHelper:ExposeKnownParams()
         if type(func) ~= "function" then
             -- We'll just skip if it's not a function
             return
@@ -76,7 +76,7 @@ describe("CommandSage_ParameterHelper", function()
 
     it("Reset or wipe doesn't affect known params built in code", function()
         -- The code is tested by messing with upvalues, which is fragile. We might just skip or we do something simpler:
-        local knownParams = debug.getupvalue(CommandSage_ParameterHelper.GetParameterSuggestions, 1)
+        local knownParams = CommandSage_ParameterHelper:ExposeKnownParams()
         local oldDance = knownParams["/dance"]
         knownParams["/dance"] = nil
 

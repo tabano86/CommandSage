@@ -19,6 +19,13 @@ if not securecall then
     end
 end
 
+-- Ensure 'unpack' exists globally (Lua 5.2+ uses table.unpack)
+if not _G.unpack then
+    if table and table.unpack then
+        _G.unpack = table.unpack
+    end
+end
+
 if not UIFrameFadeIn then
     function UIFrameFadeIn(frame, duration, fromAlpha, toAlpha)
         -- Simple stub: just set final alpha

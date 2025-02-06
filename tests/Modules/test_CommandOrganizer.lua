@@ -29,7 +29,7 @@ describe("Module: CommandSage_CommandOrganizer", function()
         -- We'll add a public function or we just skip it:
 
         -- If you truly want the old approach:
-        local tagDB = debug.getupvalue(CommandSage_CommandOrganizer.GetCommandTags, 1)
+        local tagDB = CommandSage_CommandOrganizer:ExposeTagDB()
         assert.is_table(tagDB)
         tagDB["/mytest"] = { "testcat" }
 
@@ -55,7 +55,7 @@ describe("Module: CommandSage_CommandOrganizer", function()
     end)
 
     it("multiple tags can exist but only the first is returned by GetCategory", function()
-        local tagDB = debug.getupvalue(CommandSage_CommandOrganizer.GetCommandTags, 1)
+        local tagDB = CommandSage_CommandOrganizer:ExposeTagDB()
         local oldDanceTags = tagDB["/dance"]
         tagDB["/dance"] = { "social", "fun" }
 

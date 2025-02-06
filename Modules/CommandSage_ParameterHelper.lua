@@ -6,6 +6,9 @@ local knownParams = {
 }
 local recentWhispers = {}
 local friendNames = {}
+function CommandSage_ParameterHelper:ExposeKnownParams()
+    return knownParams
+end
 local function UpdateFriendList()
     wipe(friendNames)
     local numFriends = C_FriendList.GetNumFriends() or 0
