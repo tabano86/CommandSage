@@ -21,7 +21,7 @@ function CommandSage_UIAccessibility:ReadBack(text)
     if C_VoiceChat and C_VoiceChat.SpeakText then
         C_VoiceChat.SpeakText(text, Enum.VoiceTtsDestination.LocalPlayback, 0, 100)
     else
-        print("(TTS not available)", text)
+        print(text)
     end
 end
 function CommandSage_UIAccessibility:ToggleHighContrast()

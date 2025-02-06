@@ -19,7 +19,7 @@ local function deserializeNode(data)
         info = data.info,
         maxDepth = data.maxDepth
     }
-    for c, childData in pairs(data.children) do
+    for c, childData in pairs(data.children or {}) do
         node.children[c] = deserializeNode(childData)
     end
     return node

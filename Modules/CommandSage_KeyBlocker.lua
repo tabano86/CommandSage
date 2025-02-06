@@ -11,6 +11,7 @@ local allKeys = {
     "PRINTSCREEN", "PAUSE", "SPACE", "MINUS", "EQUALS", "LEFTBRACKET", "RIGHTBRACKET",
     "BACKSLASH", "SEMICOLON", "APOSTROPHE", "GRAVE", "COMMA", "PERIOD", "SLASH"
 }
+CommandSage_KeyBlocker.allKeys = allKeys
 function CommandSage_KeyBlocker:BlockKeys()
     for _, key in ipairs(allKeys) do
         SetOverrideBindingClick(blockerButton, true, key, "CommandSageKeyBlocker")

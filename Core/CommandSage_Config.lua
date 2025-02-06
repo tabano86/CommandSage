@@ -101,15 +101,16 @@ function CommandSage_Config:InitializeDefaults()
 end
 
 function CommandSage_Config.Get(category, key)
-    if not CommandSageDB or not CommandSageDB.config then
-        return nil
-    end
+    if not CommandSageDB or not CommandSageDB.config then return nil end
     local cTable = CommandSageDB.config[category]
-    if cTable then
+    if not cTable then return nil end
+    if key == nil then
+        return cTable
+    else
         return cTable[key]
     end
-    return nil
 end
+
 
 function CommandSage_Config.Set(category, key, value)
     if not CommandSageDB or not CommandSageDB.config then
@@ -124,6 +125,7 @@ function CommandSage_Config.Set(category, key, value)
 end
 
 function CommandSage_Config:ResetPreferences()
-    CommandSageDB.config.preferences = nil
+    CommandSageDB.config = nil
     self:InitializeDefaults()
 end
+

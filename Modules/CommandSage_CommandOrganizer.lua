@@ -4,6 +4,7 @@ local tagDB = {
     ["/macro"] = { "macros" },
     ["/cmdsage"] = { "plugin" }
 }
+CommandSage_CommandOrganizer.tagDB = tagDB
 function CommandSage_CommandOrganizer:GetCommandTags(slash)
     return tagDB[slash] or {}
 end

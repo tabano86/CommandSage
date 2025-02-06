@@ -173,16 +173,13 @@ function CreateFrame(frameType, name, parent, template)
 
     -- If using a basic frame template, add TitleText and CloseButton.
     if template and template:find("BasicFrameTemplate") then
-        frame.TitleText = {
-            text = "",
-            SetText = function(self, txt) self.text = txt end,
-            GetText = function(self) return self.text or "" end
-        }
-        frame.CloseButton = {
-            SetScript = function(self, event, func) self[event] = func end,
-            Hide = function() end,
-            Show = function() end
-        }
+        frame.TitleText = { text = "", SetText = function(self, txt) self.text = txt end, GetText = function(self) return self.text or "" end }
+    end
+    if template and template:find("InterfaceOptionsCheckButtonTemplate") then
+        frame.Text = { text = "", SetText = function(self, txt) self.text = txt end }
+    end
+    if template and template:find("UIPanelButtonTemplate") then
+        frame.Text = { text = "", SetText = function(self, txt) self.text = txt end }
     end
 
     -- FontString creation stub
@@ -257,7 +254,7 @@ InCombatLockdown = InCombatLockdown or function() return false end
 -----------------------------------------
 GetNumMacros = GetNumMacros or function() return 2, 2 end
 GetMacroInfo = GetMacroInfo or function(i)
-    if i == 1 then return "TESTMACRO", "icon1", "/say Hello" end
+    if i == 1 then return "macro", "icon1", "/say Hello" end
     if i == 2 then return "WORLD", "icon2", "/wave" end
     return nil
 end

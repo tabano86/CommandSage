@@ -32,6 +32,7 @@ function CommandSage_Tutorial:ShowTutorialPrompt()
     closeBtn:SetScript("OnClick", function()
         frame:Hide()
     end)
+    frame.CloseButton = closeBtn
     FadeInIfEnabled(frame)
 end
 function CommandSage_Tutorial:RefreshTutorialPrompt()

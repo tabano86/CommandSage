@@ -13,6 +13,16 @@ if not string.trim then
     end
 end
 
+if not strsplit then
+    function strsplit(delimiter, text)
+        local list = {}
+        for token in string.gmatch(text, "[^" .. delimiter .. "]+") do
+            table.insert(list, token)
+        end
+        return unpack(list)
+    end
+end
+
 
 local function OnEvent(self, event, ...)
     if event == "ADDON_LOADED" then

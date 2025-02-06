@@ -367,7 +367,7 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
                 table.insert(matched, {
                     slash = snip.snippet,
                     data = { description = snip.desc },
-                    rank = 1
+                    rank = -1  -- lowered rank so real commands (and favorites) come first
                 })
             end
         end

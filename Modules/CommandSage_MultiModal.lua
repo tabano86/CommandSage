@@ -6,6 +6,10 @@ function CommandSage_MultiModal:OnVoiceCommand(phrase)
     end
     local possible = CommandSage_Trie:FindPrefix("/")
     local suggestions = CommandSage_FuzzyMatch:GetSuggestions(phrase:lower(), possible)
+    if #suggestions == 0 then
+        possible = CommandSage_Trie:AllCommands()
+        suggestions = CommandSage_FuzzyMatch:GetSuggestions(phrase:lower(), possible)
+    end
     if #suggestions > 0 then
         local top = suggestions[1]
         print("Voice recognized =>", top.slash)

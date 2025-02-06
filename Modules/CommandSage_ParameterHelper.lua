@@ -58,7 +58,11 @@ function CommandSage_ParameterHelper:GetInlineHint(slash)
     end
     return table.concat(subcommands, " | ")
 end
-C_Timer.After(5, UpdateFriendList)
+if _G.__COMMANDSAGE_TEST_ENV_LOADED then
+    UpdateFriendList()
+else
+    C_Timer.After(5, UpdateFriendList)
+end
 function CommandSage_ParameterHelper:AddKnownParam(slash, param)
     slash = slash:lower()
     if not knownParams[slash] then

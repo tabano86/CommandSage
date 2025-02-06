@@ -6,6 +6,7 @@ function CommandSage_SecureCallback:IsCommandProtected(slash)
     return false
 end
 function CommandSage_SecureCallback:ExecuteCommand(slash, args)
+    if not slash or slash == "" then return end
     if self:IsCommandProtected(slash) and InCombatLockdown() then
         print("|cffff0000[CommandSage]|r: Can't run protected command in combat:", slash)
         return
