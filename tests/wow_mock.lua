@@ -358,11 +358,13 @@ end
 -- Extra WoW API Stubs (30+ new stubs)
 -----------------------------------------
 -- Stub for LibStub (commonly used by addons)
-LibStub = LibStub or {
-    GetLibrary = function(libName, version)
-        return {} -- return an empty table for any requested library
+LibStub = LibStub or setmetatable({}, {
+    __call = function(self, libName, version)
+        -- Optionally, you can have some logic to return a stubbed version of the library.
+        return {}  -- Return an empty table as the library stub.
     end
-}
+})
+
 
 -- Stub for UnitName
 UnitName = UnitName or function(unit)
