@@ -43,3 +43,5 @@ function CommandSage_Analytics:ListFavorites()
     end
     return favs
 end
+
+return CommandSage_Analytics

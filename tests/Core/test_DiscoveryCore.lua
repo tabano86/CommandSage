@@ -83,7 +83,8 @@ describe("Core: CommandSage_Discovery", function()
     end)
 
     it("does not crash if SlashCmdList has weird keys", function()
-        SlashCmdList["FAKE$COMMAND"] = function(...) end
+        SlashCmdList["FAKE$COMMAND"] = function(...)
+        end
         _G["SLASH_FAKE$COMMAND1"] = "/fake"
         assert.has_no.errors(function()
             CommandSage_Discovery:ScanAllCommands()

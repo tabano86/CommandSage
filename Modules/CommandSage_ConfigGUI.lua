@@ -133,3 +133,4 @@ function CommandSage_ConfigGUI:Toggle()
         guiFrame:Show()
     end
 end
+return CommandSage_ConfigGUI

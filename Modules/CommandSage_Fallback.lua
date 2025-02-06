@@ -13,3 +13,4 @@ function CommandSage_Fallback:ToggleFallback()
     fallbackActive = not fallbackActive
     print("Fallback is now", fallbackActive and "ENABLED" or "DISABLED")
 end
+return CommandSage_Fallback

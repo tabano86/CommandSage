@@ -22,3 +22,5 @@ function CommandSage_AdaptiveLearning:ResetUsageData()
     CommandSageDB.usageData = nil
     print("CommandSage: All usage data has been cleared.")
 end
+
+return CommandSage_AdaptiveLearning

@@ -91,3 +91,4 @@ function CommandSage_Terminal:Initialize()
         end
     end
 end
+return CommandSage_Terminal

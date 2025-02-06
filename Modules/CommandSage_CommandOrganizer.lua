@@ -31,3 +31,5 @@ function CommandSage_CommandOrganizer:GetAllCategories()
     end
     return out
 end
+
+return CommandSage_CommandOrganizer

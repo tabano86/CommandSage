@@ -1,4 +1,4 @@
--- Core/CommandSage_Core.lua
+-- File: Core/CommandSage_Core.lua
 local ADDON_NAME = "CommandSage"
 CommandSage = {}
 _G["CommandSage"] = CommandSage
@@ -45,7 +45,9 @@ end
 
 if not strsplit then
     function strsplit(delimiter, text)
-        if type(text) ~= "string" then return {} end
+        if type(text) ~= "string" then
+            return {}
+        end
         local list = {}
         for token in string.gmatch(text, "[^" .. delimiter .. "]+") do
             table.insert(list, token)
@@ -226,8 +228,10 @@ function CommandSage:HookChatFrameEditBox(editBox)
 
     local function DisableAllBindings()
         local override = CommandSage_Config.Get("preferences", "overrideHotkeysWhileTyping") or false
-        local always   = CommandSage_Config.Get("preferences", "alwaysDisableHotkeysInChat") or false
-        if not override and not always then return end
+        local always = CommandSage_Config.Get("preferences", "alwaysDisableHotkeysInChat") or false
+        if not override and not always then
+            return
+        end
         for i = 1, GetNumBindings() do
             local command, key1, key2 = GetBinding(i)
             if key1 then
@@ -318,7 +322,9 @@ function CommandSage:HookChatFrameEditBox(editBox)
         if orig then
             pcall(orig, eBox, userInput)
         end
-        if not userInput then return end
+        if not userInput then
+            return
+        end
         if CommandSage_Fallback and CommandSage_Fallback.IsFallbackActive
                 and CommandSage_Fallback:IsFallbackActive()
         then
@@ -340,13 +346,7 @@ function CommandSage:HookChatFrameEditBox(editBox)
         end
         local firstWord = txt:match("^(%S+)")
         local rest = txt:match("^%S+%s+(.*)") or ""
-        local paramHints = {}
-        if CommandSage_ParameterHelper and CommandSage_ParameterHelper.GetParameterSuggestions then
-            local okPH, resultPH = pcall(CommandSage_ParameterHelper.GetParameterSuggestions, CommandSage_ParameterHelper, firstWord, rest)
-            if okPH and type(resultPH) == "table" then
-                paramHints = resultPH
-            end
-        end
+        local paramHints = CommandSage_ParameterHelper:GetParameterSuggestions(firstWord, rest)
         if #paramHints > 0 then
             local paramSugg = {}
             for _, ph in ipairs(paramHints) do
@@ -357,17 +357,11 @@ function CommandSage:HookChatFrameEditBox(editBox)
                     isParamSuggestion = true
                 })
             end
-            safeCall(CommandSage_AutoComplete, "ShowSuggestions", paramSugg)
+            CommandSage_AutoComplete:ShowSuggestions(paramSugg)
             return
         end
-        local final = {}
-        if CommandSage_AutoComplete and CommandSage_AutoComplete.GenerateSuggestions then
-            local okAuto, resultAuto = pcall(CommandSage_AutoComplete.GenerateSuggestions, CommandSage_AutoComplete, txt)
-            if okAuto and type(resultAuto) == "table" then
-                final = resultAuto
-            end
-        end
-        safeCall(CommandSage_AutoComplete, "ShowSuggestions", final)
+        local final = CommandSage_AutoComplete:GenerateSuggestions(txt)
+        CommandSage_AutoComplete:ShowSuggestions(final)
     end)
 
     editBox.CommandSageHooked = true
@@ -388,3 +382,5 @@ end
 
 CommandSage.frame = mainFrame
 debugPrint("Core/CommandSage_Core has finished loading.")
+
+return CommandSage_Core

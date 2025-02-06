@@ -11,18 +11,30 @@ describe("Module: CommandSage_AutoType", function()
         -- Stub for ChatFrame1EditBox.
         ChatFrame1EditBox = {
             text = "",
-            SetText = function(self, t) self.text = t end,
-            GetText = function(self) return self.text end,
+            SetText = function(self, t)
+                self.text = t
+            end,
+            GetText = function(self)
+                return self.text
+            end,
         }
 
         -- Create a fake frame to simulate UI behavior.
         CommandSage_AutoType.frame = {
             visible = false,
-            Show = function(self) self.visible = true end,
-            Hide = function(self) self.visible = false end,
+            Show = function(self)
+                self.visible = true
+            end,
+            Hide = function(self)
+                self.visible = false
+            end,
             script = {},
-            SetScript = function(self, event, func) self.script[event] = func end,
-            GetScript = function(self, event) return self.script[event] end,
+            SetScript = function(self, event, func)
+                self.script[event] = func
+            end,
+            GetScript = function(self, event)
+                return self.script[event]
+            end,
         }
     end)
 
@@ -84,7 +96,9 @@ describe("Module: CommandSage_AutoType", function()
         CommandSage_AutoType:StopAutoType()
         local f = CommandSage_AutoType.frame
         local updateFunc = f:GetScript("OnUpdate")
-        if updateFunc then updateFunc(f, 0.2) end
+        if updateFunc then
+            updateFunc(f, 0.2)
+        end
         -- Since auto-type was stopped, no text updates should occur.
         assert.equals("", ChatFrame1EditBox:GetText())
     end)
@@ -106,7 +120,9 @@ describe("Module: CommandSage_AutoType", function()
         local f = CommandSage_AutoType.frame
         local updateFunc = f:GetScript("OnUpdate")
         assert.has_no.errors(function()
-            if updateFunc then updateFunc(f, 0.1) end
+            if updateFunc then
+                updateFunc(f, 0.1)
+            end
         end)
         assert.equals("/hi", ChatFrame1EditBox:GetText())
     end)

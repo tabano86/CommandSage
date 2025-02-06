@@ -30,3 +30,4 @@ end
 function CommandSage_Licensing:GetLicenseKey()
     return CommandSageDB[LICENSE_KEY_DB_FIELD]
 end
+return CommandSage_Licensing

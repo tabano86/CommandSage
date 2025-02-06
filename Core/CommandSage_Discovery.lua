@@ -10,16 +10,16 @@ local forcedFallback = {
 local extraCommands = {
     { slash = "/gold", source = "Extra", description = "Display gold" },
     { slash = "/ping", source = "Extra", description = "Display latency" },
-    { slash = "/mem",  source = "Extra", description = "Display memory usage" }
+    { slash = "/mem", source = "Extra", description = "Display memory usage" }
 }
 
 local function addCommand(slash, data)
     local lower = slash:lower()
     if not discoveredCommands[lower] then
         discoveredCommands[lower] = {
-            slash       = lower,
-            callback    = data.callback,
-            source      = data.source or "Unknown",
+            slash = lower,
+            callback = data.callback,
+            source = data.source or "Unknown",
             description = data.description or "<No description>"
         }
     end
@@ -30,7 +30,8 @@ local function ForceFallbacks()
         local lower = slash:lower()
         if not discoveredCommands[lower] then
             addCommand(lower, {
-                callback = function(msg) end,
+                callback = function(msg)
+                end,
                 source = "Fallback",
                 description = "Auto fallback"
             })
@@ -39,7 +40,8 @@ local function ForceFallbacks()
     if CommandSage_Config.Get("preferences", "userCustomFallbackEnabled") and CommandSageDB.customFallbacks then
         for _, cb in ipairs(CommandSageDB.customFallbacks) do
             addCommand(cb, {
-                callback = function(msg) end,
+                callback = function(msg)
+                end,
                 source = "UserFallback",
                 description = "User fallback"
             })
@@ -68,14 +70,16 @@ local function ScanMacros()
         local name, icon, body = GetMacroInfo(i)
         if name and not seen[name:lower()] then
             seen[name:lower()] = true
-            addCommand("/" .. name, { callback = function(msg) end, source = "Macro", description = "Macro: " .. name })
+            addCommand("/" .. name, { callback = function(msg)
+            end, source = "Macro", description = "Macro: " .. name })
         end
     end
     for i = 1, char do
         local name, icon, body = GetMacroInfo(global + i)
         if name and not seen[name:lower()] then
             seen[name:lower()] = true
-            addCommand("/" .. name, { callback = function(msg) end, source = "Macro", description = "Char Macro: " .. name })
+            addCommand("/" .. name, { callback = function(msg)
+            end, source = "Macro", description = "Char Macro: " .. name })
         end
     end
 end
@@ -101,12 +105,14 @@ end
 local function ScanEmotes()
     local hardcodedEmotes = { "/dance", "/cheer", "/wave" }
     for _, e in ipairs(hardcodedEmotes) do
-        addCommand(e, { callback = function(msg) end, source = "Emote", description = "Emote " .. e })
+        addCommand(e, { callback = function(msg)
+        end, source = "Emote", description = "Emote " .. e })
     end
     if _G.EMOTE_LIST and type(_G.EMOTE_LIST) == "table" then
         for _, e in ipairs(_G.EMOTE_LIST) do
             if type(e) == "string" then
-                addCommand(e, { callback = function(msg) end, source = "Emote", description = "Emote " .. e })
+                addCommand(e, { callback = function(msg)
+                end, source = "Emote", description = "Emote " .. e })
             end
         end
     end
@@ -183,3 +189,5 @@ function CommandSage_Discovery:ForceAllFallbacks(newFallbacks)
     -- Re-run the fallback injection:
     ForceFallbacks()
 end
+
+return CommandSage_Discovery

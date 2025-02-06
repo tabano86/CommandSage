@@ -9,11 +9,10 @@ describe("CommandSage_AutoComplete", function()
         ChatFrame1EditBox:SetText("")
     end)
 
-
     it("MoveSelection cycles properly", function()
         local dummy = {
             { slash = "/dance" }, { slash = "/macro" },
-            { slash = "/test" },  { slash = "/ping" }
+            { slash = "/test" }, { slash = "/ping" }
         }
         CommandSage_AutoComplete:ShowSuggestions(dummy)
         CommandSage_AutoComplete:MoveSelection(1)

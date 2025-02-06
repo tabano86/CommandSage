@@ -54,3 +54,4 @@ function CommandSage_PersistentTrie:ClearCachedTrie()
     CommandSageDB[KEY] = nil
     print("CommandSage: Persistent trie data cleared.")
 end
+return CommandSage_PersistentTrie

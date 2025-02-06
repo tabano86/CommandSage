@@ -13,10 +13,14 @@ describe("Module: CommandSage_SecureCallback", function()
     end)
 
     it("ExecuteCommand prints error if protected in combat", function()
-        _G.InCombatLockdown = function() return true end
+        _G.InCombatLockdown = function()
+            return true
+        end
         local oldPrint = print
         local output = {}
-        print = function(...) table.insert(output, table.concat({...}, " ")) end
+        print = function(...)
+            table.insert(output, table.concat({ ... }, " "))
+        end
 
         CommandSage_SecureCallback:ExecuteCommand("/console", "arg")
 
@@ -25,7 +29,9 @@ describe("Module: CommandSage_SecureCallback", function()
         -- Match the actual string from your code:
         assert.matches("Can't run protected command in combat:", joined)
 
-        _G.InCombatLockdown = function() return false end
+        _G.InCombatLockdown = function()
+            return false
+        end
     end)
 
     it("ExecuteCommand calls callback if found in discovered commands", function()
@@ -37,7 +43,9 @@ describe("Module: CommandSage_SecureCallback", function()
 
         local oldPrint = print
         local output = {}
-        print = function(...) table.insert(output, table.concat({...}, " ")) end
+        print = function(...)
+            table.insert(output, table.concat({ ... }, " "))
+        end
 
         CommandSage_SecureCallback:ExecuteCommand("/faketest", "hello")
 
@@ -77,7 +85,9 @@ describe("Module: CommandSage_SecureCallback", function()
     end)
 
     it("protected slash but not in combat executes callback normally", function()
-        _G.InCombatLockdown = function() return false end
+        _G.InCombatLockdown = function()
+            return false
+        end
         assert.has_no.errors(function()
             CommandSage_SecureCallback:ExecuteCommand("/console", "hello")
         end)

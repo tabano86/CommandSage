@@ -26,3 +26,4 @@ function CommandSage_MultiModal:SimulateVoiceCommand(phrase)
     print("Simulating voice input: " .. phrase)
     self:OnVoiceCommand(phrase)
 end
+return CommandSage_MultiModal

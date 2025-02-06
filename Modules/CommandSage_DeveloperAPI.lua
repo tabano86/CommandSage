@@ -76,3 +76,4 @@ function CommandSage_DeveloperAPI:ListAllEvents()
     end
     return evts
 end
+return CommandSage_DeveloperAPI

@@ -49,3 +49,4 @@ function CommandSage_Performance:PrintDetailedStats()
     print("Discovered commands:", c)
     print("Memory (MB):", string.format("%.2f", collectgarbage("count") / 1024))
 end
+return CommandSage_Performance

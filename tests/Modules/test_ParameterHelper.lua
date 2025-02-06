@@ -6,15 +6,23 @@ describe("CommandSage_ParameterHelper", function()
     end)
 
     it("GetParameterSuggestions for /w merges friend list + recent whispers", function()
-        _G.C_FriendList.GetNumFriends = function() return 1 end
-        _G.C_FriendList.GetFriendInfoByIndex = function(i) return { name = "Buddy" } end
+        _G.C_FriendList.GetNumFriends = function()
+            return 1
+        end
+        _G.C_FriendList.GetFriendInfoByIndex = function(i)
+            return { name = "Buddy" }
+        end
         CommandSage_ParameterHelper:RecordWhisperTarget("Sammy")
         local results = CommandSage_ParameterHelper:GetParameterSuggestions("/w", "")
         assert.is_true(#results >= 1)
         local foundSammy, foundBuddy = false, false
         for _, r in ipairs(results) do
-            if r == "sammy" then foundSammy = true end
-            if r == "buddy" then foundBuddy = true end
+            if r == "sammy" then
+                foundSammy = true
+            end
+            if r == "buddy" then
+                foundBuddy = true
+            end
         end
         assert.is_true(foundSammy)
         assert.is_true(foundBuddy)
@@ -68,7 +76,10 @@ describe("CommandSage_ParameterHelper", function()
         local res = CommandSage_ParameterHelper:GetParameterSuggestions("/macro", "n")
         local found = false
         for _, r in ipairs(res) do
-            if r == "new" then found = true; break end
+            if r == "new" then
+                found = true;
+                break
+            end
         end
         assert.is_true(found)
     end)
@@ -99,7 +110,9 @@ describe("CommandSage_ParameterHelper", function()
         assert.not_equals(0, #results)
         local foundFancy = false
         for _, r in ipairs(results) do
-            if r == "fancy" then foundFancy = true end
+            if r == "fancy" then
+                foundFancy = true
+            end
         end
         assert.is_true(foundFancy)
     end)

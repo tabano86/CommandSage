@@ -49,3 +49,4 @@ function CommandSage_AROverlays:ToggleOverlay()
         self:ShowOverlay()
     end
 end
+return CommandSage_AROverlays

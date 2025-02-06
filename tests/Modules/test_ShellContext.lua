@@ -25,7 +25,9 @@ describe("Module: CommandSage_ShellContext", function()
     it("HandleCd says 'not changed' if unknown slash", function()
         local oldPrint = print
         local output = {}
-        print = function(...) table.insert(output, table.concat({...}, " ")) end
+        print = function(...)
+            table.insert(output, table.concat({ ... }, " "))
+        end
 
         CommandSage_ShellContext:HandleCd("unknowntest")
 
@@ -68,7 +70,6 @@ describe("Module: CommandSage_ShellContext", function()
         CommandSage_ShellContext:HandleCd("macro") -- we do want a real known slash
         assert.equals("macro", CommandSage_ShellContext:GetCurrentContext())
     end)
-
 
     it("cd 'none' also clears context", function()
         CommandSage_ShellContext:HandleCd("dance")

@@ -49,3 +49,4 @@ end
 function CommandSage_Tutorial:RefreshTutorialPrompt()
     self:ShowTutorialPrompt()
 end
+return CommandSage_Tutorial

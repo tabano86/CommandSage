@@ -63,14 +63,18 @@ describe("Core: CommandSage_Core", function()
         local mockEdit = CreateFrame("Frame", "MockEditBox2")
         CommandSage:HookChatFrameEditBox(mockEdit)
         local focusFunc = mockEdit:GetScript("OnEditFocusGained")
-        assert.has_no.errors(function() focusFunc(mockEdit) end)
+        assert.has_no.errors(function()
+            focusFunc(mockEdit)
+        end)
     end)
 
     it("PLAYER_LOGIN event does not show tutorial if showTutorialOnStartup = false", function()
         CommandSage_Config.Set("preferences", "showTutorialOnStartup", false)
         local oldFunc = CommandSage_Tutorial.ShowTutorialPrompt
         local wasTriggered = false
-        CommandSage_Tutorial.ShowTutorialPrompt = function() wasTriggered = true end
+        CommandSage_Tutorial.ShowTutorialPrompt = function()
+            wasTriggered = true
+        end
 
         local frame = CommandSage.frame
         local eventFunc = frame:GetScript("OnEvent")

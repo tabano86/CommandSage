@@ -33,3 +33,4 @@ end
 blockerButton:SetScript("OnClick", function(self)
     -- Additional click logic if needed.
 end)
+return CommandSage_KeyBlocker

@@ -47,7 +47,9 @@ describe("Module: CommandSage_MultiModal", function()
     it("Voice recognized => /dance if within tolerance", function()
         local oldPrint = print
         local output = {}
-        print = function(...) table.insert(output, table.concat({...}, " ")) end
+        print = function(...)
+            table.insert(output, table.concat({ ... }, " "))
+        end
 
         CommandSage_MultiModal:OnVoiceCommand("dance")
 
@@ -72,7 +74,9 @@ describe("Module: CommandSage_MultiModal", function()
     it("SimulateVoiceCommand prints the phrase", function()
         local oldPrint = print
         local output = {}
-        print = function(...) table.insert(output, table.concat({...}, " ")) end
+        print = function(...)
+            table.insert(output, table.concat({ ... }, " "))
+        end
 
         CommandSage_MultiModal:SimulateVoiceCommand("hello there")
 

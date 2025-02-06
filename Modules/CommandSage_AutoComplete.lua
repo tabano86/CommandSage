@@ -54,7 +54,9 @@ local snippetTemplates = {
 -- MoveSelection: Cycle through visible suggestion buttons.
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:MoveSelection(delta)
-    if not content or not content.buttons then return end
+    if not content or not content.buttons then
+        return
+    end
 
     local totalShown = 0
     for _, b in ipairs(content.buttons) do
@@ -62,7 +64,9 @@ function CommandSage_AutoComplete:MoveSelection(delta)
             totalShown = totalShown + 1
         end
     end
-    if totalShown == 0 then return end
+    if totalShown == 0 then
+        return
+    end
 
     selectedIndex = selectedIndex + delta
     if selectedIndex < 1 then
@@ -84,7 +88,9 @@ end
 -- AcceptOrAdvance: Accept the current suggestion or move selection.
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:AcceptOrAdvance()
-    if not content then return end
+    if not content then
+        return
+    end
     local btn = content.buttons[selectedIndex]
     if selectedIndex > 0 and btn and btn:IsShown() then
         self:AcceptSuggestion(btn.suggestionData)
@@ -216,8 +222,12 @@ local function CreateAutoCompleteUI()
         btn.usage:SetJustifyH("LEFT")
         btn.usage:SetWidth(60)
 
-        btn:SetScript("OnEnter", function(self) self.bg:Show() end)
-        btn:SetScript("OnLeave", function(self) self.bg:Hide() end)
+        btn:SetScript("OnEnter", function(self)
+            self.bg:Show()
+        end)
+        btn:SetScript("OnLeave", function(self)
+            self.bg:Hide()
+        end)
         btn:SetScript("OnClick", function(self)
             CommandSage_AutoComplete:AcceptSuggestion(self.suggestionData)
         end)
@@ -233,7 +243,9 @@ end
 -- AcceptSuggestion: Accept a suggestion (via auto type or immediate text set).
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:AcceptSuggestion(sugg)
-    if not sugg then return end
+    if not sugg then
+        return
+    end
     local slashCmd = sugg.slash
     if slashCmd then
         if CommandSage_Config.Get("preferences", "animateAutoType") then
@@ -487,7 +499,9 @@ end
 
 hookingFrame:SetScript("OnEvent", function()
     local edit = ChatFrame1EditBox
-    if not edit then return end
+    if not edit then
+        return
+    end
 
     hooksecurefunc("ChatEdit_DeactivateChat", CloseAutoCompleteOnChatDeactivate)
 
@@ -546,16 +560,24 @@ hookingFrame:SetScript("OnEvent", function()
         if orig then
             orig(eBox, userInput)
         end
-        if not userInput then return end
-        if CommandSage_Fallback:IsFallbackActive() then return end
+        if not userInput then
+            return
+        end
+        if CommandSage_Fallback:IsFallbackActive() then
+            return
+        end
         local text = eBox:GetText()
         if text == "" then
-            if autoFrame then autoFrame:Hide() end
+            if autoFrame then
+                autoFrame:Hide()
+            end
             return
         end
         local firstChar = text:sub(1, 1)
         if firstChar ~= "/" and not CommandSage_ShellContext:IsActive() then
-            if autoFrame then autoFrame:Hide() end
+            if autoFrame then
+                autoFrame:Hide()
+            end
             return
         end
         local firstWord = text:match("^(%S+)")
@@ -584,3 +606,4 @@ function CommandSage_AutoComplete:CloseSuggestions()
         autoFrame:Hide()
     end
 end
+return CommandSage_AutoComplete
