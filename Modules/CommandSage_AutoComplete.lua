@@ -368,7 +368,6 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
     local mode = CommandSage_Config.Get("preferences", "suggestionMode") or "fuzzy"
     typedText = CommandSage_ShellContext:RewriteInputIfNeeded(typedText)
     local partialLower = typedText:lower()
-
     if partialLower:sub(1, 1) ~= "/" and not CommandSage_ShellContext:IsActive() then
         partialLower = "/" .. partialLower
     end
@@ -377,18 +376,15 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
     local fallback = CommandSage_Config.Get("preferences", "partialFuzzyFallback")
 
     if fallback and #possible == 0 then
-        -- skip fuzzy, show everything
+        -- Fallback branch: return all commands merged with history and then add snippet suggestions.
         possible = CommandSage_Trie:AllCommands()
-        -- also merge history ignoring fuzzy
         possible = MergeHistoryWithCommands(partialLower, possible)
-        -- skip fuzzy entirely
         local final = {}
         for _, cmd in ipairs(possible) do
             if not CommandSage_Analytics:IsBlacklisted(cmd.slash) and self:PassesContextFilter(cmd) then
                 table.insert(final, { slash = cmd.slash, data = cmd.data, rank = 0, isParamSuggestion = cmd.isParamSuggestion })
             end
         end
-        -- snippet expansions
         if CommandSage_Config.Get("preferences", "snippetEnabled") then
             for _, snip in ipairs(snippetTemplates) do
                 if snip.slash:find(partialLower, 1, true) then
@@ -400,28 +396,27 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
                 end
             end
         end
-        -- favorites sorting, snippet last
         if CommandSage_Config.Get("preferences", "favoritesSortingEnabled") then
             table.sort(final, function(a, b)
+                -- Always put snippet suggestions (rank -1) after non-snippet ones
+                if a.rank == -1 and b.rank ~= -1 then
+                    return false
+                elseif b.rank == -1 and a.rank ~= -1 then
+                    return true
+                end
                 local aFav = CommandSage_Analytics:IsFavorite(a.slash) and 1 or 0
                 local bFav = CommandSage_Analytics:IsFavorite(b.slash) and 1 or 0
                 if aFav ~= bFav then
                     return aFav > bFav
                 end
-                -- snippet last
-                local aSnip = (a.rank == -1)
-                local bSnip = (b.rank == -1)
-                if aSnip ~= bSnip then
-                    return not aSnip
-                end
                 return (a.rank or 0) > (b.rank or 0)
             end)
         else
             table.sort(final, function(a, b)
-                local aSnip = (a.rank == -1)
-                local bSnip = (b.rank == -1)
-                if aSnip ~= bSnip then
-                    return not aSnip
+                if a.rank == -1 and b.rank ~= -1 then
+                    return false
+                elseif b.rank == -1 and a.rank ~= -1 then
+                    return true
                 end
                 return (a.rank or 0) > (b.rank or 0)
             end)
@@ -429,20 +424,17 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
         return final
     end
 
-    -- Normal path
+    -- Normal (non-fallback) path:
     possible = MergeHistoryWithCommands(partialLower, possible)
     local matched = {}
-
     if mode == "fuzzy" then
         local rawMatches = CommandSage_FuzzyMatch:GetSuggestions(partialLower, possible)
-        -- need snippet expansions after fuzzy
         for _, m in ipairs(rawMatches) do
             if not CommandSage_Analytics:IsBlacklisted(m.slash) and self:PassesContextFilter(m) then
                 table.insert(matched, m)
             end
         end
     else
-        -- strict prefix sort
         for _, cmd in ipairs(possible) do
             if not CommandSage_Analytics:IsBlacklisted(cmd.slash) and self:PassesContextFilter(cmd) then
                 table.insert(matched, { slash = cmd.slash, data = cmd.data, rank = 0 })
@@ -453,7 +445,6 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
         end)
     end
 
-    -- snippet expansions
     if CommandSage_Config.Get("preferences", "snippetEnabled") then
         for _, snip in ipairs(snippetTemplates) do
             if snip.slash:find(partialLower, 1, true) then
@@ -466,27 +457,44 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
         end
     end
 
-    -- final sort with favorites + snippet-later
+    -- If any non-snippet suggestion exists, filter out snippet suggestions.
+    local hasNonSnippet = false
+    for _, s in ipairs(matched) do
+        if s.rank ~= -1 then
+            hasNonSnippet = true
+            break
+        end
+    end
+    if hasNonSnippet then
+        local filtered = {}
+        for _, s in ipairs(matched) do
+            if s.rank ~= -1 then
+                table.insert(filtered, s)
+            end
+        end
+        matched = filtered
+    end
+
     if CommandSage_Config.Get("preferences", "favoritesSortingEnabled") then
         table.sort(matched, function(a, b)
+            if a.rank == -1 and b.rank ~= -1 then
+                return false
+            elseif b.rank == -1 and a.rank ~= -1 then
+                return true
+            end
             local aFav = CommandSage_Analytics:IsFavorite(a.slash) and 1 or 0
             local bFav = CommandSage_Analytics:IsFavorite(b.slash) and 1 or 0
             if aFav ~= bFav then
                 return aFav > bFav
             end
-            local aSnip = (a.rank == -1)
-            local bSnip = (b.rank == -1)
-            if aSnip ~= bSnip then
-                return not aSnip
-            end
             return (a.rank or 0) > (b.rank or 0)
         end)
     else
         table.sort(matched, function(a, b)
-            local aSnip = (a.rank == -1)
-            local bSnip = (b.rank == -1)
-            if aSnip ~= bSnip then
-                return not aSnip
+            if a.rank == -1 and b.rank ~= -1 then
+                return false
+            elseif b.rank == -1 and a.rank ~= -1 then
+                return true
             end
             return (a.rank or 0) > (b.rank or 0)
         end)
@@ -494,6 +502,7 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
 
     return matched
 end
+
 
 -- hooking code below unchanged...
 local hookingFrame = CreateFrame("Frame")

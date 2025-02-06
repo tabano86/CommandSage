@@ -1,5 +1,5 @@
 -- tests/Core/test_CoreMain.lua
--- Only showing the relevant change in the "before_each" or the specific test.
+require("tests.test_helper")
 
 describe("Core: CommandSage_Core", function()
     before_each(function()
@@ -19,7 +19,7 @@ describe("Core: CommandSage_Core", function()
             return oldInit(...)
         end
 
-        -- The event was already triggered in before_each, so loadedCount≥1
+        -- The event was already triggered in before_each, so loadedCount should be at least 1
         assert.is_true(loadedCount >= 1)
         CommandSage_Config.InitializeDefaults = oldInit
     end)
@@ -40,16 +40,15 @@ describe("Core: CommandSage_Core", function()
     end)
 
     it("Slash command /cmdsage config <key> <value> sets preference", function()
-        -- We do NOT re-init defaults again. Just run the slash command:
+        -- Run the slash command without reinitializing defaults
         SlashCmdList["COMMANDSAGE"]("config uiScale 1.5")
         local newVal = CommandSage_Config.Get("preferences", "uiScale")
         assert.equals(1.5, newVal)
     end)
 
     it("Slash command /cmdsage resetprefs resets to default", function()
-        -- set it to light first
+        -- Set a nondefault value first
         CommandSage_Config.Set("preferences", "uiTheme", "light")
-        -- call the slash command
         SlashCmdList["COMMANDSAGE"]("resetprefs")
         local val = CommandSage_Config.Get("preferences", "uiTheme")
         assert.equals("dark", val)
@@ -97,12 +96,10 @@ describe("Core: CommandSage_Core", function()
     it("ADDON_UNLOADED event clears shell context if same addon name", function()
         CommandSage_ShellContext:HandleCd("macro")
         assert.equals("macro", CommandSage_ShellContext:GetCurrentContext())
-
         local frame = CommandSage.frame
         local eventFunc = frame:GetScript("OnEvent")
         eventFunc(frame, "ADDON_UNLOADED", "CommandSage")
-
-        -- We DO want it cleared:
-        assert.is_nil(CommandSage_ShellContext:GetCurrentContext())  -- fix
+        -- We expect the shell context to be cleared (nil)
+        assert.is_nil(CommandSage_ShellContext:GetCurrentContext())
     end)
 end)
