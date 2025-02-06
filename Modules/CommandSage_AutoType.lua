@@ -1,10 +1,12 @@
 -- CommandSage_AutoType.lua
+local CommandSage_Config = require("CommandSage_Config")
 local CommandSage_AutoType = {}
+
 -- Create or reference the frame (for example, a hidden UI frame)
 CommandSage_AutoType.frame = CommandSage_AutoType.frame or CreateFrame("Frame", "CommandSageAutoTypeFrame", UIParent)
-CommandSage_AutoType.text = ""
-CommandSage_AutoType.index = 0
-CommandSage_AutoType.timer = 0
+CommandSage_AutoType.text   = ""
+CommandSage_AutoType.index  = 0
+CommandSage_AutoType.timer  = 0
 CommandSage_AutoType.isTyping = false
 
 -- Begins the auto-typing process for the given command string.
@@ -19,7 +21,7 @@ function CommandSage_AutoType:BeginAutoType(cmd)
         self:StopAutoType()
     end
 
-    self.text = cmd
+    self.text  = cmd
     self.index = 1
     self.timer = 0
     self.isTyping = true
@@ -47,7 +49,7 @@ end
 
 -- Internal update function called on each frame update when animating.
 function CommandSage_AutoType:OnUpdate(frame, elapsed)
-    -- Retrieve the delay from config (default to 0.1 seconds if not set)
+    -- Retrieve the delay from config (with fallback)
     local delay = CommandSage_Config.Get("preferences", "autoTypeDelay") or 0.1
     self.timer = self.timer + elapsed
     if self.timer >= delay then

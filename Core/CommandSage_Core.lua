@@ -1,12 +1,9 @@
 -- Core/CommandSage_Core.lua
--- Enhanced version – ironclad, resilient, and feature–rich.
--- This version avoids vararg misuse, safely calls methods,
--- compares addon names case–insensitively, and clears shell context on unload.
-local ADDON_NAME = "CommandSage"  -- In a live environment you might retrieve this via select(1,...) if desired.
+local ADDON_NAME = "CommandSage"
 CommandSage = {}
 _G["CommandSage"] = CommandSage
 
--- Create our main frame for event handling.
+-- Create main frame for event handling.
 local mainFrame = CreateFrame("Frame", "CommandSageMainFrame", UIParent)
 mainFrame:RegisterEvent("ADDON_LOADED")
 mainFrame:RegisterEvent("PLAYER_LOGIN")
@@ -26,7 +23,6 @@ local function safePrint(msg)
     print("[CommandSage]: " .. tostring(msg))
 end
 
--- safeCall attempts to call mod[methodName] safely.
 local function safeCall(mod, methodName, ...)
     if not mod or type(mod[methodName]) ~= "function" then
         debugPrint("Method " .. tostring(methodName) .. " not available on module.")
@@ -71,7 +67,6 @@ local function OnEvent(self, event, param)
         if event == "ADDON_LOADED" then
             local loadedAddon = param
             if loadedAddon and loadedAddon:lower() == ADDON_NAME:lower() then
-                -- Initialize configuration.
                 if CommandSage_Config and CommandSage_Config.InitializeDefaults then
                     CommandSage_Config:InitializeDefaults()
                     CommandSage.coreConfigInitialized = true
@@ -79,33 +74,25 @@ local function OnEvent(self, event, param)
                     safePrint("Error: CommandSage_Config.InitializeDefaults not available.")
                 end
 
-                -- Clear any old shell context.
                 if CommandSage_ShellContext and CommandSage_ShellContext.ClearContext then
                     safeCall(CommandSage_ShellContext, "ClearContext")
                 end
 
-                -- Initialize terminal goodies if enabled.
                 if CommandSage_Config and CommandSage_Config.Get("preferences", "enableTerminalGoodies") then
                     safeCall(CommandSage_Terminal, "Initialize")
                 end
 
-                -- Load persistent trie data.
                 safeCall(CommandSage_PersistentTrie, "LoadTrie")
-
-                -- Scan for slash commands.
                 safeCall(CommandSage_Discovery, "ScanAllCommands")
 
-                -- Register slash commands.
                 if CommandSage.RegisterSlashCommands then
                     CommandSage:RegisterSlashCommands()
                 end
 
-                -- Initialize configuration GUI if enabled.
                 if CommandSage_Config and CommandSage_Config.Get("preferences", "configGuiEnabled") and CommandSage_ConfigGUI then
                     safeCall(CommandSage_ConfigGUI, "InitGUI")
                 end
 
-                -- Hook all chat frames.
                 if CommandSage.HookAllChatFrames then
                     CommandSage:HookAllChatFrames()
                 end
@@ -120,7 +107,6 @@ local function OnEvent(self, event, param)
         elseif event == "ADDON_UNLOADED" then
             local unloadedAddon = param
             if unloadedAddon and unloadedAddon:lower() == ADDON_NAME:lower() then
-                -- Clear the shell context on unload.
                 if CommandSage_ShellContext and CommandSage_ShellContext.ClearContext then
                     safeCall(CommandSage_ShellContext, "ClearContext")
                 end
@@ -221,7 +207,7 @@ function CommandSage:RegisterSlashCommands()
 end
 
 --------------------------------------------------------------------------------
--- Hook Chat Frame EditBox
+-- Hook Chat Frame EditBox (if needed)
 --------------------------------------------------------------------------------
 function CommandSage:HookChatFrameEditBox(editBox)
     if not editBox or editBox.CommandSageHooked then

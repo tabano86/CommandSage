@@ -8,7 +8,7 @@ describe("Module: CommandSage_AutoType", function()
         _G.CommandSageDB = {}
         CommandSage_Config:InitializeDefaults()
 
-        -- Create a stub for ChatFrame1EditBox
+        -- Stub for ChatFrame1EditBox.
         ChatFrame1EditBox = {
             text = "",
             SetText = function(self, t) self.text = t end,
@@ -85,7 +85,7 @@ describe("Module: CommandSage_AutoType", function()
         local f = CommandSage_AutoType.frame
         local updateFunc = f:GetScript("OnUpdate")
         if updateFunc then updateFunc(f, 0.2) end
-        -- Because we just stopped, we expect no further text updates.
+        -- Since auto-type was stopped, no text updates should occur.
         assert.equals("", ChatFrame1EditBox:GetText())
     end)
 
@@ -94,7 +94,7 @@ describe("Module: CommandSage_AutoType", function()
             CommandSage_AutoType:BeginAutoType("/a")
             CommandSage_AutoType:BeginAutoType("/b")
         end)
-        -- The new command should take over.
+        -- When not animated, the latter command should immediately set text.
         if not CommandSage_Config.Get("preferences", "animateAutoType") then
             assert.equals("/b", ChatFrame1EditBox:GetText())
         end

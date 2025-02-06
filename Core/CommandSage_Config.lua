@@ -1,9 +1,23 @@
-CommandSage_Config = {}
-local CURRENT_DB_VERSION = 5
+-- CommandSage_Config.lua
+local CommandSage_Config = {}
 
+-- Initializes default configuration values.
 function CommandSage_Config:InitializeDefaults()
     if not CommandSageDB then
-        CommandSageDB = {}
+        CommandSageDB = {
+            preferences = {
+                animateAutoType = true, -- Enable incremental typing by default.
+                autoTypeDelay = 0.1, -- Default delay between characters.
+                suggestionMode = "fuzzy", -- Default suggestion mode.
+                fuzzyMatchEnabled = true, -- Fuzzy matching enabled.
+                uiTheme = "dark", -- Default UI theme.
+                enableTerminalGoodies = false,
+                chatInputHaloEnabled = false,
+                overrideHotkeysWhileTyping = false,
+                alwaysDisableHotkeysInChat = false,
+                advancedKeybinds = false,
+            }
+        }
     end
     if not CommandSageDB.dbVersion or CommandSageDB.dbVersion < CURRENT_DB_VERSION then
         CommandSageDB.dbVersion = CURRENT_DB_VERSION
@@ -60,6 +74,9 @@ function CommandSage_Config:InitializeDefaults()
             usageChartEnabled = false,
             paramGlowEnabled = false,
             chatInputHaloEnabled = false,
+            overrideHotkeysWhileTyping = false,
+            alwaysDisableHotkeysInChat = false,
+            advancedKeybinds = false,
             colorCommandEnabled = false,
             spin3DEnabled = false,
             arRuneRingEnabled = false,
@@ -98,34 +115,38 @@ function CommandSage_Config:InitializeDefaults()
     if prefs.advancedEmoteEffectsEnabled == nil then
         prefs.advancedEmoteEffectsEnabled = false
     end
+
+    -- Also cache the preferences locally in the module for quick access.
+    CommandSage_Config.preferences = _G.CommandSageDB.config.preferences
 end
 
-function CommandSage_Config.Get(category, key)
-    if not CommandSageDB or not CommandSageDB.config then return nil end
-    local cTable = CommandSageDB.config[category]
-    if not cTable then return nil end
-    if key == nil then
-        return cTable
+-- Sets a configuration value.
+function CommandSage_Config.Set(section, key, value)
+    if section == "preferences" then
+        if not _G.CommandSageDB.config or not _G.CommandSageDB.config.preferences then
+            error("Configuration not initialized. Call InitializeDefaults() first.")
+        end
+        _G.CommandSageDB.config.preferences[key] = value
     else
-        return cTable[key]
+        error("Unknown configuration section: " .. tostring(section))
     end
 end
 
-
-function CommandSage_Config.Set(category, key, value)
-    if not CommandSageDB or not CommandSageDB.config then
-        return
+-- Retrieves a configuration value.
+function CommandSage_Config.Get(section, key)
+    if section == "preferences" then
+        if not _G.CommandSageDB.config or not _G.CommandSageDB.config.preferences then
+            error("Configuration not initialized. Call InitializeDefaults() first.")
+        end
+        return _G.CommandSageDB.config.preferences[key]
+    else
+        error("Unknown configuration section: " .. tostring(section))
     end
-    local cTable = CommandSageDB.config[category]
-    if not cTable then
-        cTable = {}
-        CommandSageDB.config[category] = cTable
-    end
-    cTable[key] = value
 end
 
+-- Resets preferences to their default values.
 function CommandSage_Config:ResetPreferences()
-    CommandSageDB.config = nil
     self:InitializeDefaults()
 end
 
+return CommandSage_Config
