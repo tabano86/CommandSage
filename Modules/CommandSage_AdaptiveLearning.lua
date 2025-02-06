@@ -9,11 +9,12 @@ local function EnsureUsageData()
 end
 function CommandSage_AdaptiveLearning:IncrementUsage(slash)
     EnsureUsageData()
-    CommandSageDB.usageData[slash] = (CommandSageDB.usageData[slash] or 0) + 1
+    local key = slash:lower()
+    CommandSageDB.usageData[key] = (CommandSageDB.usageData[key] or 0) + 1
 end
 function CommandSage_AdaptiveLearning:GetUsageScore(slash)
     EnsureUsageData()
-    return CommandSageDB.usageData[slash] or 0
+    return CommandSageDB.usageData[slash:lower()] or 0
 end
 function CommandSage_AdaptiveLearning:ResetUsageData()
     if type(CommandSageDB) ~= "table" then
