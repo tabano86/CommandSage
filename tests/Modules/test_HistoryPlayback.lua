@@ -1,7 +1,6 @@
 require("tests.test_helper")
 
 describe("Module: CommandSage_HistoryPlayback", function()
-
     before_each(function()
         _G.CommandSageDB = {}
         CommandSage_Config:InitializeDefaults()
@@ -33,8 +32,8 @@ describe("Module: CommandSage_HistoryPlayback", function()
             CommandSage_HistoryPlayback:AddToHistory("/cmd" .. i)
         end
         local hist = CommandSage_HistoryPlayback:GetHistory()
-        assert.is_true(#hist <= 200)  -- default maxHist = 200
-        assert.equals("/cmd101", hist[1])  -- the earliest 100 dropped
+        assert.is_true(#hist <= 200)
+        assert.equals("/cmd101", hist[1])
     end)
 
     it("/cmdsagehistory prints the entire history", function()
@@ -69,7 +68,7 @@ describe("Module: CommandSage_HistoryPlayback", function()
         end)
     end)
 
-    it("AddToHistory store multiple commands in correct order", function()
+    it("stores multiple commands in correct order", function()
         CommandSage_Config.Set("preferences", "persistHistory", true)
         CommandSage_HistoryPlayback:AddToHistory("/dance1")
         CommandSage_HistoryPlayback:AddToHistory("/dance2")

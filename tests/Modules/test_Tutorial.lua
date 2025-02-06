@@ -1,7 +1,6 @@
 require("tests.test_helper")
 
 describe("Module: CommandSage_Tutorial", function()
-
     before_each(function()
         _G.CommandSageDB = {}
         CommandSage_Config:InitializeDefaults()
@@ -40,7 +39,6 @@ describe("Module: CommandSage_Tutorial", function()
     it("Title text is set", function()
         CommandSage_Tutorial:ShowTutorialPrompt()
         local f = _G["CommandSageTutorialFrame"]
-        -- Verify that TitleText exists and its text is nonempty
         assert.is_truthy(f.TitleText)
         assert.is_true(#(f.TitleText.text or "") > 0)
     end)

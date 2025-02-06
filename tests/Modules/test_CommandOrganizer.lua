@@ -1,7 +1,6 @@
 require("tests.test_helper")
 
 describe("Module: CommandSage_CommandOrganizer", function()
-
     before_each(function()
         _G.CommandSageDB = {}
         CommandSage_Config:InitializeDefaults()
@@ -25,7 +24,7 @@ describe("Module: CommandSage_CommandOrganizer", function()
         assert.equals("other", cat2)
     end)
 
-    it("can add new tags dynamically if we extend tagDB manually (not recommended)", function()
+    it("can add new tags dynamically if we extend tagDB manually", function()
         local tagDB = debug.getupvalue(CommandSage_CommandOrganizer.GetCommandTags, 1)
         tagDB["/mytest"] = { "testcat" }
         local cat = CommandSage_CommandOrganizer:GetCategory("/mytest")
@@ -34,7 +33,7 @@ describe("Module: CommandSage_CommandOrganizer", function()
 
     it("GetAllCategories returns a table of category strings", function()
         local cats = CommandSage_CommandOrganizer:GetAllCategories()
-        assert.is_true(#cats >= 3)  -- e.g. "social","macros","plugin"
+        assert.is_true(#cats >= 3)
     end)
 
     it("Tag for /macro is 'macros'", function()
@@ -52,7 +51,7 @@ describe("Module: CommandSage_CommandOrganizer", function()
         tagDB["/dance"] = { "social", "fun" }
         local cat = CommandSage_CommandOrganizer:GetCategory("/dance")
         assert.equals("social", cat)
-        tagDB["/dance"] = { "social" } -- revert
+        tagDB["/dance"] = { "social" }
     end)
 
     it("other unknown slash still returns 'other'", function()

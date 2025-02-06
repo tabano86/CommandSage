@@ -46,16 +46,12 @@ describe("CommandSage_FuzzyMatch", function()
     end)
 
     it("InCombatLockdown lowers rank by 1", function()
-        _G.InCombatLockdown = function()
-            return true
-        end
+        _G.InCombatLockdown = function() return true end
         CommandSage_Trie:InsertCommand("/abc", {})
         local possible = CommandSage_Trie:AllCommands()
         local res = CommandSage_FuzzyMatch:GetSuggestions("/abc", possible)
         assert.equals("/abc", res[1].slash)
-        _G.InCombatLockdown = function()
-            return false
-        end
+        _G.InCombatLockdown = function() return false end
     end)
 
     it("handles empty input with no commands gracefully", function()

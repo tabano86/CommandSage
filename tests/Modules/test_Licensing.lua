@@ -8,7 +8,6 @@ SlashCmdList["CMDLICENSE"] = function(msg)
 end
 
 describe("Module: CommandSage_Licensing", function()
-
     before_each(function()
         _G.CommandSageDB = {}
         CommandSage_Config:InitializeDefaults()

@@ -1,7 +1,6 @@
 require("tests.test_helper")
 
 describe("Module: CommandSage_Fallback", function()
-
     before_each(function()
         CommandSage_Fallback:DisableFallback()
     end)
@@ -42,7 +41,7 @@ describe("Module: CommandSage_Fallback", function()
         assert.is_false(CommandSage_Fallback:IsFallbackActive())
     end)
 
-    it("ToggleFallback from false => true => false => true, etc.", function()
+    it("ToggleFallback from false => true => false => true", function()
         CommandSage_Fallback:ToggleFallback()
         local s1 = CommandSage_Fallback:IsFallbackActive()
         CommandSage_Fallback:ToggleFallback()
@@ -50,7 +49,7 @@ describe("Module: CommandSage_Fallback", function()
         assert.is_not_equal(s1, s2)
     end)
 
-    it("We can check final state after multiple toggles", function()
+    it("final state after multiple toggles", function()
         CommandSage_Fallback:DisableFallback()
         CommandSage_Fallback:ToggleFallback() -- now true
         CommandSage_Fallback:ToggleFallback() -- now false

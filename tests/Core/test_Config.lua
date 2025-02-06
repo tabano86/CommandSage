@@ -29,7 +29,6 @@ describe("CommandSage_Config Tests", function()
         CommandSage_Config:InitializeDefaults()
         CommandSage_Config.Set("preferences", "uiTheme", "light")
         assert.equals("light", CommandSage_Config.Get("preferences", "uiTheme"))
-
         CommandSage_Config:ResetPreferences()
         assert.equals("dark", CommandSage_Config.Get("preferences", "uiTheme"))
     end)

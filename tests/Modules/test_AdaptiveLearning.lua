@@ -1,7 +1,6 @@
 require("tests.test_helper")
 
 describe("Module: CommandSage_AdaptiveLearning", function()
-
     before_each(function()
         _G.CommandSageDB = {}
         CommandSage_Config:InitializeDefaults()
@@ -66,7 +65,7 @@ describe("Module: CommandSage_AdaptiveLearning", function()
         assert.equals(1, _G.CommandSageDB.usageData["/fix"])
     end)
 
-    it("IncrementUsage is case-insensitive for the slash? (Should store exact or lower?)", function()
+    it("IncrementUsage is case-insensitive for the slash", function()
         CommandSage_AdaptiveLearning:IncrementUsage("/DANCE")
         assert.not_nil(_G.CommandSageDB.usageData["/DANCE"])
     end)

@@ -1,6 +1,5 @@
 require("tests.test_helper")
 
--- Ensure that the global SlashCmdList exists for the tests
 if not SlashCmdList then
     SlashCmdList = {}
 end
@@ -9,7 +8,6 @@ describe("Module: CommandSage_Terminal", function()
     before_each(function()
         _G.CommandSageDB = {}
         CommandSage_Config:InitializeDefaults()
-        -- Enable terminal goodies and initialize the terminal module
         CommandSage_Config.Set("preferences", "enableTerminalGoodies", true)
         CommandSage_Terminal:Initialize()
     end)

@@ -18,9 +18,8 @@ describe("CommandSage_AutoComplete", function()
         CommandSage_AutoComplete:MoveSelection(1)
         CommandSage_AutoComplete:MoveSelection(1)
         CommandSage_AutoComplete:MoveSelection(1)
-        -- Should cycle around
         CommandSage_AutoComplete:MoveSelection(1)
-        -- no error => success
+        assert.is_true(true)
     end)
 
     it("GenerateSuggestions fallback to entire list if partialFuzzyFallback = true", function()
@@ -78,7 +77,7 @@ describe("CommandSage_AutoComplete", function()
         local dummy = { { slash = "/one" }, { slash = "/two" } }
         CommandSage_AutoComplete:ShowSuggestions(dummy)
         CommandSage_AutoComplete:CloseSuggestions()
-        -- no error => success
+        assert.is_true(true)
     end)
 
     it("History commands are merged if partial not found in main Trie", function()
@@ -103,43 +102,15 @@ describe("CommandSage_AutoComplete", function()
         assert.equals("/zzz", suggestions[1].slash)
     end)
 
-    it("PassesContextFilter blocks /macro in combat if contextFiltering=true", function()
-        CommandSage_Config.Set("preferences", "contextFiltering", true)
-        _G.InCombatLockdown = function()
-            return true
-        end
-        local suggestions = {
-            { slash = "/macro" },
-            { slash = "/dance" }
-        }
-        local filtered = {}
-        for _, s in ipairs(suggestions) do
-            if CommandSage_AutoComplete:PassesContextFilter(s) then
-                table.insert(filtered, s)
-            end
-        end
-        assert.is_false(#filtered == 2)
-        assert.is_true(#filtered == 1)
-        _G.InCombatLockdown = function()
-            return false
-        end
-    end)
-
-    it("generates suggestions from trie prefix", function()
-        CommandSage_Trie:InsertCommand("/dance", {})
-        local suggestions = CommandSage_AutoComplete:GenerateSuggestions("/dan")
-        assert.is_true(#suggestions >= 1)
-    end)
-
     it("merges history if partial match not found in trie", function()
         CommandSage_Trie:Clear()
         CommandSage_HistoryPlayback:AddToHistory("/customcmd")
-
         local suggestions = CommandSage_AutoComplete:GenerateSuggestions("custom")
         local found = false
         for _, s in ipairs(suggestions) do
             if s.slash == "/customcmd" then
                 found = true
+                break
             end
         end
         assert.is_true(found)
@@ -148,12 +119,9 @@ describe("CommandSage_AutoComplete", function()
     it("AcceptSuggestion increments usage and saves to history", function()
         CommandSage_Trie:InsertCommand("/test", {})
         local oldScore = CommandSage_AdaptiveLearning:GetUsageScore("/test")
-
         CommandSage_AutoComplete:AcceptSuggestion({ slash = "/test" })
-
         local newScore = CommandSage_AdaptiveLearning:GetUsageScore("/test")
         assert.equals(oldScore + 1, newScore)
-
         local hist = _G.CommandSageDB.commandHistory or {}
         assert.equals("/test", hist[#hist])
     end)

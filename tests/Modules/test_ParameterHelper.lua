@@ -6,28 +6,16 @@ describe("CommandSage_ParameterHelper", function()
     end)
 
     it("GetParameterSuggestions for /w merges friend list + recent whispers", function()
-        _G.C_FriendList.GetNumFriends = function()
-            return 1
-        end
-        _G.C_FriendList.GetFriendInfoByIndex = function(i)
-            return { name = "Buddy" }
-        end
+        _G.C_FriendList.GetNumFriends = function() return 1 end
+        _G.C_FriendList.GetFriendInfoByIndex = function(i) return { name = "Buddy" } end
         CommandSage_ParameterHelper:RecordWhisperTarget("Sammy")
         local results = CommandSage_ParameterHelper:GetParameterSuggestions("/w", "Sa")
         assert.is_true(#results >= 1)
         local foundSammy = false
-        for _, r in ipairs(results) do
-            if r == "sammy" then
-                foundSammy = true
-                break
-            end
-        end
         local foundBuddy = false
         for _, r in ipairs(results) do
-            if r == "buddy" then
-                foundBuddy = true
-                break
-            end
+            if r == "sammy" then foundSammy = true end
+            if r == "buddy" then foundBuddy = true end
         end
         assert.is_true(foundSammy)
         assert.is_true(foundBuddy)
@@ -63,10 +51,9 @@ describe("CommandSage_ParameterHelper", function()
     end)
 
     it("UpdateFriendList is triggered after 5s, no error", function()
-        -- We can just call it manually
         assert.has_no.errors(function()
             local func = debug.getupvalue(CommandSage_ParameterHelper.GetParameterSuggestions, 2)
-            func()  -- UpdateFriendList
+            func()  -- call UpdateFriendList
         end)
     end)
 
@@ -74,21 +61,16 @@ describe("CommandSage_ParameterHelper", function()
         local res = CommandSage_ParameterHelper:GetParameterSuggestions("/macro", "n")
         local found = false
         for _, r in ipairs(res) do
-            if r == "new" then
-                found = true
-                break
-            end
+            if r == "new" then found = true; break end
         end
         assert.is_true(found)
     end)
 
     it("Reset or wipe doesn't affect known params built in code", function()
-        -- There's no official reset, but we can do it manually
         local knownParams = debug.getupvalue(CommandSage_ParameterHelper.GetParameterSuggestions, 1)
         knownParams["/dance"] = nil
         local res = CommandSage_ParameterHelper:GetParameterSuggestions("/dance", "")
         assert.equals(0, #res)
-        -- revert
         knownParams["/dance"] = { "silly", "fancy", "epic" }
     end)
 
@@ -104,9 +86,7 @@ describe("CommandSage_ParameterHelper", function()
         assert.not_equals(0, #results)
         local foundFancy = false
         for _, r in ipairs(results) do
-            if r == "fancy" then
-                foundFancy = true
-            end
+            if r == "fancy" then foundFancy = true end
         end
         assert.is_true(foundFancy)
     end)

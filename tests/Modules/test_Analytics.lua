@@ -1,7 +1,6 @@
 require("tests.test_helper")
 
 describe("Module: CommandSage_Analytics", function()
-
     before_each(function()
         _G.CommandSageDB = {}
         CommandSage_Config:InitializeDefaults()
@@ -15,7 +14,6 @@ describe("Module: CommandSage_Analytics", function()
     it("RemoveFavorite unmarks slash as favorite", function()
         CommandSage_Analytics:AddFavorite("/dance")
         CommandSage_Analytics:RemoveFavorite("/dance")
-        -- Make sure we return a boolean false instead of nil:
         assert.is_false(CommandSage_Analytics:IsFavorite("/dance"))
     end)
 
@@ -59,7 +57,6 @@ describe("Module: CommandSage_Analytics", function()
         CommandSage_Analytics:Blacklist("/dance")
         assert.is_true(CommandSage_Analytics:IsBlacklisted("/dance"))
         assert.is_true(CommandSage_Analytics:IsFavorite("/dance"))
-        -- They can coexist in this design
     end)
 
     it("handles no CommandSageDB gracefully", function()

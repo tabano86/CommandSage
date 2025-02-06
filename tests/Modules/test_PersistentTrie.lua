@@ -1,7 +1,6 @@
 require("tests.test_helper")
 
 describe("Module: CommandSage_PersistentTrie", function()
-
     before_each(function()
         _G.CommandSageDB = {}
         CommandSage_Config:InitializeDefaults()
@@ -23,7 +22,7 @@ describe("Module: CommandSage_PersistentTrie", function()
         assert.is_true(#results >= 1)
     end)
 
-    it("Clearing the trie data then LoadTrie with no saved data => empty trie", function()
+    it("Clearing the trie data then LoadTrie with no saved data yields an empty trie", function()
         CommandSage_Trie:InsertCommand("/dance", {})
         CommandSage_Trie:Clear()
         CommandSage_PersistentTrie:LoadTrie()
@@ -45,7 +44,7 @@ describe("Module: CommandSage_PersistentTrie", function()
         CommandSage_Trie:Clear()
         CommandSage_PersistentTrie:LoadTrie()
         local res = CommandSage_Trie:FindPrefix("/ab")
-        assert.is_true(#res == 2)
+        assert.equals(2, #res)
     end)
 
     it("LoadTrie does nothing if CommandSageDB.cachedTrie is nil", function()
@@ -65,16 +64,14 @@ describe("Module: CommandSage_PersistentTrie", function()
         CommandSage_Trie:InsertCommand("/dance", { desc = "some info" })
         CommandSage_PersistentTrie:SaveTrie()
         local s = _G.CommandSageDB.cachedTrie
-        assert.is_true(s.isTerminal == false) -- root
-        -- children check
+        assert.is_true(s.isTerminal == false)
         for k, v in pairs(s.children) do
-            -- e.g. the slash starts with /
             break
         end
     end)
 
     it("Handles weird data in CommandSageDB[cachedTrie] gracefully", function()
-        _G.CommandSageDB.cachedTrie = { isTerminal = true, children = 123 }  -- invalid
+        _G.CommandSageDB.cachedTrie = { isTerminal = true, children = 123 }
         assert.has_no.errors(function()
             CommandSage_PersistentTrie:LoadTrie()
         end)

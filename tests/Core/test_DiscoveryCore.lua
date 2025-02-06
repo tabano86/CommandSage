@@ -1,7 +1,6 @@
 require("tests.test_helper")
 
 describe("Core: CommandSage_Discovery", function()
-
     before_each(function()
         _G.CommandSageDB = {}
         CommandSage_Config:InitializeDefaults()
@@ -84,8 +83,7 @@ describe("Core: CommandSage_Discovery", function()
     end)
 
     it("does not crash if SlashCmdList has weird keys", function()
-        SlashCmdList["FAKE$COMMAND"] = function(...)
-        end
+        SlashCmdList["FAKE$COMMAND"] = function(...) end
         _G["SLASH_FAKE$COMMAND1"] = "/fake"
         assert.has_no.errors(function()
             CommandSage_Discovery:ScanAllCommands()

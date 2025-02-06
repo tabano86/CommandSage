@@ -1,7 +1,6 @@
 require("tests.test_helper")
 
 describe("Module: CommandSage_AutoType", function()
-
     before_each(function()
         _G.CommandSageDB = {}
         CommandSage_Config:InitializeDefaults()
@@ -30,12 +29,11 @@ describe("Module: CommandSage_AutoType", function()
 
     it("Incremental typing updates ChatFrame1EditBox text", function()
         CommandSage_Config.Set("preferences", "animateAutoType", true)
-        -- Use the frame directly (avoid debug.getinfo)
         local f = CommandSage_AutoType.frame
         CommandSage_AutoType:BeginAutoType("/macro")
         local updateFunc = f:GetScript("OnUpdate")
         assert.is_truthy(updateFunc)
-        updateFunc(f, 0.2) -- simulate time
+        updateFunc(f, 0.2)
         local t = ChatFrame1EditBox:GetText()
         assert.is_true(#t > 0 and #t < #"/macro")
     end)

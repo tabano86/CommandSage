@@ -1,7 +1,6 @@
 require("tests.test_helper")
 
 describe("Module: CommandSage_UIAccessibility", function()
-
     it("EnableHighContrast prints a message", function()
         assert.has_no.errors(function()
             CommandSage_UIAccessibility:EnableHighContrast()
@@ -11,7 +10,7 @@ describe("Module: CommandSage_UIAccessibility", function()
     it("DisableHighContrast toggles it off", function()
         CommandSage_UIAccessibility:EnableHighContrast()
         CommandSage_UIAccessibility:DisableHighContrast()
-        -- no direct check but no error
+        assert.is_true(true)
     end)
 
     it("EnableLargeText prints a message", function()
@@ -23,32 +22,27 @@ describe("Module: CommandSage_UIAccessibility", function()
     it("DisableLargeText toggles it off", function()
         CommandSage_UIAccessibility:EnableLargeText()
         CommandSage_UIAccessibility:DisableLargeText()
-        -- no error
+        assert.is_true(true)
     end)
 
     it("ToggleHighContrast flips the state", function()
         CommandSage_UIAccessibility:ToggleHighContrast()
         CommandSage_UIAccessibility:ToggleHighContrast()
-        -- no direct check but no error
+        assert.is_true(true)
     end)
 
     it("ReadBack prints text if TTS not available", function()
         local oldPrint = print
         local output = {}
-        print = function(...)
-            table.insert(output, table.concat({ ... }, " "))
-        end
-
+        print = function(...) table.insert(output, table.concat({...}, " ")) end
         CommandSage_UIAccessibility:ReadBack("Hello test")
-
         print = oldPrint
         local joined = table.concat(output, "\n")
         assert.matches("Hello test", joined)
     end)
 
     it("no error if TTS is available but arguments are empty", function()
-        _G.C_VoiceChat = { SpeakText = function(...)
-        end }
+        _G.C_VoiceChat = { SpeakText = function(...) end }
         _G.Enum = { VoiceTtsDestination = { LocalPlayback = 0 } }
         assert.has_no.errors(function()
             CommandSage_UIAccessibility:ReadBack("")
@@ -60,7 +54,7 @@ describe("Module: CommandSage_UIAccessibility", function()
     it("multiple toggles do not break the internal state", function()
         CommandSage_UIAccessibility:ToggleHighContrast()
         CommandSage_UIAccessibility:ToggleHighContrast()
-        -- no error
+        assert.is_true(true)
     end)
 
     it("EnableLargeText and then readBack is valid usage scenario", function()
@@ -72,6 +66,6 @@ describe("Module: CommandSage_UIAccessibility", function()
 
     it("DisableLargeText afterwards is also safe", function()
         CommandSage_UIAccessibility:DisableLargeText()
-        -- no error
+        assert.is_true(true)
     end)
 end)

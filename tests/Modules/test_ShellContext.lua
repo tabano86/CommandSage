@@ -1,7 +1,6 @@
 require("tests.test_helper")
 
 describe("Module: CommandSage_ShellContext", function()
-
     before_each(function()
         _G.CommandSageDB = {}
         CommandSage_Config:InitializeDefaults()
@@ -26,9 +25,7 @@ describe("Module: CommandSage_ShellContext", function()
     it("HandleCd says 'not changed' if unknown slash", function()
         local oldPrint = print
         local output = {}
-        print = function(...)
-            table.insert(output, table.concat({ ... }, " "))
-        end
+        print = function(...) table.insert(output, table.concat({...}, " ")) end
         CommandSage_ShellContext:HandleCd("unknowntest")
         print = oldPrint
         local joined = table.concat(output, "\n")
@@ -54,7 +51,7 @@ describe("Module: CommandSage_ShellContext", function()
         assert.equals("/already", newTxt)
     end)
 
-    it("Shell context is disabled by config => always returns typedText", function()
+    it("Shell context disabled by config returns typedText", function()
         CommandSage_Config.Set("preferences", "shellContextEnabled", false)
         CommandSage_ShellContext:HandleCd("dance")
         local newTxt = CommandSage_ShellContext:RewriteInputIfNeeded("test")

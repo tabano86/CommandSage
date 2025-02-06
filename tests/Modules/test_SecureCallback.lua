@@ -1,7 +1,6 @@
 require("tests.test_helper")
 
 describe("Module: CommandSage_SecureCallback", function()
-
     before_each(function()
         _G.CommandSageDB = {}
         CommandSage_Config:InitializeDefaults()
@@ -14,21 +13,15 @@ describe("Module: CommandSage_SecureCallback", function()
     end)
 
     it("ExecuteCommand prints error if protected in combat", function()
-        _G.InCombatLockdown = function()
-            return true
-        end
+        _G.InCombatLockdown = function() return true end
         local oldPrint = print
         local output = {}
-        print = function(...)
-            table.insert(output, table.concat({ ... }, " "))
-        end
+        print = function(...) table.insert(output, table.concat({...}, " ")) end
         CommandSage_SecureCallback:ExecuteCommand("/console", "arg")
         print = oldPrint
         local joined = table.concat(output, "\n")
         assert.matches("Can't run protected command in combat", joined)
-        _G.InCombatLockdown = function()
-            return false
-        end
+        _G.InCombatLockdown = function() return false end
     end)
 
     it("ExecuteCommand calls callback if found in discovered commands", function()
@@ -37,15 +30,10 @@ describe("Module: CommandSage_SecureCallback", function()
         end
         _G["SLASH_FAKETEST1"] = "/faketest"
         CommandSage_Discovery:ScanAllCommands()
-
         local oldPrint = print
         local output = {}
-        print = function(...)
-            table.insert(output, table.concat({ ... }, " "))
-        end
-
+        print = function(...) table.insert(output, table.concat({...}, " ")) end
         CommandSage_SecureCallback:ExecuteCommand("/faketest", "hello")
-
         print = oldPrint
         local joined = table.concat(output, "\n")
         assert.matches("Callback invoked hello", joined)
@@ -67,7 +55,7 @@ describe("Module: CommandSage_SecureCallback", function()
         assert.is_false(CommandSage_SecureCallback:IsAnyCommandProtected(cmdList))
     end)
 
-    it("no error if discovered commands is empty", function()
+    it("No error if discovered commands is empty", function()
         _G.CommandSageDB = {}
         CommandSage_Trie:Clear()
         assert.has_no.errors(function()
@@ -76,18 +64,13 @@ describe("Module: CommandSage_SecureCallback", function()
     end)
 
     it("ExecuteCommand does normal slash invocation if found but no callback", function()
-        -- fallback style
         assert.has_no.errors(function()
             CommandSage_SecureCallback:ExecuteCommand("/afk", "arg")
         end)
     end)
 
-    it("protected slash but not in combat => executes callback normally", function()
-        _G.InCombatLockdown = function()
-            return false
-        end
-        -- if /console had a callback discovered, it would be invoked
-        -- We do minimal check
+    it("protected slash but not in combat executes callback normally", function()
+        _G.InCombatLockdown = function() return false end
         assert.has_no.errors(function()
             CommandSage_SecureCallback:ExecuteCommand("/console", "hello")
         end)
