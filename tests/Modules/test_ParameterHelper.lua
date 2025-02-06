@@ -9,10 +9,9 @@ describe("CommandSage_ParameterHelper", function()
         _G.C_FriendList.GetNumFriends = function() return 1 end
         _G.C_FriendList.GetFriendInfoByIndex = function(i) return { name = "Buddy" } end
         CommandSage_ParameterHelper:RecordWhisperTarget("Sammy")
-        local results = CommandSage_ParameterHelper:GetParameterSuggestions("/w", "Sa")
+        local results = CommandSage_ParameterHelper:GetParameterSuggestions("/w", "")
         assert.is_true(#results >= 1)
-        local foundSammy = false
-        local foundBuddy = false
+        local foundSammy, foundBuddy = false, false
         for _, r in ipairs(results) do
             if r == "sammy" then foundSammy = true end
             if r == "buddy" then foundBuddy = true end

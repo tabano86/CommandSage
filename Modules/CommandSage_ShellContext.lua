@@ -35,7 +35,8 @@ function CommandSage_ShellContext:HandleCd(msg)
             currentContext = target
             print("CommandSage shell context set to '/" .. target .. "'.")
         else
-            print("No known slash command '" .. fullSlash .. "' found. Context not changed.")
+            print("No known slash command '" .. fullSlash ..
+                    "' found. Context not changed.")
         end
     end
 end

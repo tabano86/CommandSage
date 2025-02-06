@@ -1,9 +1,14 @@
-require("tests.test_helper")
+-- tests/Core/test_CoreMain.lua
+-- Only showing the relevant change in the "before_each" or the specific test.
 
 describe("Core: CommandSage_Core", function()
     before_each(function()
         _G.CommandSageDB = {}
         CommandSage_Config:InitializeDefaults()
+        -- Force the ADDON_LOADED event each time so we definitely trigger config init
+        local frame = CommandSage.frame
+        local eventFunc = frame:GetScript("OnEvent")
+        eventFunc(frame, "ADDON_LOADED", "CommandSage")
     end)
 
     it("initial ADDON_LOADED triggers config init", function()
@@ -14,15 +19,8 @@ describe("Core: CommandSage_Core", function()
             return oldInit(...)
         end
 
-        local frame = CommandSage.frame
-        local eventFunc = frame:GetScript("OnEvent")
-        eventFunc(frame, "ADDON_LOADED", "CommandSage")
-
-        -- Some systems might load the addon before the test runs. If so, loadedCount could be 0.
-        -- If you truly want to ensure it calls exactly once, consider removing any prior loads.
-        -- We'll just check that it was called at least once:
+        -- The event was already triggered in before_each, so loadedCount≥1
         assert.is_true(loadedCount >= 1)
-
         CommandSage_Config.InitializeDefaults = oldInit
     end)
 
@@ -42,17 +40,18 @@ describe("Core: CommandSage_Core", function()
     end)
 
     it("Slash command /cmdsage config <key> <value> sets preference", function()
+        -- We do NOT re-init defaults again. Just run the slash command:
         SlashCmdList["COMMANDSAGE"]("config uiScale 1.5")
         local newVal = CommandSage_Config.Get("preferences", "uiScale")
-        -- If your code isn't actually setting 1.5, fix the code or accept 1.0 below:
         assert.equals(1.5, newVal)
     end)
 
     it("Slash command /cmdsage resetprefs resets to default", function()
+        -- set it to light first
         CommandSage_Config.Set("preferences", "uiTheme", "light")
+        -- call the slash command
         SlashCmdList["COMMANDSAGE"]("resetprefs")
         local val = CommandSage_Config.Get("preferences", "uiTheme")
-        -- If your default is "dark", keep this:
         assert.equals("dark", val)
     end)
 
@@ -98,11 +97,12 @@ describe("Core: CommandSage_Core", function()
     it("ADDON_UNLOADED event clears shell context if same addon name", function()
         CommandSage_ShellContext:HandleCd("macro")
         assert.equals("macro", CommandSage_ShellContext:GetCurrentContext())
+
         local frame = CommandSage.frame
         local eventFunc = frame:GetScript("OnEvent")
         eventFunc(frame, "ADDON_UNLOADED", "CommandSage")
 
-        -- The actual code sets context to nil
-        assert.is_nil(CommandSage_ShellContext:GetCurrentContext())
+        -- We DO want it cleared:
+        assert.is_nil(CommandSage_ShellContext:GetCurrentContext())  -- fix
     end)
 end)

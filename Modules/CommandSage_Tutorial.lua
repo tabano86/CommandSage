@@ -33,6 +33,7 @@ function CommandSage_Tutorial:ShowTutorialPrompt()
         frame:Hide()
     end)
     frame.CloseButton = closeBtn
+    frame:Show() -- ensure it's visible
     FadeInIfEnabled(frame)
 end
 function CommandSage_Tutorial:RefreshTutorialPrompt()

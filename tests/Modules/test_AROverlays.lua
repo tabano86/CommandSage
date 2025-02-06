@@ -2,6 +2,8 @@ require("tests.test_helper")
 
 describe("Module: CommandSage_AROverlays", function()
     before_each(function()
+        -- forcibly hide before each test so we start in a known state
+        CommandSageAROverlayFrame:Hide()
         _G.CommandSageDB = {}
         CommandSage_Config:InitializeDefaults()
     end)

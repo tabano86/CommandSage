@@ -340,15 +340,66 @@ local function MergeHistoryWithCommands(typedLower, possible)
 end
 function CommandSage_AutoComplete:GenerateSuggestions(typedText)
     local mode = CommandSage_Config.Get("preferences", "suggestionMode") or "fuzzy"
+    -- Rewrite input if needed (e.g. add a slash for shell context)
     typedText = CommandSage_ShellContext:RewriteInputIfNeeded(typedText)
     local partialLower = typedText:lower()
     if partialLower:sub(1, 1) ~= "/" and not CommandSage_ShellContext:IsActive() then
         partialLower = "/" .. partialLower
     end
+
     local possible = CommandSage_Trie:FindPrefix(partialLower)
+
+    -- If partialFuzzyFallback is enabled and no prefix matches, then fallback:
     if CommandSage_Config.Get("preferences", "partialFuzzyFallback") and #possible == 0 then
         possible = CommandSage_Trie:AllCommands()
+        possible = MergeHistoryWithCommands(partialLower, possible)
+        local final = {}
+        for _, cmdObj in ipairs(possible) do
+            if not CommandSage_Analytics:IsBlacklisted(cmdObj.slash) and self:PassesContextFilter(cmdObj) then
+                table.insert(final, { slash = cmdObj.slash, data = cmdObj.data, rank = 0 })
+            end
+        end
+        -- Add snippet expansions if enabled
+        if CommandSage_Config.Get("preferences", "snippetEnabled") then
+            for _, snip in ipairs(snippetTemplates) do
+                if snip.slash:find(partialLower, 1, true) then
+                    table.insert(final, {
+                        slash = snip.snippet,
+                        data = { description = snip.desc },
+                        rank = -1
+                    })
+                end
+            end
+        end
+        -- Sort final results: favorites come first; snippet entries (rank -1) are pushed to the bottom.
+        if CommandSage_Config.Get("preferences", "favoritesSortingEnabled") then
+            table.sort(final, function(a, b)
+                local aFav = CommandSage_Analytics:IsFavorite(a.slash) and 1 or 0
+                local bFav = CommandSage_Analytics:IsFavorite(b.slash) and 1 or 0
+                if aFav ~= bFav then
+                    return aFav > bFav
+                end
+                local aIsSnippet = (a.rank == -1)
+                local bIsSnippet = (b.rank == -1)
+                if aIsSnippet ~= bIsSnippet then
+                    return not aIsSnippet  -- non-snippet come first
+                end
+                return (a.rank or 0) > (b.rank or 0)
+            end)
+        else
+            table.sort(final, function(a, b)
+                local aIsSnippet = (a.rank == -1)
+                local bIsSnippet = (b.rank == -1)
+                if aIsSnippet ~= bIsSnippet then
+                    return not aIsSnippet
+                end
+                return (a.rank or 0) > (b.rank or 0)
+            end)
+        end
+        return final
     end
+
+    -- Normal (non-fallback) path: merge history into what was found
     possible = MergeHistoryWithCommands(partialLower, possible)
     local matched = {}
     if mode == "fuzzy" then
@@ -361,23 +412,27 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
             return a.slash < b.slash
         end)
     end
+
+    -- Add snippet expansions if enabled
     if CommandSage_Config.Get("preferences", "snippetEnabled") then
         for _, snip in ipairs(snippetTemplates) do
             if snip.slash:find(partialLower, 1, true) then
                 table.insert(matched, {
                     slash = snip.snippet,
                     data = { description = snip.desc },
-                    rank = -1  -- lowered rank so real commands (and favorites) come first
+                    rank = -1  -- lowered rank so real commands come first
                 })
             end
         end
     end
+
     local final = {}
     for _, m in ipairs(matched) do
         if not CommandSage_Analytics:IsBlacklisted(m.slash) and self:PassesContextFilter(m) then
             table.insert(final, m)
         end
     end
+
     if CommandSage_Config.Get("preferences", "favoritesSortingEnabled") then
         table.sort(final, function(a, b)
             local aFav = CommandSage_Analytics:IsFavorite(a.slash) and 1 or 0
@@ -385,15 +440,27 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
             if aFav ~= bFav then
                 return aFav > bFav
             end
+            local aIsSnippet = (a.rank == -1)
+            local bIsSnippet = (b.rank == -1)
+            if aIsSnippet ~= bIsSnippet then
+                return not aIsSnippet  -- non-snippet come first
+            end
             return (a.rank or 0) > (b.rank or 0)
         end)
     else
         table.sort(final, function(a, b)
+            local aIsSnippet = (a.rank == -1)
+            local bIsSnippet = (b.rank == -1)
+            if aIsSnippet ~= bIsSnippet then
+                return not aIsSnippet
+            end
             return (a.rank or 0) > (b.rank or 0)
         end)
     end
+
     return final
 end
+
 local hookingFrame = CreateFrame("Frame")
 hookingFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 local function CloseAutoCompleteOnChatDeactivate()

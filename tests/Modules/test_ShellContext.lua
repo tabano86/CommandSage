@@ -62,10 +62,13 @@ describe("Module: CommandSage_ShellContext", function()
     end)
 
     it("GetCurrentContext returns the internal var or nil", function()
+        -- by default we haven't done anything, so:
         assert.is_nil(CommandSage_ShellContext:GetCurrentContext())
-        CommandSage_ShellContext:HandleCd("macro")
+
+        CommandSage_ShellContext:HandleCd("macro") -- we do want a real known slash
         assert.equals("macro", CommandSage_ShellContext:GetCurrentContext())
     end)
+
 
     it("cd 'none' also clears context", function()
         CommandSage_ShellContext:HandleCd("dance")

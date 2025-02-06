@@ -12,12 +12,12 @@ function CommandSage_MultiModal:OnVoiceCommand(phrase)
     end
     if #suggestions > 0 then
         local top = suggestions[1]
-        print("Voice recognized =>", top.slash)
+        print("Voice recognized => " .. top.slash) -- no comma
     else
-        print("No match for voice input:", phrase)
+        print("No match for voice input: " .. phrase)
     end
 end
 function CommandSage_MultiModal:SimulateVoiceCommand(phrase)
-    print("Simulating voice input:", phrase)
+    print("Simulating voice input: " .. phrase)
     self:OnVoiceCommand(phrase)
 end

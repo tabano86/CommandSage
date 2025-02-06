@@ -19,11 +19,15 @@ local function deserializeNode(data)
         info = data.info,
         maxDepth = data.maxDepth
     }
-    for c, childData in pairs(data.children or {}) do
+    if type(data.children) ~= "table" then
+        data.children = {}  -- fix for weird data
+    end
+    for c, childData in pairs(data.children) do
         node.children[c] = deserializeNode(childData)
     end
     return node
 end
+
 function CommandSage_PersistentTrie:SaveTrie()
     local r = CommandSage_Trie:GetRoot()
     local s = serializeNode(r)

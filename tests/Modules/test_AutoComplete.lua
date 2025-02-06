@@ -4,9 +4,11 @@ describe("CommandSage_AutoComplete", function()
     before_each(function()
         _G.CommandSageDB = {}
         CommandSage_Config:InitializeDefaults()
-        CommandSage_Trie:Clear()
-        CommandSage_HistoryPlayback:GetHistory()
+        -- disable the shell context for this test:
+        CommandSage_Config.Set("preferences", "shellContextEnabled", false)
+        ChatFrame1EditBox:SetText("")
     end)
+
 
     it("MoveSelection cycles properly", function()
         local dummy = {
