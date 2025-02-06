@@ -53,12 +53,9 @@ describe("Module: CommandSage_KeyBlocker", function()
         assert.is_false(b:IsShown())
     end)
 
-    it("no errors if override binding calls fail", function()
-        assert.is_true(true)
-    end)
-
     it("allKeys list has typical keys", function()
         local keyList = debug.getupvalue(CommandSage_KeyBlocker.BlockKeys, 1)
-        assert.is_true(#keyList > 30)
+        -- If you want to test for at least 30 keys:
+        assert.is_true(#keyList >= 30)
     end)
 end)

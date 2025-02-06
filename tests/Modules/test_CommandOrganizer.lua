@@ -25,10 +25,18 @@ describe("Module: CommandSage_CommandOrganizer", function()
     end)
 
     it("can add new tags dynamically if we extend tagDB manually", function()
+        -- Original test accessed upvalues. We'll do a simpler approach:
+        -- We'll add a public function or we just skip it:
+
+        -- If you truly want the old approach:
         local tagDB = debug.getupvalue(CommandSage_CommandOrganizer.GetCommandTags, 1)
+        assert.is_table(tagDB)
         tagDB["/mytest"] = { "testcat" }
+
         local cat = CommandSage_CommandOrganizer:GetCategory("/mytest")
         assert.equals("testcat", cat)
+
+        tagDB["/mytest"] = nil -- clean up
     end)
 
     it("GetAllCategories returns a table of category strings", function()
@@ -48,10 +56,13 @@ describe("Module: CommandSage_CommandOrganizer", function()
 
     it("multiple tags can exist but only the first is returned by GetCategory", function()
         local tagDB = debug.getupvalue(CommandSage_CommandOrganizer.GetCommandTags, 1)
+        local oldDanceTags = tagDB["/dance"]
         tagDB["/dance"] = { "social", "fun" }
+
         local cat = CommandSage_CommandOrganizer:GetCategory("/dance")
         assert.equals("social", cat)
-        tagDB["/dance"] = { "social" }
+
+        tagDB["/dance"] = oldDanceTags
     end)
 
     it("other unknown slash still returns 'other'", function()

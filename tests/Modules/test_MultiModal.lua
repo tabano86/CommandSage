@@ -48,10 +48,12 @@ describe("Module: CommandSage_MultiModal", function()
         local oldPrint = print
         local output = {}
         print = function(...) table.insert(output, table.concat({...}, " ")) end
+
         CommandSage_MultiModal:OnVoiceCommand("dance")
+
         print = oldPrint
         local joined = table.concat(output, "\n")
-        assert.matches("Voice recognized =>", joined)
+        assert.matches("Voice recognized => /dance", joined)
     end)
 
     it("Null or nil phrase is safe", function()
@@ -71,7 +73,9 @@ describe("Module: CommandSage_MultiModal", function()
         local oldPrint = print
         local output = {}
         print = function(...) table.insert(output, table.concat({...}, " ")) end
+
         CommandSage_MultiModal:SimulateVoiceCommand("hello there")
+
         print = oldPrint
         local joined = table.concat(output, "\n")
         assert.matches("Simulating voice input: hello there", joined)

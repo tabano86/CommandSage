@@ -51,6 +51,10 @@ describe("Module: CommandSage_Terminal", function()
 
     it("/color respects config colorCommandEnabled", function()
         CommandSage_Config.Set("preferences", "colorCommandEnabled", true)
+        -- Re-initialize if needed:
+        CommandSage_Terminal:Initialize()
+
+        assert.is_function(SlashCmdList["CMDCOLOR"])
         assert.has_no.errors(function()
             SlashCmdList["CMDCOLOR"]("1 0 0")
         end)
@@ -58,6 +62,7 @@ describe("Module: CommandSage_Terminal", function()
 
     it("/3dspin is added if spin3DEnabled = true", function()
         CommandSage_Config.Set("preferences", "spin3DEnabled", true)
+        CommandSage_Terminal:Initialize()
         assert.is_function(SlashCmdList["CMD3DSPIN"])
         assert.has_no.errors(function()
             SlashCmdList["CMD3DSPIN"]("")

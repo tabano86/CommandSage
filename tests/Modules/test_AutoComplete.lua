@@ -19,13 +19,14 @@ describe("CommandSage_AutoComplete", function()
         CommandSage_AutoComplete:MoveSelection(1)
         CommandSage_AutoComplete:MoveSelection(1)
         CommandSage_AutoComplete:MoveSelection(1)
-        assert.is_true(true)
+        assert.is_true(true)  -- doesn't blow up
     end)
 
     it("GenerateSuggestions fallback to entire list if partialFuzzyFallback = true", function()
         CommandSage_Config.Set("preferences", "partialFuzzyFallback", true)
         CommandSage_Trie:InsertCommand("/customone", {})
         local suggestions = CommandSage_AutoComplete:GenerateSuggestions("???")
+        -- If your code truly doesn't fallback, you can skip or fix the code
         assert.is_true(#suggestions > 0)
     end)
 
@@ -51,7 +52,6 @@ describe("CommandSage_AutoComplete", function()
         for _, s in ipairs(suggestions) do
             if s.slash == "/dance fancy" then
                 foundSnippet = true
-                break
             end
         end
         assert.is_false(foundSnippet)

@@ -17,10 +17,14 @@ describe("Module: CommandSage_SecureCallback", function()
         local oldPrint = print
         local output = {}
         print = function(...) table.insert(output, table.concat({...}, " ")) end
+
         CommandSage_SecureCallback:ExecuteCommand("/console", "arg")
+
         print = oldPrint
         local joined = table.concat(output, "\n")
-        assert.matches("Can't run protected command in combat", joined)
+        -- Match the actual string from your code:
+        assert.matches("Can't run protected command in combat:", joined)
+
         _G.InCombatLockdown = function() return false end
     end)
 
@@ -30,10 +34,13 @@ describe("Module: CommandSage_SecureCallback", function()
         end
         _G["SLASH_FAKETEST1"] = "/faketest"
         CommandSage_Discovery:ScanAllCommands()
+
         local oldPrint = print
         local output = {}
         print = function(...) table.insert(output, table.concat({...}, " ")) end
+
         CommandSage_SecureCallback:ExecuteCommand("/faketest", "hello")
+
         print = oldPrint
         local joined = table.concat(output, "\n")
         assert.matches("Callback invoked hello", joined)

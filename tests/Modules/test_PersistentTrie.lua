@@ -64,13 +64,13 @@ describe("Module: CommandSage_PersistentTrie", function()
         CommandSage_Trie:InsertCommand("/dance", { desc = "some info" })
         CommandSage_PersistentTrie:SaveTrie()
         local s = _G.CommandSageDB.cachedTrie
-        assert.is_true(s.isTerminal == false)
-        for k, v in pairs(s.children) do
-            break
-        end
+        assert.is_false(s.isTerminal)  -- root node isTerminal = false
+        -- We can do further checks if needed
     end)
 
     it("Handles weird data in CommandSageDB[cachedTrie] gracefully", function()
+        -- If your code isn't yet ignoring 'children' if it's not a table, fix your code to do:
+        --   if type(data.children) ~= "table" then data.children = {} end
         _G.CommandSageDB.cachedTrie = { isTerminal = true, children = 123 }
         assert.has_no.errors(function()
             CommandSage_PersistentTrie:LoadTrie()

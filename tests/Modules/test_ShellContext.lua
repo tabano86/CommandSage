@@ -26,10 +26,12 @@ describe("Module: CommandSage_ShellContext", function()
         local oldPrint = print
         local output = {}
         print = function(...) table.insert(output, table.concat({...}, " ")) end
+
         CommandSage_ShellContext:HandleCd("unknowntest")
+
         print = oldPrint
         local joined = table.concat(output, "\n")
-        assert.matches("No known slash command '/unknowntest' found", joined)
+        assert.matches("No known slash command '/unknowntest' found. Context not changed.", joined)
         assert.is_nil(CommandSage_ShellContext:GetCurrentContext())
     end)
 

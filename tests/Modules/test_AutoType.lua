@@ -64,6 +64,7 @@ describe("Module: CommandSage_AutoType", function()
         local f = CommandSage_AutoType.frame
         local updateFunc = f:GetScript("OnUpdate")
         updateFunc(f, 0.2)
+        -- Because we just stopped, we expect no typed text
         assert.equals("", ChatFrame1EditBox:GetText())
     end)
 
@@ -79,9 +80,11 @@ describe("Module: CommandSage_AutoType", function()
         CommandSage_AutoType:BeginAutoType("/hi")
         local f = CommandSage_AutoType.frame
         local updateFunc = f:GetScript("OnUpdate")
+        -- We do OnUpdate and see that it doesn't actually type each char
         assert.has_no.errors(function()
             updateFunc(f, 0.1)
         end)
+        -- So the entire text is set immediately:
         assert.equals("/hi", ChatFrame1EditBox:GetText())
     end)
 
