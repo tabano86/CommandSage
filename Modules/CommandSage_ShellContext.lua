@@ -13,6 +13,7 @@ function CommandSage_ShellContext:RewriteInputIfNeeded(typedText)
     if typedText:sub(1, 1) == "/" then
         return typedText
     end
+
     if not currentContext or currentContext == "" then
         return typedText
     end
