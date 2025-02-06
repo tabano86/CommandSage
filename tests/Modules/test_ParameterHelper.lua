@@ -1,8 +1,5 @@
 -- tests\test_ParameterHelper.lua
-require("busted.runner")()
 require("tests.test_helper")
-require("Modules.CommandSage_ParameterHelper")
-require("Core.CommandSage_Config")
 
 describe("CommandSage_ParameterHelper", function()
     before_each(function()

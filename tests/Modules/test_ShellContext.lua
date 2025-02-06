@@ -1,13 +1,7 @@
 -- tests/test_ShellContext.lua
 -- 10 tests for Core.CommandSage_ShellContext
 
-require("busted.runner")()
 require("tests.test_helper")
-require("Modules.CommandSage_ShellContext")
-require("Core.CommandSage_Config")
-require("Core.CommandSage_Discovery")
-require("Modules.CommandSage_Trie")
-require("Core.CommandSage_Discovery")
 
 describe("Module: CommandSage_ShellContext", function()
 

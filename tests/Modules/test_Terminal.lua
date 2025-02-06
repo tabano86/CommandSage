@@ -1,7 +1,4 @@
-require("busted.runner")()
 require("tests.test_helper")
-require("Modules.CommandSage_Terminal")
-require("Core.CommandSage_Config")
 
 -- Ensure that the global SlashCmdList exists for the tests
 if not SlashCmdList then

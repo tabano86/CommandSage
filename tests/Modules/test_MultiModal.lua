@@ -1,12 +1,7 @@
 -- tests/test_MultiModal.lua
 -- 10 tests for Core.CommandSage_MultiModal
 
-require("busted.runner")()
 require("tests.test_helper")
-require("Modules.CommandSage_MultiModal")
-require("Modules.CommandSage_Trie")
-require("Modules.CommandSage_FuzzyMatch")
-require("Core.CommandSage_Config")
 
 describe("Module: CommandSage_MultiModal", function()
 

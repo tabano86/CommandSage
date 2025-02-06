@@ -1,10 +1,10 @@
--- tests/test_AROverlays.lua
--- 10 tests for Modules.CommandSage_AROverlays
+--==========================
+-- tests/Modules/test_AROverlays.lua
+--==========================
+-- The same content from your old test_AROverlays.lua, but pointed to the new
+-- test_helper and placed in tests/Modules/.
 
-require("busted.runner")()
 require("tests.test_helper")
-require("Modules.CommandSage_AROverlays")
-require("Core.CommandSage_Config")
 
 describe("Module: CommandSage_AROverlays", function()
 

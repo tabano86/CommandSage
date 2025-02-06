@@ -1,10 +1,7 @@
 -- tests/test_Licensing.lua
 -- 10 tests for Core.CommandSage_Licensing
 
-require("busted.runner")()
 require("tests.test_helper")
-require("Modules.CommandSage_Licensing")
-require("Core.CommandSage_Config")
 
 if not SlashCmdList then
     SlashCmdList = {}

@@ -1,10 +1,7 @@
 -- tests/test_Analytics.lua
 -- 10 tests for Modules.CommandSage_Analytics
 
-require("busted.runner")()
 require("tests.test_helper")
-require("Modules.CommandSage_Analytics")
-require("Core.CommandSage_Config")
 
 describe("Module: CommandSage_Analytics", function()
 

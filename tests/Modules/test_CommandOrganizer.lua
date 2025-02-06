@@ -1,10 +1,7 @@
 -- tests/test_CommandOrganizer.lua
 -- 10 tests for Modules.CommandSage_CommandOrganizer
 
-require("busted.runner")()
 require("tests.test_helper")
-require("Modules.CommandSage_CommandOrganizer")
-require("Core.CommandSage_Config")
 
 describe("Module: CommandSage_CommandOrganizer", function()
 

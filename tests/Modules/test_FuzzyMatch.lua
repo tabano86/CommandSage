@@ -1,12 +1,6 @@
 -- tests/test_FuzzyMatch.lua
 
-require("busted.runner")()
 require("tests.test_helper")
-require("Modules.CommandSage_FuzzyMatch")
-require("Modules.CommandSage_Trie")
-require("Modules.CommandSage_AdaptiveLearning")
-require("Core.CommandSage_Config")
-require("Core.CommandSage_Discovery")
 
 describe("CommandSage_FuzzyMatch", function()
     before_each(function()

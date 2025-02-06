@@ -1,17 +1,9 @@
--- tests/test_AutoComplete.lua
--- Tests for Modules.CommandSage_AutoComplete
+--==========================
+-- tests/Modules/test_AutoComplete.lua
+--==========================
+-- Example module test, now living in tests/Modules/
 
-require("busted.runner")()
 require("tests.test_helper")
-require("Modules.CommandSage_AutoComplete")
-require("Modules.CommandSage_Trie")
-require("Modules.CommandSage_ParameterHelper")
-require("Modules.CommandSage_Analytics")
-require("Modules.CommandSage_HistoryPlayback")
-require("Modules.CommandSage_Fallback")
-require("Modules.CommandSage_AdaptiveLearning")
-require("Modules.CommandSage_ShellContext")
-require("Core.CommandSage_Config")
 
 describe("CommandSage_AutoComplete", function()
     before_each(function()
@@ -23,7 +15,8 @@ describe("CommandSage_AutoComplete", function()
 
     it("MoveSelection cycles properly", function()
         local dummy = {
-            { slash = "/dance" }, { slash = "/macro" }, { slash = "/test" }, { slash = "/ping" }
+            { slash = "/dance" }, { slash = "/macro" },
+            { slash = "/test" },  { slash = "/ping" }
         }
         CommandSage_AutoComplete:ShowSuggestions(dummy)
         CommandSage_AutoComplete:MoveSelection(1)

@@ -1,9 +1,6 @@
 -- tests/test_AutoType.lua
 -- 10 tests for Modules.CommandSage_AutoType
-require("busted.runner")()
 require("tests.test_helper")
-require("Modules.CommandSage_AutoType")
-require("Core.CommandSage_Config")
 
 describe("Module: CommandSage_AutoType", function()
 

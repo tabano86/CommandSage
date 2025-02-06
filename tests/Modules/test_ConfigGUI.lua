@@ -1,10 +1,7 @@
 -- tests/test_ConfigGUI.lua
 -- 10 tests for Modules.CommandSage_ConfigGUI
 
-require("busted.runner")()
 require("tests.test_helper")
-require("Modules.CommandSage_ConfigGUI")
-require("Core.CommandSage_Config")
 
 describe("Module: CommandSage_ConfigGUI", function()
 

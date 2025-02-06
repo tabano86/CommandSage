@@ -1,10 +1,9 @@
--- tests/test_CoreMain.lua
--- 10 tests for Core/CommandSage_Core.lua
-require("busted.runner")()
+--==========================
+-- tests/Core/test_CoreMain.lua
+--==========================
+-- Exactly the same content you already had, but placed in tests/Core/
+
 require("tests.test_helper")
-require("Core.CommandSage_Core")
-require("Core.CommandSage_Config")
-require("Modules.CommandSage_KeyBlocker")
 
 describe("Core: CommandSage_Core", function()
 
@@ -20,11 +19,12 @@ describe("Core: CommandSage_Core", function()
             loadedCount = loadedCount + 1
             return oldInit(...)
         end
-        local frame = CommandSage.frame  -- use the frame directly
+
+        local frame = CommandSage.frame
         local eventFunc = frame:GetScript("OnEvent")
         eventFunc(frame, "ADDON_LOADED", "CommandSage")
+
         assert.equals(1, loadedCount)
-        -- restore original if desired
         CommandSage_Config.InitializeDefaults = oldInit
     end)
 

@@ -1,9 +1,7 @@
 -- tests/test_KeyBlocker.lua
 -- 10 tests for Core.CommandSage_KeyBlocker
 
-require("busted.runner")()
 require("tests.test_helper")
-require("Modules.CommandSage_KeyBlocker")
 
 describe("Module: CommandSage_KeyBlocker", function()
 

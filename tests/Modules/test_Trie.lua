@@ -1,5 +1,4 @@
 require("tests.test_helper")
-require("Modules.CommandSage_Trie")
 
 describe("CommandSage_Trie", function()
     before_each(function()
