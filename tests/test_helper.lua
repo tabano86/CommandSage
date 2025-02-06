@@ -1,59 +1,36 @@
+--==========================
 -- tests/test_helper.lua
--- Loads common mocks and sets up package.path so that require can find Core/ and Modules/
+--==========================
+-- Master test helper that:
+--   1) loads wow_mock
+--   2) sets up package.path
+--   3) ensures string.trim
+--   4) calls loader.lua to mimic .toc order
+--   5) does any additional test stubs or runner configs
+
+print("test_helper.lua loaded...")
+
+-- 1) Provide the wow_mock:
 require("tests.wow_mock")
-package.path = package.path .. ";./Core/?.lua;./Modules/?.lua;./tests/?.lua;./?.lua;"
 
--- Ensure C_Timer is defined
-if not C_Timer then
-    C_Timer = { After = function(sec, func)
-        func()
-    end }
-end
+-- 2) Adjust package.path for your 'Core'/'Modules' subdirs, if needed:
+package.path = package.path
+        .. ";./Core/?.lua"
+        .. ";./Modules/?.lua"
+        .. ";./tests/?.lua"
+        .. ";./?.lua;"
 
-if not GetRealZoneText then
-    GetRealZoneText = function()
-        return "TestZone"
+-- 3) Add a global trim polyfill if not present:
+if not string.trim then
+    function string:trim()
+        return self:match("^%s*(.-)%s*$")
     end
 end
 
-if not GetSubZoneText then
-    GetSubZoneText = function()
-        return "TestSubZone"
-    end
-end
+-- 4) Force the .toc load order:
+require("tests.loader")
 
-if not GetTime then
-    GetTime = function()
-        return os.time()
-    end
-end
+-- 5) (Optional) do any busted runner config here
+-- e.g. local busted = require("busted.runner")()
 
-if not date then
-    date = function(fmt)
-        return "12:34:56"
-    end
-end
-
-if not UnitName then
-    UnitName = function(unit)
-        return (unit == "player") and "TestPlayer" or "Unknown"
-    end
-end
-
--- Also ensure that NUM_CHAT_WINDOWS and ChatFrame mocks exist:
-if not NUM_CHAT_WINDOWS then
-    NUM_CHAT_WINDOWS = 1
-end
-if not _G["ChatFrame1"] then
-    _G["ChatFrame1"] = {
-        Clear = function()
-        end,
-        IsVisible = function()
-            return true
-        end,
-    }
-end
-
-_G._TEST = true
-
-print("test_helper.lua loaded.")
+print("test_helper.lua: done with everything.")
