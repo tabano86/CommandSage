@@ -5,6 +5,15 @@ local f = CreateFrame("Frame")
 f:RegisterEvent("ADDON_LOADED")
 f:RegisterEvent("PLAYER_LOGIN")
 f:RegisterEvent("ADDON_UNLOADED")
+
+
+if not string.trim then
+    function string:trim()
+        return self:match("^%s*(.-)%s*$")
+    end
+end
+
+
 local function OnEvent(self, event, ...)
     if event == "ADDON_LOADED" then
         local loadedAddon = ...

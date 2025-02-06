@@ -5,6 +5,13 @@
 -- Utility & Global Helpers
 --------------------------------------------------------------------------------
 
+if not LibStub or type(LibStub) ~= "function" then
+    function LibStub(libName, strict)
+        return {}
+    end
+end
+
+
 -- Provide wipe if not already defined
 if not wipe then
     function wipe(tbl)
@@ -109,6 +116,7 @@ local function createTexture()
     return t
 end
 
+
 if not CreateFrame then
     function CreateFrame(frameType, name, parent, template)
         local f = {}
@@ -123,11 +131,16 @@ if not CreateFrame then
         f.height = 0
         f.alpha = 1
 
+        if name then
+            _G[name] = f
+        end
+
         -- Basic methods
         function f:SetPoint(...)
+            -- Method stub.
         end
         function f:SetSize(w, h)
-            self.width = w;
+            self.width = w
             self.height = h
         end
         function f:GetWidth()

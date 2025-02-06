@@ -23,7 +23,7 @@ function CommandSage_ShellContext:HandleCd(msg)
         print("Shell context is disabled by config.")
         return
     end
-    local target = msg:lower():trim()
+    local target = (msg:lower() or ""):trim()
     if target == ".." or target == "none" or target == "clear" or target == "" then
         currentContext = nil
         print("CommandSage shell context cleared.")
