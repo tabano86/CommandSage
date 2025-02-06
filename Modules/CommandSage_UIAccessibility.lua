@@ -1,20 +1,20 @@
 CommandSage_UIAccessibility = {}
-local highContrast=false
-local largeText=false
+local highContrast = false
+local largeText = false
 function CommandSage_UIAccessibility:EnableHighContrast()
-    highContrast=true
+    highContrast = true
     print("High contrast mode enabled.")
 end
 function CommandSage_UIAccessibility:DisableHighContrast()
-    highContrast=false
+    highContrast = false
     print("High contrast mode disabled.")
 end
 function CommandSage_UIAccessibility:EnableLargeText()
-    largeText=true
+    largeText = true
     print("Large text mode enabled.")
 end
 function CommandSage_UIAccessibility:DisableLargeText()
-    largeText=false
+    largeText = false
     print("Large text mode disabled.")
 end
 function CommandSage_UIAccessibility:ReadBack(text)

@@ -15,18 +15,18 @@ describe("Module: CommandSage_PersistentTrie", function()
     end)
 
     it("SaveTrie stores data in CommandSageDB[cachedTrie]", function()
-        CommandSage_Trie:InsertCommand("/dance", {desc="D"})
+        CommandSage_Trie:InsertCommand("/dance", { desc = "D" })
         CommandSage_PersistentTrie:SaveTrie()
         assert.is_table(_G.CommandSageDB.cachedTrie)
     end)
 
     it("LoadTrie populates the Trie from cached data", function()
-        CommandSage_Trie:InsertCommand("/dance", {desc="D"})
+        CommandSage_Trie:InsertCommand("/dance", { desc = "D" })
         CommandSage_PersistentTrie:SaveTrie()
         CommandSage_Trie:Clear()
         CommandSage_PersistentTrie:LoadTrie()
         local results = CommandSage_Trie:FindPrefix("/dan")
-        assert.is_true(#results>=1)
+        assert.is_true(#results >= 1)
     end)
 
     it("Clearing the trie data then LoadTrie with no saved data => empty trie", function()
@@ -45,13 +45,13 @@ describe("Module: CommandSage_PersistentTrie", function()
     end)
 
     it("deserialization with nested children works", function()
-        CommandSage_Trie:InsertCommand("/abc", {desc="abc"})
-        CommandSage_Trie:InsertCommand("/abd", {desc="abd"})
+        CommandSage_Trie:InsertCommand("/abc", { desc = "abc" })
+        CommandSage_Trie:InsertCommand("/abd", { desc = "abd" })
         CommandSage_PersistentTrie:SaveTrie()
         CommandSage_Trie:Clear()
         CommandSage_PersistentTrie:LoadTrie()
         local res = CommandSage_Trie:FindPrefix("/ab")
-        assert.is_true(#res==2)
+        assert.is_true(#res == 2)
     end)
 
     it("LoadTrie does nothing if CommandSageDB.cachedTrie is nil", function()
@@ -62,25 +62,25 @@ describe("Module: CommandSage_PersistentTrie", function()
 
     it("SaveTrie overwrites any existing cached data", function()
         _G.CommandSageDB.cachedTrie = "old data"
-        CommandSage_Trie:InsertCommand("/dance",{})
+        CommandSage_Trie:InsertCommand("/dance", {})
         CommandSage_PersistentTrie:SaveTrie()
         assert.is_table(_G.CommandSageDB.cachedTrie)
     end)
 
     it("Serialization includes isTerminal, info, children, maxDepth", function()
-        CommandSage_Trie:InsertCommand("/dance", {desc="some info"})
+        CommandSage_Trie:InsertCommand("/dance", { desc = "some info" })
         CommandSage_PersistentTrie:SaveTrie()
         local s = _G.CommandSageDB.cachedTrie
         assert.is_true(s.isTerminal == false) -- root
         -- children check
-        for k,v in pairs(s.children) do
+        for k, v in pairs(s.children) do
             -- e.g. the slash starts with /
             break
         end
     end)
 
     it("Handles weird data in CommandSageDB[cachedTrie] gracefully", function()
-        _G.CommandSageDB.cachedTrie = { isTerminal=true, children=123 }  -- invalid
+        _G.CommandSageDB.cachedTrie = { isTerminal = true, children = 123 }  -- invalid
         assert.has_no.errors(function()
             CommandSage_PersistentTrie:LoadTrie()
         end)

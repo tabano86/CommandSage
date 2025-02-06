@@ -54,14 +54,14 @@ describe("Module: CommandSage_ConfigGUI", function()
     end)
 
     it("usageChartEnabled shows usage chart subframe", function()
-        CommandSage_Config.Set("preferences","usageChartEnabled",true)
+        CommandSage_Config.Set("preferences", "usageChartEnabled", true)
         CommandSage_ConfigGUI:InitGUI()
         CommandSage_ConfigGUI:Toggle()
         -- no error => success
     end)
 
     it("disabling usageChartEnabled hides usage chart", function()
-        CommandSage_Config.Set("preferences","usageChartEnabled",false)
+        CommandSage_Config.Set("preferences", "usageChartEnabled", false)
         CommandSage_ConfigGUI:InitGUI()
         CommandSage_ConfigGUI:Toggle()
         -- no error
@@ -82,7 +82,7 @@ describe("Module: CommandSage_ConfigGUI", function()
     end)
 
     it("CheckBoxes read from preferences to set initial .Checked", function()
-        CommandSage_Config.Set("preferences","animateAutoType",false)
+        CommandSage_Config.Set("preferences", "animateAutoType", false)
         CommandSage_ConfigGUI:InitGUI()
         -- No direct check. No error => success
     end)

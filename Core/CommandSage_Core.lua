@@ -119,7 +119,9 @@ function CommandSage:RegisterSlashCommands()
     end
 end
 function CommandSage:HookChatFrameEditBox(editBox)
-    if not editBox or editBox.CommandSageHooked then return end
+    if not editBox or editBox.CommandSageHooked then
+        return
+    end
     local bindingManagerFrame = CreateFrame("Frame", nil)
     local function DisableAllBindings()
         local override = CommandSage_Config.Get("preferences", "overrideHotkeysWhileTyping")
@@ -129,8 +131,12 @@ function CommandSage:HookChatFrameEditBox(editBox)
         end
         for i = 1, GetNumBindings() do
             local command, key1, key2 = GetBinding(i)
-            if key1 then SetOverrideBinding(bindingManagerFrame, true, key1, nil) end
-            if key2 then SetOverrideBinding(bindingManagerFrame, true, key2, nil) end
+            if key1 then
+                SetOverrideBinding(bindingManagerFrame, true, key1, nil)
+            end
+            if key2 then
+                SetOverrideBinding(bindingManagerFrame, true, key2, nil)
+            end
         end
     end
     local function RestoreAllBindings()
@@ -149,7 +155,7 @@ function CommandSage:HookChatFrameEditBox(editBox)
         self:SetPropagateKeyboardInput(true)
         CommandSage_KeyBlocker:UnblockKeys()
         if CommandSage_Config.Get("preferences", "chatInputHaloEnabled") then
-            self:SetBackdropColor(0,0,0,0)
+            self:SetBackdropColor(0, 0, 0, 0)
         end
     end)
     local function CloseAutoCompleteOnChatDeactivate()
@@ -158,7 +164,7 @@ function CommandSage:HookChatFrameEditBox(editBox)
     hooksecurefunc("ChatEdit_DeactivateChat", CloseAutoCompleteOnChatDeactivate)
     editBox:HookScript("OnKeyDown", function(self, key)
         local text = self:GetText() or ""
-        local isSlash = (text:sub(1,1) == "/")
+        local isSlash = (text:sub(1, 1) == "/")
         local isInShellContext = CommandSage_ShellContext:IsActive()
         if not CommandSage_Config.Get("preferences", "advancedKeybinds") then
             self:SetPropagateKeyboardInput(true)
@@ -212,7 +218,7 @@ function CommandSage:HookChatFrameEditBox(editBox)
             CommandSage_AutoComplete:CloseSuggestions()
             return
         end
-        local firstChar = text:sub(1,1)
+        local firstChar = text:sub(1, 1)
         if firstChar ~= "/" and not CommandSage_ShellContext:IsActive() then
             CommandSage_AutoComplete:CloseSuggestions()
             return
@@ -224,9 +230,9 @@ function CommandSage:HookChatFrameEditBox(editBox)
             local paramSugg = {}
             for _, ph in ipairs(paramHints) do
                 table.insert(paramSugg, {
-                    slash = firstWord.." "..ph,
-                    data  = { description = "[Arg completion]" },
-                    rank  = 0,
+                    slash = firstWord .. " " .. ph,
+                    data = { description = "[Arg completion]" },
+                    rank = 0,
                     isParamSuggestion = true
                 })
             end
@@ -240,7 +246,7 @@ function CommandSage:HookChatFrameEditBox(editBox)
 end
 function CommandSage:HookAllChatFrames()
     for i = 1, NUM_CHAT_WINDOWS do
-        local cf = _G["ChatFrame"..i]
+        local cf = _G["ChatFrame" .. i]
         local editBox = cf and cf.editBox
         if editBox then
             self:HookChatFrameEditBox(editBox)

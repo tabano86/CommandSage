@@ -46,7 +46,7 @@ describe("CommandSage_AutoComplete", function()
         CommandSage_Trie:InsertCommand("/test", {})
         local oldScore = CommandSage_AdaptiveLearning:GetUsageScore("/test")
 
-        CommandSage_AutoComplete:AcceptSuggestion({slash="/test"})
+        CommandSage_AutoComplete:AcceptSuggestion({ slash = "/test" })
 
         local newScore = CommandSage_AdaptiveLearning:GetUsageScore("/test")
         assert.equals(oldScore + 1, newScore)

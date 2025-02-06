@@ -1,11 +1,11 @@
 -- tests/test_DeveloperAPI.lua
 -- 10 tests for Modules.CommandSage_DeveloperAPI
-
 require("busted.runner")()
 require("tests.test_helper")
 
+-- Use Core for Discovery and Config
 require("Modules.CommandSage_DeveloperAPI")
-require("Core.CommandSage_Discovery")  -- was previously "CORE.CommandSage_Discovery"
+require("Core.CommandSage_Discovery")
 require("Core.CommandSage_Config")
 require("Modules.CommandSage_Trie")
 
@@ -44,19 +44,23 @@ describe("Module: CommandSage_DeveloperAPI", function()
 
     it("Subscribe and FireEvent triggers callback", function()
         local triggered = false
-        CommandSage_DeveloperAPI:Subscribe("COMMANDS_UPDATED", function(...) triggered = true end)
+        CommandSage_DeveloperAPI:Subscribe("COMMANDS_UPDATED", function(...)
+            triggered = true
+        end)
         CommandSage_DeveloperAPI:FireEvent("COMMANDS_UPDATED")
         assert.is_true(triggered)
     end)
 
     it("RegisterCommand inserts new slash into discovered + trie", function()
-        CommandSage_DeveloperAPI:RegisterCommand("/mycmd", function() end, "desc", "cat")
+        CommandSage_DeveloperAPI:RegisterCommand("/mycmd", function()
+        end, "desc", "cat")
         local all = CommandSage_DeveloperAPI:GetAllCommands()
         assert.is_not_nil(all["/mycmd"])
     end)
 
     it("UnregisterCommand removes from discovered + trie", function()
-        CommandSage_DeveloperAPI:RegisterCommand("/mycmd", function() end)
+        CommandSage_DeveloperAPI:RegisterCommand("/mycmd", function()
+        end)
         CommandSage_DeveloperAPI:UnregisterCommand("/mycmd")
         local all = CommandSage_DeveloperAPI:GetAllCommands()
         assert.is_nil(all["/mycmd"])
@@ -64,14 +68,19 @@ describe("Module: CommandSage_DeveloperAPI", function()
 
     it("Firing an event with multiple callbacks calls them all", function()
         local count = 0
-        CommandSage_DeveloperAPI:Subscribe("TEST_MULTI", function() count = count + 1 end)
-        CommandSage_DeveloperAPI:Subscribe("TEST_MULTI", function() count = count + 1 end)
+        CommandSage_DeveloperAPI:Subscribe("TEST_MULTI", function()
+            count = count + 1
+        end)
+        CommandSage_DeveloperAPI:Subscribe("TEST_MULTI", function()
+            count = count + 1
+        end)
         CommandSage_DeveloperAPI:FireEvent("TEST_MULTI")
         assert.equals(2, count)
     end)
 
     it("ListAllEvents returns array of subscribed event names", function()
-        CommandSage_DeveloperAPI:Subscribe("X_EVENT", function() end)
+        CommandSage_DeveloperAPI:Subscribe("X_EVENT", function()
+        end)
         local evts = CommandSage_DeveloperAPI:ListAllEvents()
         assert.is_true(#evts >= 1)
     end)
@@ -83,7 +92,8 @@ describe("Module: CommandSage_DeveloperAPI", function()
     end)
 
     it("RegisterCommand with blank slash does nothing", function()
-        CommandSage_DeveloperAPI:RegisterCommand("", function() end)
+        CommandSage_DeveloperAPI:RegisterCommand("", function()
+        end)
         -- no error => success
     end)
 end)

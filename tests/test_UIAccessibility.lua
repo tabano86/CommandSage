@@ -39,18 +39,21 @@ describe("Module: CommandSage_UIAccessibility", function()
     it("ReadBack prints text if TTS not available", function()
         local oldPrint = print
         local output = {}
-        print = function(...) table.insert(output, table.concat({...}," ")) end
+        print = function(...)
+            table.insert(output, table.concat({ ... }, " "))
+        end
 
         CommandSage_UIAccessibility:ReadBack("Hello test")
 
         print = oldPrint
-        local joined = table.concat(output,"\n")
+        local joined = table.concat(output, "\n")
         assert.matches("Hello test", joined)
     end)
 
     it("no error if TTS is available but arguments are empty", function()
-        _G.C_VoiceChat = { SpeakText = function(...) end }
-        _G.Enum = { VoiceTtsDestination = { LocalPlayback=0 } }
+        _G.C_VoiceChat = { SpeakText = function(...)
+        end }
+        _G.Enum = { VoiceTtsDestination = { LocalPlayback = 0 } }
         assert.has_no.errors(function()
             CommandSage_UIAccessibility:ReadBack("")
         end)

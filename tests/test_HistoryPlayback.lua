@@ -13,14 +13,14 @@ describe("Module: CommandSage_HistoryPlayback", function()
     end)
 
     it("AddToHistory won't store anything if persistHistory=false", function()
-        CommandSage_Config.Set("preferences","persistHistory",false)
+        CommandSage_Config.Set("preferences", "persistHistory", false)
         CommandSage_HistoryPlayback:AddToHistory("/dance")
         local hist = CommandSageDB.commandHistory
         assert.is_nil(hist)
     end)
 
     it("AddToHistory appends command if persistHistory=true", function()
-        CommandSage_Config.Set("preferences","persistHistory",true)
+        CommandSage_Config.Set("preferences", "persistHistory", true)
         CommandSage_HistoryPlayback:AddToHistory("/dance")
         local hist = CommandSageDB.commandHistory
         assert.equals("/dance", hist[#hist])
@@ -33,9 +33,9 @@ describe("Module: CommandSage_HistoryPlayback", function()
     end)
 
     it("exceeding maxHist removes earliest entry", function()
-        CommandSage_Config.Set("preferences","persistHistory",true)
-        for i=1,300 do
-            CommandSage_HistoryPlayback:AddToHistory("/cmd"..i)
+        CommandSage_Config.Set("preferences", "persistHistory", true)
+        for i = 1, 300 do
+            CommandSage_HistoryPlayback:AddToHistory("/cmd" .. i)
         end
         local hist = CommandSage_HistoryPlayback:GetHistory()
         assert.is_true(#hist <= 200)  -- default maxHist = 200
@@ -43,7 +43,7 @@ describe("Module: CommandSage_HistoryPlayback", function()
     end)
 
     it("/cmdsagehistory prints the entire history", function()
-        CommandSage_Config.Set("preferences","persistHistory",true)
+        CommandSage_Config.Set("preferences", "persistHistory", true)
         CommandSage_HistoryPlayback:AddToHistory("/dance")
         assert.has_no.errors(function()
             SlashCmdList["COMMANDSAGEHISTORY"]("")
@@ -51,7 +51,7 @@ describe("Module: CommandSage_HistoryPlayback", function()
     end)
 
     it("/searchhistory <query> prints matching lines", function()
-        CommandSage_Config.Set("preferences","persistHistory",true)
+        CommandSage_Config.Set("preferences", "persistHistory", true)
         CommandSage_HistoryPlayback:AddToHistory("/dance test")
         CommandSage_HistoryPlayback:AddToHistory("/macro foo")
         assert.has_no.errors(function()
@@ -60,7 +60,7 @@ describe("Module: CommandSage_HistoryPlayback", function()
     end)
 
     it("/clearhistory clears the table", function()
-        CommandSage_Config.Set("preferences","persistHistory",true)
+        CommandSage_Config.Set("preferences", "persistHistory", true)
         CommandSage_HistoryPlayback:AddToHistory("/dance")
         SlashCmdList["CLEARHISTORY"]("")
         local hist = CommandSage_HistoryPlayback:GetHistory()
@@ -75,7 +75,7 @@ describe("Module: CommandSage_HistoryPlayback", function()
     end)
 
     it("AddToHistory store multiple commands in correct order", function()
-        CommandSage_Config.Set("preferences","persistHistory",true)
+        CommandSage_Config.Set("preferences", "persistHistory", true)
         CommandSage_HistoryPlayback:AddToHistory("/dance1")
         CommandSage_HistoryPlayback:AddToHistory("/dance2")
         local h = CommandSage_HistoryPlayback:GetHistory()

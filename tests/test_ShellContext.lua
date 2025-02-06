@@ -32,10 +32,12 @@ describe("Module: CommandSage_ShellContext", function()
     it("HandleCd says 'not changed' if unknown slash", function()
         local oldPrint = print
         local output = {}
-        print = function(...) table.insert(output, table.concat({...}," ")) end
+        print = function(...)
+            table.insert(output, table.concat({ ... }, " "))
+        end
         CommandSage_ShellContext:HandleCd("unknowntest")
         print = oldPrint
-        local joined = table.concat(output,"\n")
+        local joined = table.concat(output, "\n")
         assert.matches("No known slash command '/unknowntest' found", joined)
         assert.is_nil(CommandSage_ShellContext:GetCurrentContext())
     end)
@@ -59,7 +61,7 @@ describe("Module: CommandSage_ShellContext", function()
     end)
 
     it("Shell context is disabled by config => always returns typedText", function()
-        CommandSage_Config.Set("preferences","shellContextEnabled",false)
+        CommandSage_Config.Set("preferences", "shellContextEnabled", false)
         CommandSage_ShellContext:HandleCd("dance")
         local newTxt = CommandSage_ShellContext:RewriteInputIfNeeded("test")
         assert.equals("test", newTxt)

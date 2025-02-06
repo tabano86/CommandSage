@@ -34,7 +34,7 @@ describe("Core: CommandSage_Discovery", function()
         CommandSage_Discovery:ScanAllCommands()
         local disc = CommandSage_Discovery:GetDiscoveredCommands()
         local foundTestMacro = false
-        for k,_ in pairs(disc) do
+        for k, _ in pairs(disc) do
             if k == "/testmacro" then
                 foundTestMacro = true
                 break
@@ -51,13 +51,13 @@ describe("Core: CommandSage_Discovery", function()
 
     it("ForceAllFallbacks adds new fallback slash", function()
         CommandSage_Discovery:ScanAllCommands()
-        CommandSage_Discovery:ForceAllFallbacks({"/mysuperfallback"})
+        CommandSage_Discovery:ForceAllFallbacks({ "/mysuperfallback" })
         local disc = CommandSage_Discovery:GetDiscoveredCommands()
         assert.is_not_nil(disc["/mysuperfallback"])
     end)
 
     it("blizzAllFallback = false does not add built-in slash commands", function()
-        CommandSage_Config.Set("preferences","blizzAllFallback",false)
+        CommandSage_Config.Set("preferences", "blizzAllFallback", false)
         CommandSage_Discovery:ScanAllCommands()
         local disc = CommandSage_Discovery:GetDiscoveredCommands()
         assert.is_nil(disc["/help"])
@@ -83,8 +83,8 @@ describe("Core: CommandSage_Discovery", function()
     end)
 
     it("userCustomFallbackEnabled will add from CommandSageDB.customFallbacks", function()
-        CommandSage_Config.Set("preferences","userCustomFallbackEnabled",true)
-        _G.CommandSageDB.customFallbacks = {"/mytestcmd", "/someonecmd"}
+        CommandSage_Config.Set("preferences", "userCustomFallbackEnabled", true)
+        _G.CommandSageDB.customFallbacks = { "/mytestcmd", "/someonecmd" }
         CommandSage_Discovery:ScanAllCommands()
         local disc = CommandSage_Discovery:GetDiscoveredCommands()
         assert.is_not_nil(disc["/mytestcmd"])
@@ -92,7 +92,8 @@ describe("Core: CommandSage_Discovery", function()
     end)
 
     it("does not crash if SlashCmdList has weird keys", function()
-        SlashCmdList["FAKE$COMMAND"] = function(...) end
+        SlashCmdList["FAKE$COMMAND"] = function(...)
+        end
         _G["SLASH_FAKE$COMMAND1"] = "/fake"
         assert.has_no.errors(function()
             CommandSage_Discovery:ScanAllCommands()

@@ -40,7 +40,7 @@ describe("Module: CommandSage_MultiModal", function()
     end)
 
     it("Handles partial expansions if fuzzyMatchTolerance > 0", function()
-        CommandSage_Config.Set("preferences","fuzzyMatchTolerance",2)
+        CommandSage_Config.Set("preferences", "fuzzyMatchTolerance", 2)
         CommandSage_MultiModal:OnVoiceCommand("dnce") -- 1 char off
         -- no error
     end)
@@ -54,10 +54,12 @@ describe("Module: CommandSage_MultiModal", function()
     it("Voice recognized => /dance if within tolerance", function()
         local oldPrint = print
         local output = {}
-        print = function(...) table.insert(output, table.concat({...}, " ")) end
+        print = function(...)
+            table.insert(output, table.concat({ ... }, " "))
+        end
         CommandSage_MultiModal:OnVoiceCommand("dance")
         print = oldPrint
-        local joined = table.concat(output,"\n")
+        local joined = table.concat(output, "\n")
         assert.matches("Voice recognized => /dance", joined)
     end)
 
@@ -77,10 +79,12 @@ describe("Module: CommandSage_MultiModal", function()
     it("SimulateVoiceCommand prints the phrase", function()
         local oldPrint = print
         local output = {}
-        print = function(...) table.insert(output, table.concat({...}, " ")) end
+        print = function(...)
+            table.insert(output, table.concat({ ... }, " "))
+        end
         CommandSage_MultiModal:SimulateVoiceCommand("hello there")
         print = oldPrint
-        local joined = table.concat(output,"\n")
+        local joined = table.concat(output, "\n")
         assert.matches("Simulating voice input: hello there", joined)
     end)
 end)

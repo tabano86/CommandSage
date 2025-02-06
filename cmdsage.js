@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 "use strict";
 
-const { Command } = require("commander");
+const {Command} = require("commander");
 const path = require("path");
 const os = require("os");
 const fs = require("fs");
-const { spawnSync, spawn } = require("child_process");
+const {spawnSync, spawn} = require("child_process");
 const clipboardy = require("clipboardy");
 const archiver = require("archiver");
 
@@ -19,13 +19,13 @@ function isWSL() {
 
 function toolExists(toolName) {
     const cmd = isWindows() ? "where" : "which";
-    const check = spawnSync(cmd, [toolName], { encoding: "utf-8" });
+    const check = spawnSync(cmd, [toolName], {encoding: "utf-8"});
     return check.status === 0;
 }
 
 function runCommand(command, args, options = {}) {
     return new Promise((resolve, reject) => {
-        const proc = spawn(command, args, { stdio: "inherit", shell: true, ...options });
+        const proc = spawn(command, args, {stdio: "inherit", shell: true, ...options});
         proc.on("error", reject);
         proc.on("exit", code => {
             if (code !== 0) {
@@ -57,13 +57,13 @@ async function lintLua() {
 
 async function buildAddon(outputName) {
     const distDir = path.join(process.cwd(), "dist");
-    if (!fs.existsSync(distDir)) fs.mkdirSync(distDir, { recursive: true });
+    if (!fs.existsSync(distDir)) fs.mkdirSync(distDir, {recursive: true});
     const zipName = outputName || "CommandSage.zip";
     const zipPath = path.join(distDir, zipName);
     if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
     await new Promise((resolve, reject) => {
         const output = fs.createWriteStream(zipPath);
-        const archive = archiver("zip", { zlib: { level: 9 } });
+        const archive = archiver("zip", {zlib: {level: 9}});
         output.on("close", () => {
             console.log(`Build complete. ${archive.pointer()} total bytes written to ${zipPath}.`);
             resolve();
@@ -109,11 +109,12 @@ async function copyFiles(excludePatterns, exts) {
             }
         }
     }
+
     walk(sourceDir);
     if (clipboardContent) {
         try {
             if (isWSL()) {
-                const proc = spawnSync("clip.exe", { input: clipboardContent });
+                const proc = spawnSync("clip.exe", {input: clipboardContent});
                 if (proc.status !== 0) throw new Error("clip.exe failed");
                 console.log("Content copied to clipboard (via clip.exe).");
             } else {
@@ -132,7 +133,7 @@ async function copyFiles(excludePatterns, exts) {
 async function clean() {
     const distDir = path.join(process.cwd(), "dist");
     if (fs.existsSync(distDir)) {
-        fs.rmSync(distDir, { recursive: true, force: true });
+        fs.rmSync(distDir, {recursive: true, force: true});
         console.log("dist/ directory removed.");
     } else {
         console.log("No dist/ directory found.");

@@ -34,7 +34,7 @@ describe("Module: CommandSage_CommandOrganizer", function()
 
     it("can add new tags dynamically if we extend tagDB manually (not recommended)", function()
         local tagDB = debug.getupvalue(CommandSage_CommandOrganizer.GetCommandTags, 1)
-        tagDB["/mytest"] = {"testcat"}
+        tagDB["/mytest"] = { "testcat" }
         local cat = CommandSage_CommandOrganizer:GetCategory("/mytest")
         assert.equals("testcat", cat)
     end)
@@ -56,10 +56,10 @@ describe("Module: CommandSage_CommandOrganizer", function()
 
     it("multiple tags can exist but only the first is returned by GetCategory", function()
         local tagDB = debug.getupvalue(CommandSage_CommandOrganizer.GetCommandTags, 1)
-        tagDB["/dance"] = {"social", "fun"}
+        tagDB["/dance"] = { "social", "fun" }
         local cat = CommandSage_CommandOrganizer:GetCategory("/dance")
         assert.equals("social", cat)
-        tagDB["/dance"] = {"social"} -- revert
+        tagDB["/dance"] = { "social" } -- revert
     end)
 
     it("other unknown slash still returns 'other'", function()

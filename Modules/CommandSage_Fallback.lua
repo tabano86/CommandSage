@@ -1,15 +1,15 @@
 CommandSage_Fallback = {}
-local fallbackActive=false
+local fallbackActive = false
 function CommandSage_Fallback:EnableFallback()
-    fallbackActive=true
+    fallbackActive = true
 end
 function CommandSage_Fallback:DisableFallback()
-    fallbackActive=false
+    fallbackActive = false
 end
 function CommandSage_Fallback:IsFallbackActive()
     return fallbackActive
 end
 function CommandSage_Fallback:ToggleFallback()
-    fallbackActive=not fallbackActive
+    fallbackActive = not fallbackActive
     print("Fallback is now", fallbackActive and "ENABLED" or "DISABLED")
 end

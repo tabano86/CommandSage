@@ -24,7 +24,7 @@ describe("Module: CommandSage_AutoComplete (Extended)", function()
 
     it("MoveSelection cycles properly", function()
         local dummy = {
-            {slash="/dance"}, {slash="/macro"}, {slash="/test"}, {slash="/ping"}
+            { slash = "/dance" }, { slash = "/macro" }, { slash = "/test" }, { slash = "/ping" }
         }
         CommandSage_AutoComplete:ShowSuggestions(dummy)
         CommandSage_AutoComplete:MoveSelection(1)
@@ -37,15 +37,15 @@ describe("Module: CommandSage_AutoComplete (Extended)", function()
     end)
 
     it("GenerateSuggestions fallback to entire list if partialFuzzyFallback = true", function()
-        CommandSage_Config.Set("preferences","partialFuzzyFallback",true)
+        CommandSage_Config.Set("preferences", "partialFuzzyFallback", true)
         CommandSage_Trie:InsertCommand("/customone", {})
         local suggestions = CommandSage_AutoComplete:GenerateSuggestions("???")
         assert.is_true(#suggestions > 0)
     end)
 
     it("Snippet expansions appear if snippetEnabled = true", function()
-        CommandSage_Config.Set("preferences","snippetEnabled",true)
-        CommandSage_Trie:InsertCommand("/dance", {description="Dance!"})
+        CommandSage_Config.Set("preferences", "snippetEnabled", true)
+        CommandSage_Trie:InsertCommand("/dance", { description = "Dance!" })
         local suggestions = CommandSage_AutoComplete:GenerateSuggestions("/dan")
         local foundSnippet = false
         for _, s in ipairs(suggestions) do
@@ -58,7 +58,7 @@ describe("Module: CommandSage_AutoComplete (Extended)", function()
     end)
 
     it("Snippet expansions do not appear if snippetEnabled = false", function()
-        CommandSage_Config.Set("preferences","snippetEnabled",false)
+        CommandSage_Config.Set("preferences", "snippetEnabled", false)
         CommandSage_Trie:InsertCommand("/dance", {})
         local suggestions = CommandSage_AutoComplete:GenerateSuggestions("/dan")
         local foundSnippet = false
@@ -72,23 +72,23 @@ describe("Module: CommandSage_AutoComplete (Extended)", function()
     end)
 
     it("AcceptSuggestion sets text in ChatFrame1EditBox if animateAutoType = false", function()
-        CommandSage_Config.Set("preferences","animateAutoType",false)
-        local suggestion = {slash="/dance"}
+        CommandSage_Config.Set("preferences", "animateAutoType", false)
+        local suggestion = { slash = "/dance" }
         ChatFrame1EditBox:SetText("")
         CommandSage_AutoComplete:AcceptSuggestion(suggestion)
         assert.equals("/dance", ChatFrame1EditBox:GetText())
     end)
 
     it("AcceptSuggestion uses auto-typing if animateAutoType = true", function()
-        CommandSage_Config.Set("preferences","animateAutoType",true)
-        local suggestion = {slash="/dance"}
+        CommandSage_Config.Set("preferences", "animateAutoType", true)
+        local suggestion = { slash = "/dance" }
         assert.has_no.errors(function()
             CommandSage_AutoComplete:AcceptSuggestion(suggestion)
         end)
     end)
 
     it("CloseSuggestions hides the autocomplete frame", function()
-        local dummy = {{slash="/one"},{slash="/two"}}
+        local dummy = { { slash = "/one" }, { slash = "/two" } }
         CommandSage_AutoComplete:ShowSuggestions(dummy)
         CommandSage_AutoComplete:CloseSuggestions()
         -- no error => success
@@ -108,7 +108,7 @@ describe("Module: CommandSage_AutoComplete (Extended)", function()
     end)
 
     it("favoritesSortingEnabled sorts favorites first", function()
-        CommandSage_Config.Set("preferences","favoritesSortingEnabled",true)
+        CommandSage_Config.Set("preferences", "favoritesSortingEnabled", true)
         CommandSage_Trie:InsertCommand("/abc", {})
         CommandSage_Trie:InsertCommand("/zzz", {})
         CommandSage_Analytics:AddFavorite("/zzz")
@@ -117,11 +117,13 @@ describe("Module: CommandSage_AutoComplete (Extended)", function()
     end)
 
     it("PassesContextFilter blocks /macro in combat if contextFiltering=true", function()
-        CommandSage_Config.Set("preferences","contextFiltering",true)
-        _G.InCombatLockdown = function() return true end
+        CommandSage_Config.Set("preferences", "contextFiltering", true)
+        _G.InCombatLockdown = function()
+            return true
+        end
         local suggestions = {
-            {slash="/macro"},
-            {slash="/dance"}
+            { slash = "/macro" },
+            { slash = "/dance" }
         }
         local filtered = {}
         for _, s in ipairs(suggestions) do
@@ -131,6 +133,8 @@ describe("Module: CommandSage_AutoComplete (Extended)", function()
         end
         assert.is_false(#filtered == 2)
         assert.is_true(#filtered == 1)
-        _G.InCombatLockdown = function() return false end
+        _G.InCombatLockdown = function()
+            return false
+        end
     end)
 end)

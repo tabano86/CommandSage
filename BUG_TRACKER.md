@@ -2,7 +2,8 @@
 
 Below are 20 predicted issues that could arise in the next 5 weeks, with 15 already fixed.
 
-1. **(Fixed)** Rainbow border in the autocomplete frame occasionally flickers when the user quickly toggles advanced styling.
+1. **(Fixed)** Rainbow border in the autocomplete frame occasionally flickers when the user quickly toggles advanced
+   styling.
     - *Resolution:* Added throttling to the color-shift in `CommandSage_AutoComplete.lua`.
 2. **(Fixed)** `/3dspin` command: potential crash if no 3D environment is detected in certain builds.
     - *Resolution:* Added a check for `WorldFrame` existence in `CommandSage_Terminal.lua`.

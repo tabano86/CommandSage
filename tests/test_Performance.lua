@@ -52,11 +52,11 @@ describe("Module: CommandSage_Performance", function()
 
     it("discoveredCommands after scanning is not empty", function()
         local discovered = CommandSage_Discovery:GetDiscoveredCommands()
-        local c=0
+        local c = 0
         for _ in pairs(discovered) do
             c = c + 1
         end
-        assert.is_true(c>0)
+        assert.is_true(c > 0)
     end)
 
     it("No error if ShowDashboard called with no discovered commands (rare)", function()
