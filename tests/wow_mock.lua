@@ -237,6 +237,10 @@ function CreateFrame(frameType, name, parent, template)
         function fs:SetPoint(...) end
         function fs:SetWidth(w) end
         function fs:SetJustifyH(justify) end
+        -- Added SetTextColor stub.
+        function fs:SetTextColor(...)
+            self.textColor = { ... }
+        end
         return fs
     end
 
@@ -459,13 +463,13 @@ end
 -- Stub for GameTooltip (basic implementation)
 GameTooltip = GameTooltip or {}
 function GameTooltip:SetOwner(owner, anchor)
-    -- No-op.
+    -- No-op for testing.
 end
 function GameTooltip:SetText(text, ...)
     print("GameTooltip:", text)
 end
 function GameTooltip:Hide()
-    -- No-op.
+    -- No-op for testing.
 end
 
 -- Debug print stub (for consistency)
