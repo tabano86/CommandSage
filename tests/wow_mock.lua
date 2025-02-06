@@ -2,7 +2,7 @@
 -- tests/wow_mock.lua
 -- A comprehensive WoW Classic API stub for testing CommandSage.
 -- This file is our single source of truth for WoW Classic API stubs.
--- It mimics the WoW Classic environment closely.
+-- It closely mimics the WoW Classic environment.
 -------------------------------------------------------------
 
 -- Force our stub to be used by clearing any preexisting CreateFrame.
@@ -128,6 +128,14 @@ function CreateFrame(frameType, name, parent, template)
         self.scale = scale
     end
 
+    -- Add SetHeight and SetWidth methods.
+    function frame:SetHeight(h)
+        self.height = h
+    end
+    function frame:SetWidth(w)
+        self.width = w
+    end
+
     -- Extra stubs for scroll frames and related methods.
     if frameType == "ScrollFrame" then
         function frame:SetScrollChild(child)
@@ -174,7 +182,7 @@ function CreateFrame(frameType, name, parent, template)
     function frame:SetMovable(b) self.movable = b end
     function frame:RegisterForDrag(...) self.dragEvents = {...} end
     function frame:SetBackdrop(bdrop) self.backdrop = bdrop end
-    function frame:SetBackdropColor(r, g, b, a) self.backdropColor = {r, g, b, a} end
+    function frame:SetBackdropColor(r, g, b, a) self.backdropColor = { r, g, b, a } end
     function frame:SetAlpha(a) self.alpha = a end
     function frame:SetText(t) self.text = t end
     function frame:GetText() return self.text or "" end
@@ -242,7 +250,7 @@ function CreateFrame(frameType, name, parent, template)
         function tex:SetAlpha(a) self.alpha = a end
         function tex:SetRotation(angle) self.rotation = angle end
         function tex:SetSize(w, h) self.width = w; self.height = h end
-        function tex:SetColorTexture(r, g, b, a) self.color = {r, g, b, a} end
+        function tex:SetColorTexture(r, g, b, a) self.color = { r, g, b, a } end
         function tex:Show() self.hidden = false end
         function tex:Hide() self.hidden = true end
         function tex:IsShown() return not self.hidden end
@@ -351,7 +359,7 @@ end
 -- Additional Chat EditBox Methods
 -----------------------------------------
 function ChatFrame1EditBox:SetBackdropColor(r, g, b, a)
-    self.backdropColor = {r, g, b, a}
+    self.backdropColor = { r, g, b, a }
 end
 
 -----------------------------------------
@@ -360,11 +368,10 @@ end
 -- Stub for LibStub (commonly used by addons)
 LibStub = LibStub or setmetatable({}, {
     __call = function(self, libName, version)
-        -- Optionally, you can have some logic to return a stubbed version of the library.
-        return {}  -- Return an empty table as the library stub.
+        -- Return an empty table as a stub library.
+        return {}
     end
 })
-
 
 -- Stub for UnitName
 UnitName = UnitName or function(unit)
@@ -452,13 +459,13 @@ end
 -- Stub for GameTooltip (basic implementation)
 GameTooltip = GameTooltip or {}
 function GameTooltip:SetOwner(owner, anchor)
-    -- No-op for testing.
+    -- No-op.
 end
 function GameTooltip:SetText(text, ...)
     print("GameTooltip:", text)
 end
 function GameTooltip:Hide()
-    -- No-op for testing.
+    -- No-op.
 end
 
 -- Debug print stub (for consistency)
