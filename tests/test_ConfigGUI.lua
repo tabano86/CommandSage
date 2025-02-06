@@ -3,7 +3,6 @@
 
 require("busted.runner")()
 require("tests.test_helper")
-
 require("Modules.CommandSage_ConfigGUI")
 require("Core.CommandSage_Config")
 

@@ -2,6 +2,7 @@
 -- 10 tests for Core.CommandSage_ShellContext
 
 require("busted.runner")()
+require("tests.test_helper")
 require("Modules.CommandSage_ShellContext")
 require("Core.CommandSage_Config")
 require("Core.CommandSage_Discovery")

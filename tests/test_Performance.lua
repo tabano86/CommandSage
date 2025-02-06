@@ -2,6 +2,7 @@
 -- 10 tests for Core.CommandSage_Performance
 
 require("busted.runner")()
+require("tests.test_helper")
 require("Modules.CommandSage_Performance")
 require("Core.CommandSage_Discovery")
 require("Modules.CommandSage_Trie")

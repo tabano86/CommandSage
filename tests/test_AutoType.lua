@@ -2,7 +2,6 @@
 -- 10 tests for Modules.CommandSage_AutoType
 require("busted.runner")()
 require("tests.test_helper")
-
 require("Modules.CommandSage_AutoType")
 require("Core.CommandSage_Config")
 

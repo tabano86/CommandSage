@@ -2,8 +2,6 @@
 -- 10 tests for Core/CommandSage_Core.lua
 require("busted.runner")()
 require("tests.test_helper")
-
--- Use the Core versions for files in the Core folder
 require("Core.CommandSage_Core")
 require("Core.CommandSage_Config")
 require("Modules.CommandSage_KeyBlocker")

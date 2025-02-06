@@ -2,6 +2,7 @@
 -- 10 tests for Core.CommandSage_UIAccessibility
 
 require("busted.runner")()
+require("tests.test_helper")
 require("Modules.CommandSage_UIAccessibility")
 
 describe("Module: CommandSage_UIAccessibility", function()

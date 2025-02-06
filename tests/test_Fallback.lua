@@ -3,7 +3,6 @@
 
 require("busted.runner")()
 require("tests.test_helper")
-
 require("Modules.CommandSage_Fallback")
 
 describe("Module: CommandSage_Fallback", function()

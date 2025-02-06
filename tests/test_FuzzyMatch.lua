@@ -2,7 +2,6 @@
 
 require("busted.runner")()
 require("tests.test_helper")
-
 require("Modules.CommandSage_FuzzyMatch")
 require("Modules.CommandSage_Trie")
 require("Modules.CommandSage_AdaptiveLearning")

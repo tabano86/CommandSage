@@ -2,8 +2,6 @@
 -- 10 tests for Modules.CommandSage_DeveloperAPI
 require("busted.runner")()
 require("tests.test_helper")
-
--- Use Core for Discovery and Config
 require("Modules.CommandSage_DeveloperAPI")
 require("Core.CommandSage_Discovery")
 require("Core.CommandSage_Config")

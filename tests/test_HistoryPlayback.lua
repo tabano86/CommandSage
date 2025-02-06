@@ -2,6 +2,7 @@
 -- 10 tests for Core.CommandSage_HistoryPlayback
 
 require("busted.runner")()
+require("tests.test_helper")
 require("Modules.CommandSage_HistoryPlayback")
 require("Core.CommandSage_Config")
 
