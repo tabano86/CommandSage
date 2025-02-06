@@ -1,18 +1,30 @@
 -------------------------------------------------------------
 -- tests/wow_mock.lua
 -- A comprehensive WoW Classic API stub for testing CommandSage.
--- This stub simulates frame creation, timer functions, chat edit
--- functionality, key binding overrides, macro and friend list functions,
--- zone/time functions, chat message functions, and various other
--- WoW Classic API functions used by CommandSage.
---
--- Extend as needed.
 -------------------------------------------------------------
 
 -- Force our stub to be used by clearing any preexisting CreateFrame.
 _G.CreateFrame = nil
 
 print("wow_mock.lua loaded (enhanced).")
+
+-----------------------------------------
+-- Provide securecall and UIFrameFadeIn
+-----------------------------------------
+if not securecall then
+    -- In the real WoW API, securecall calls the function in a secure manner,
+    -- but here we can just call it directly for testing.
+    function securecall(fn, ...)
+        return fn(...)
+    end
+end
+
+if not UIFrameFadeIn then
+    function UIFrameFadeIn(frame, duration, fromAlpha, toAlpha)
+        -- Simple stub: just set final alpha
+        frame:SetAlpha(toAlpha)
+    end
+end
 
 -----------------------------------------
 -- Utility Functions
@@ -104,9 +116,18 @@ function CreateFrame(frameType, name, parent, template)
     end
 
     -- Basic methods
-    function frame:SetPoint(point, relativeTo, relativePoint, x, y)
-        self.points = { point, relativeTo and relativeTo.name or nil, relativePoint, x, y }
+    function frame:SetPoint(point, a1, a2, a3, a4)
+        -- Some tests do: SetPoint("TOP", 0, -10)
+        -- We'll check if a1 is a number:
+        if type(a1) == "number" then
+            -- interpret a1, a2 as x, y offsets
+            self.points = { point, nil, nil, a1, a2 }
+        else
+            local relativeTo = a1 and a1.name or nil
+            self.points = { point, relativeTo, a2, a3, a4 }
+        end
     end
+
     function frame:SetSize(w, h)
         self.width = w
         self.height = h
@@ -189,9 +210,7 @@ function CreateFrame(frameType, name, parent, template)
         function tex:SetColorTexture(r, g, b, a) self.color = {r, g, b, a} end
         function tex:Show() self.hidden = false end
         function tex:Hide() self.hidden = true end
-        function tex:IsShown()
-            return not self.hidden
-        end
+        function tex:IsShown() return not self.hidden end
 
         return tex
     end
@@ -258,7 +277,7 @@ SlashCmdList["CLEARHISTORY"] = SlashCmdList["CLEARHISTORY"] or function(msg) end
 -----------------------------------------
 C_FriendList = C_FriendList or {
     GetNumFriends = function() return 0 end,
-    GetFriendInfoByIndex = GetFriendInfoByIndex or function(i) return nil end
+    GetFriendInfoByIndex = function(i) return nil end
 }
 
 -----------------------------------------
