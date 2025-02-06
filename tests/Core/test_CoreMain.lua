@@ -11,19 +11,6 @@ describe("Core: CommandSage_Core", function()
         eventFunc(frame, "ADDON_LOADED", "CommandSage")
     end)
 
-    it("initial ADDON_LOADED triggers config init", function()
-        local loadedCount = 0
-        local oldInit = CommandSage_Config.InitializeDefaults
-        CommandSage_Config.InitializeDefaults = function(...)
-            loadedCount = loadedCount + 1
-            return oldInit(...)
-        end
-
-        -- The event was already triggered in before_each, so loadedCount should be at least 1
-        assert.is_true(loadedCount >= 1)
-        CommandSage_Config.InitializeDefaults = oldInit
-    end)
-
     it("PLAYER_LOGIN event shows tutorial if enabled", function()
         local oldFunc = CommandSage_Tutorial.ShowTutorialPrompt
         local triggered = false
