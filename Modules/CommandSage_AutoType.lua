@@ -26,7 +26,7 @@ function CommandSage_AutoType:BeginAutoType(cmdStr)
     end
     frame.textToType = cmdStr
     frame.index = 0
-    frame.delay = 0
+    frame.delay = CommandSage_Config.Get("preferences", "autoTypeDelay") or 0.08
     frame:Show()
 end
 function CommandSage_AutoType:StopAutoType()

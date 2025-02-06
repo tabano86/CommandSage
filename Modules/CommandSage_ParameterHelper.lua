@@ -26,6 +26,7 @@ function CommandSage_ParameterHelper:RecordWhisperTarget(targetName)
 end
 function CommandSage_ParameterHelper:GetParameterSuggestions(slash, partialArg)
     if slash:lower() == "/w" then
+        UpdateFriendList()  -- ensure friendNames is updated
         local suggestions = {}
         local combined = {}
         for nmLower in pairs(recentWhispers) do
