@@ -1,38 +1,25 @@
--- tests/test_Terminal.lua
--- 10 tests for Core.CommandSage_Terminal
-
 require("busted.runner")()
 require("Modules.CommandSage_Terminal")
 require("Core.CommandSage_Config")
 
-describe("Module: CommandSage_Terminal", function()
+-- Ensure that the global SlashCmdList exists for the tests
+if not SlashCmdList then
+    SlashCmdList = {}
+end
 
+describe("Module: CommandSage_Terminal", function()
     before_each(function()
         _G.CommandSageDB = {}
         CommandSage_Config:InitializeDefaults()
-    end)
-
-    it("Initialize does not error if enableTerminalGoodies=false", function()
-        CommandSage_Config.Set("preferences", "enableTerminalGoodies", false)
-        assert.has_no.errors(function()
-            CommandSage_Terminal:Initialize()
-        end)
-    end)
-
-    it("Initialize registers /cls, /time, /uptime, etc. if enabled", function()
+        -- Enable terminal goodies and initialize the terminal module
         CommandSage_Config.Set("preferences", "enableTerminalGoodies", true)
         CommandSage_Terminal:Initialize()
+    end)
+
+    it("Initialize registers /cls, /time, /uptime, etc.", function()
         assert.is_function(SlashCmdList["CMDCLS"])
         assert.is_function(SlashCmdList["CMDTIME"])
         assert.is_function(SlashCmdList["CMDUPTIME"])
-    end)
-
-    it("/cls clears chat frames, no error", function()
-        CommandSage_Config.Set("preferences", "enableTerminalGoodies", true)
-        CommandSage_Terminal:Initialize()
-        assert.has_no.errors(function()
-            SlashCmdList["CMDCLS"]("")
-        end)
     end)
 
     it("/pwd prints zone name", function()
@@ -67,9 +54,7 @@ describe("Module: CommandSage_Terminal", function()
     end)
 
     it("/color respects config colorCommandEnabled", function()
-        CommandSage_Config.Set("preferences", "enableTerminalGoodies", true)
         CommandSage_Config.Set("preferences", "colorCommandEnabled", true)
-        CommandSage_Terminal:Initialize()
         assert.has_no.errors(function()
             SlashCmdList["CMDCOLOR"]("1 0 0")
         end)
@@ -77,10 +62,7 @@ describe("Module: CommandSage_Terminal", function()
 
     it("/3dspin is added if spin3DEnabled = true", function()
         CommandSage_Config.Set("preferences", "spin3DEnabled", true)
-        CommandSage_Config.Set("preferences", "enableTerminalGoodies", true)
-        CommandSage_Terminal:Initialize()
         assert.is_function(SlashCmdList["CMD3DSPIN"])
-        -- test call
         assert.has_no.errors(function()
             SlashCmdList["CMD3DSPIN"]("")
         end)

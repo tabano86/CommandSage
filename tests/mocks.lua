@@ -1,12 +1,5 @@
 -- tests/mocks.lua
-_G = _G or {}
-
--- Provide a place for slash commands
-SlashCmdList = SlashCmdList or {}
--- Example global slash for help
-SLASH_HELP1 = "/help"
-SlashCmdList["HELP"] = function(msg)
-end
+-- FIRST: Define globals that modules depend on
 
 -- Define wipe if not already defined
 if not wipe then
@@ -17,38 +10,7 @@ if not wipe then
     end
 end
 
--- Provide placeholders for standard UI objects
-UIParent = UIParent or CreateFrame("Frame", "UIParent")
-ChatFrame1 = ChatFrame1 or {
-    AddMessage = function(self, msg)
-    end,
-    Clear = function(self)
-    end,
-    IsVisible = function()
-        return true
-    end,
-}
-ChatFrame1EditBox = ChatFrame1EditBox or {
-    text = "",
-    SetText = function(self, txt)
-        self.text = txt
-    end,
-    GetText = function(self)
-        return self.text
-    end,
-    SetCursorPosition = function(self, pos)
-        self.cursorPos = pos
-    end,
-    SetPropagateKeyboardInput = function(self, b)
-    end,
-    HookScript = function(self, event, func)
-        self[event] = func
-    end
-}
-
-NUM_CHAT_WINDOWS = 1
-
--- CreateFrame mock with extra behavior
+-- Define CreateFrame before it is used anywhere else
 function CreateFrame(frameType, name, parent, template)
     local f = {}
     f.name = name or "MockFrame"
@@ -76,7 +38,7 @@ function CreateFrame(frameType, name, parent, template)
     function f:RegisterEvent(e)
     end
     function f:SetSize(w, h)
-        self.width = w;
+        self.width = w
         self.height = h
     end
     function f:SetPoint(...)
@@ -115,7 +77,6 @@ function CreateFrame(frameType, name, parent, template)
         function f.Text:SetText(t)
             self.text = t
         end
-        -- Optionally add a GetChecked/SetChecked stub
         f.checked = false
         function f:GetChecked()
             return self.checked

@@ -5,6 +5,13 @@ require("busted.runner")()
 require("Modules.CommandSage_Licensing")
 require("Core.CommandSage_Config")
 
+if not SlashCmdList then
+    SlashCmdList = {}
+end
+SlashCmdList["CMDLICENSE"] = function(msg)
+    CommandSage_Licensing:HandleLicenseCommand(msg)
+end
+
 describe("Module: CommandSage_Licensing", function()
 
     before_each(function()
