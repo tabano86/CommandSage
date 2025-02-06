@@ -1,8 +1,3 @@
---==========================
--- tests/Core/test_CoreMain.lua
---==========================
--- Exactly the same content you already had, but placed in tests/Core/
-
 require("tests.test_helper")
 
 describe("Core: CommandSage_Core", function()

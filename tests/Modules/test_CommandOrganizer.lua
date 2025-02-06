@@ -1,6 +1,3 @@
--- tests/test_CommandOrganizer.lua
--- 10 tests for Modules.CommandSage_CommandOrganizer
-
 require("tests.test_helper")
 
 describe("Module: CommandSage_CommandOrganizer", function()

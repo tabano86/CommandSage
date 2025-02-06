@@ -1,6 +1,3 @@
--- tests/test_ConfigGUI.lua
--- 10 tests for Modules.CommandSage_ConfigGUI
-
 require("tests.test_helper")
 
 describe("Module: CommandSage_ConfigGUI", function()

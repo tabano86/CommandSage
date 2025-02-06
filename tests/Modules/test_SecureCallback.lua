@@ -1,6 +1,3 @@
--- tests/test_SecureCallback.lua
--- 10 tests for Core.CommandSage_SecureCallback
-
 require("tests.test_helper")
 
 describe("Module: CommandSage_SecureCallback", function()

@@ -1,6 +1,3 @@
--- tests/test_Fallback.lua
--- 10 tests for Modules.CommandSage_Fallback
-
 require("tests.test_helper")
 
 describe("Module: CommandSage_Fallback", function()

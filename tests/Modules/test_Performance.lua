@@ -1,6 +1,3 @@
--- tests/test_Performance.lua
--- 10 tests for Core.CommandSage_Performance
-
 require("tests.test_helper")
 
 describe("Module: CommandSage_Performance", function()

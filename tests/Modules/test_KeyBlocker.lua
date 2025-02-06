@@ -1,6 +1,3 @@
--- tests/test_KeyBlocker.lua
--- 10 tests for Core.CommandSage_KeyBlocker
-
 require("tests.test_helper")
 
 describe("Module: CommandSage_KeyBlocker", function()

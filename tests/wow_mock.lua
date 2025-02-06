@@ -7,6 +7,11 @@
 
 print("wow_mock.lua loaded (enhanced).")
 
+if _G.__COMMANDSAGE_MOCK_LOADED then
+    return
+end
+_G.__COMMANDSAGE_MOCK_LOADED = true
+
 -- Provide wipe if not already defined
 if not wipe then
     function wipe(tbl)
@@ -106,7 +111,7 @@ if not CreateFrame then
             _G[name] = f
         end
 
-        function f:SetPoint(...) end
+        function f:SetPoint(point, relativeTo, relativePoint, x, y) end
         function f:SetSize(w, h)
             self.width = w
             self.height = h

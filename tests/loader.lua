@@ -1,22 +1,9 @@
---==========================
--- tests/loader.lua
---==========================
--- This file forces the same load order as your .toc. The key is to require
--- all modules in dependency order so that each one sees the expected globals.
+print("loader.lua start.")
 
--- 1) Load the WoW API mock & test helper
--- (We'll expect test_helper.lua to have loaded wow_mock, or vice versa.)
--- If you'd rather do it here, you can do:
--- require("tests.wow_mock")
-
--- 2) Reflect the .toc order for the addon:
-
--- Core
 require("Core.CommandSage_Config")
 require("Core.CommandSage_Core")
 require("Core.CommandSage_Discovery")
 
--- Modules
 require("Modules.CommandSage_Trie")
 require("Modules.CommandSage_FuzzyMatch")
 require("Modules.CommandSage_ParameterHelper")
@@ -41,9 +28,4 @@ require("Modules.CommandSage_Licensing")
 require("Modules.CommandSage_ConfigGUI")
 require("Modules.CommandSage_KeyBlocker")
 
--- Now all of the CommandSage_… modules are effectively loaded and placed
--- in the global environment. Your tests can reference them.
-
-
---------------------------------------------------------------------------------
-print("loader.lua: finished loading modules in .toc order.")
+print("loader.lua: finished loading in .toc order.")

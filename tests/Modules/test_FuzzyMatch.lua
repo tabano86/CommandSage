@@ -1,5 +1,3 @@
--- tests/test_FuzzyMatch.lua
-
 require("tests.test_helper")
 
 describe("CommandSage_FuzzyMatch", function()

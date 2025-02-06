@@ -1,6 +1,3 @@
--- tests/test_MultiModal.lua
--- 10 tests for Core.CommandSage_MultiModal
-
 require("tests.test_helper")
 
 describe("Module: CommandSage_MultiModal", function()

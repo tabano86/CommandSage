@@ -1,6 +1,3 @@
--- tests/test_Licensing.lua
--- 10 tests for Core.CommandSage_Licensing
-
 require("tests.test_helper")
 
 if not SlashCmdList then

@@ -1,6 +1,3 @@
--- tests/test_AdaptiveLearning.lua
--- 10 tests for Modules.CommandSage_AdaptiveLearning
-
 require("tests.test_helper")
 
 describe("Module: CommandSage_AdaptiveLearning", function()

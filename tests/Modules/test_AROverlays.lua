@@ -1,9 +1,3 @@
---==========================
--- tests/Modules/test_AROverlays.lua
---==========================
--- The same content from your old test_AROverlays.lua, but pointed to the new
--- test_helper and placed in tests/Modules/.
-
 require("tests.test_helper")
 
 describe("Module: CommandSage_AROverlays", function()

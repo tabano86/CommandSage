@@ -1,6 +1,4 @@
--- tests\test_ParameterHelper.lua
 require("tests.test_helper")
-
 describe("CommandSage_ParameterHelper", function()
     before_each(function()
         _G.CommandSageDB = {}

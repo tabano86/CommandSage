@@ -1,5 +1,3 @@
--- tests/test_AutoType.lua
--- 10 tests for Modules.CommandSage_AutoType
 require("tests.test_helper")
 
 describe("Module: CommandSage_AutoType", function()

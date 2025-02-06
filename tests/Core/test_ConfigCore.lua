@@ -1,9 +1,4 @@
--- tests/test_ConfigCore.lua
--- Another small check for CommandSage_Config
-
-require("busted.runner")()
 require("tests.test_helper")
-require("Core.CommandSage_Config")
 
 describe("Core: CommandSage_Config", function()
     before_each(function()

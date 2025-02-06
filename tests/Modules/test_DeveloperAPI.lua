@@ -1,7 +1,4 @@
--- tests/test_DeveloperAPI.lua
--- 10 tests for Modules.CommandSage_DeveloperAPI
 require("tests.test_helper")
-
 describe("Module: CommandSage_DeveloperAPI", function()
 
     before_each(function()

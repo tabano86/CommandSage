@@ -1,8 +1,3 @@
---==========================
--- tests/Modules/test_AutoComplete.lua
---==========================
--- Example module test, now living in tests/Modules/
-
 require("tests.test_helper")
 
 describe("CommandSage_AutoComplete", function()

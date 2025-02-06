@@ -1,6 +1,3 @@
--- tests/test_HistoryPlayback.lua
--- 10 tests for Core.CommandSage_HistoryPlayback
-
 require("tests.test_helper")
 
 describe("Module: CommandSage_HistoryPlayback", function()

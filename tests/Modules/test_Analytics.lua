@@ -1,6 +1,3 @@
--- tests/test_Analytics.lua
--- 10 tests for Modules.CommandSage_Analytics
-
 require("tests.test_helper")
 
 describe("Module: CommandSage_Analytics", function()

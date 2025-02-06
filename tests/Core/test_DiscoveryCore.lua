@@ -1,11 +1,4 @@
--- tests/test_DiscoveryCore.lua
--- 10 tests for Core.CommandSage_Discovery
-
-require("busted.runner")()
 require("tests.test_helper")
-require("Core.CommandSage_Discovery")
-require("Core.CommandSage_Config")
-require("Modules.CommandSage_Trie")
 
 describe("Core: CommandSage_Discovery", function()
 

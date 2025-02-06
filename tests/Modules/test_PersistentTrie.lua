@@ -1,6 +1,3 @@
--- tests/test_PersistentTrie.lua
--- 10 tests for Core.CommandSage_PersistentTrie
-
 require("tests.test_helper")
 
 describe("Module: CommandSage_PersistentTrie", function()
