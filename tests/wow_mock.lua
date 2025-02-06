@@ -1,6 +1,8 @@
 -------------------------------------------------------------
 -- tests/wow_mock.lua
 -- A comprehensive WoW Classic API stub for testing CommandSage.
+-- This file is our single source of truth for WoW Classic API stubs.
+-- It mimics the WoW Classic environment closely.
 -------------------------------------------------------------
 
 -- Force our stub to be used by clearing any preexisting CreateFrame.
@@ -12,8 +14,7 @@ print("wow_mock.lua loaded (enhanced).")
 -- Provide securecall and UIFrameFadeIn
 -----------------------------------------
 if not securecall then
-    -- In the real WoW API, securecall calls the function in a secure manner,
-    -- but here we can just call it directly for testing.
+    -- In WoW, securecall invokes a function in a protected environment.
     function securecall(fn, ...)
         return fn(...)
     end
@@ -28,7 +29,7 @@ end
 
 if not UIFrameFadeIn then
     function UIFrameFadeIn(frame, duration, fromAlpha, toAlpha)
-        -- Simple stub: just set final alpha
+        -- Simple stub: immediately set final alpha.
         frame:SetAlpha(toAlpha)
     end
 end
@@ -51,7 +52,7 @@ end
 if not C_Timer then
     C_Timer = {
         After = function(sec, func)
-            -- In tests, call the function immediately.
+            -- In tests, immediately call the function.
             func()
         end
     }
@@ -87,7 +88,7 @@ end
 -----------------------------------------
 -- Chat API Stubs
 -----------------------------------------
--- Simulate ChatEdit_DeactivateChat (e.g. when chat input loses focus).
+-- Simulate ChatEdit_DeactivateChat (e.g. when chat input loses focus)
 function ChatEdit_DeactivateChat()
     if ChatFrame1EditBox and ChatFrame1EditBox.scripts and ChatFrame1EditBox.scripts["OnDeactivate"] then
         ChatFrame1EditBox.scripts["OnDeactivate"](ChatFrame1EditBox)
@@ -100,7 +101,7 @@ function ChatEdit_SendText(editBox, send)
 end
 
 -----------------------------------------
--- CreateFrame Stub
+-- CreateFrame Stub (with many extra methods)
 -----------------------------------------
 function CreateFrame(frameType, name, parent, template)
     local frame = {}
@@ -122,17 +123,36 @@ function CreateFrame(frameType, name, parent, template)
         _G[name] = frame
     end
 
-    -- Provide a SetScale method so things like autoFrame:SetScale(...) won't error
+    -- Provide a SetScale method.
     function frame:SetScale(scale)
         self.scale = scale
     end
 
-    -- Basic methods
+    -- Extra stubs for scroll frames and related methods.
+    if frameType == "ScrollFrame" then
+        function frame:SetScrollChild(child)
+            self.child = child
+        end
+        function frame:GetScrollChild()
+            return self.child
+        end
+        function frame:SetVerticalScroll(offset)
+            self.verticalScroll = offset
+        end
+        function frame:GetVerticalScroll()
+            return self.verticalScroll or 0
+        end
+        function frame:SetHorizontalScroll(offset)
+            self.horizontalScroll = offset
+        end
+        function frame:GetHorizontalScroll()
+            return self.horizontalScroll or 0
+        end
+    end
+
+    -- Basic methods.
     function frame:SetPoint(point, a1, a2, a3, a4)
-        -- Some tests do: SetPoint("TOP", 0, -10)
-        -- We'll check if a1 is a number:
         if type(a1) == "number" then
-            -- interpret a1, a2 as x, y offsets
             self.points = { point, nil, nil, a1, a2 }
         else
             local relativeTo = a1 and a1.name or nil
@@ -163,17 +183,17 @@ function CreateFrame(frameType, name, parent, template)
     function frame:StartMoving() self.isMoving = true end
     function frame:StopMovingOrSizing() self.isMoving = false end
 
-    -- Script handling
+    -- Script handling.
     function frame:SetScript(event, func) self.scripts[event] = func end
     function frame:GetScript(event) return self.scripts[event] end
     function frame:HookScript(event, func) self.scripts[event] = func end
 
-    -- Event registration
+    -- Event registration.
     frame.registeredEvents = {}
     function frame:RegisterEvent(evt) self.registeredEvents[evt] = true end
     function frame:UnregisterEvent(evt) self.registeredEvents[evt] = nil end
 
-    -- Children
+    -- Children handling.
     function frame:GetChildren() return self.children end
     function frame:SetParent(p)
         self.parent = p
@@ -188,21 +208,19 @@ function CreateFrame(frameType, name, parent, template)
         frame.TitleText = { text = "", SetText = function(self, txt) self.text = txt end, GetText = function(self) return self.text or "" end }
     end
     if template and template:find("InterfaceOptionsCheckButtonTemplate") then
-        -- Provide SetChecked / GetChecked for checkboxes
         frame.SetChecked = function(self, val)
             self.checkedState = (val == true)
         end
         frame.GetChecked = function(self)
             return self.checkedState == true
         end
-
         frame.Text = { text = "", SetText = function(self, txt) self.text = txt end }
     end
     if template and template:find("UIPanelButtonTemplate") then
         frame.Text = { text = "", SetText = function(self, txt) self.text = txt end }
     end
 
-    -- FontString creation stub
+    -- FontString creation stub.
     function frame:CreateFontString(n, layer, templ)
         local fs = {}
         fs.text = ""
@@ -214,7 +232,7 @@ function CreateFrame(frameType, name, parent, template)
         return fs
     end
 
-    -- Texture creation stub
+    -- Texture creation stub.
     function frame:CreateTexture(n, layer, templ)
         local tex = {}
         tex.hidden = false
@@ -228,7 +246,6 @@ function CreateFrame(frameType, name, parent, template)
         function tex:Show() self.hidden = false end
         function tex:Hide() self.hidden = true end
         function tex:IsShown() return not self.hidden end
-
         return tex
     end
 
@@ -338,10 +355,150 @@ function ChatFrame1EditBox:SetBackdropColor(r, g, b, a)
 end
 
 -----------------------------------------
--- Debug Print (optional)
+-- Extra WoW API Stubs (30+ new stubs)
 -----------------------------------------
+-- Stub for LibStub (commonly used by addons)
+LibStub = LibStub or {
+    GetLibrary = function(libName, version)
+        return {} -- return an empty table for any requested library
+    end
+}
+
+-- Stub for UnitName
+UnitName = UnitName or function(unit)
+    if unit == "player" then
+        return "TestPlayer"
+    end
+    return "Unknown"
+end
+
+-- Stub for GetLocale
+GetLocale = GetLocale or function()
+    return "enUS"
+end
+
+-- Stub for PlaySound
+PlaySound = PlaySound or function(soundID, channel)
+    print("PlaySound called with soundID:", soundID)
+end
+
+-- Stub for StopSound
+StopSound = StopSound or function(soundID)
+    print("StopSound called with soundID:", soundID)
+end
+
+-- Stubs for SetCVar and GetCVar
+SetCVar = SetCVar or function(cvar, value)
+    _G[cvar] = value
+end
+GetCVar = GetCVar or function(cvar)
+    return _G[cvar]
+end
+
+-- Stub for CreateAnimationGroup and CreateAnimation
+function CreateAnimationGroup(frame)
+    local ag = {}
+    ag.animations = {}
+    function ag:CreateAnimation(animType)
+        local anim = { type = animType }
+        table.insert(ag.animations, anim)
+        return anim
+    end
+    function ag:Play() end
+    return ag
+end
+
+-- Frame level stubs
+function SetFrameLevel(frame, level)
+    frame.frameLevel = level
+end
+function GetFrameLevel(frame)
+    return frame.frameLevel or 1
+end
+function RaiseFrameLevel(frame)
+    frame.frameLevel = (frame.frameLevel or 1) + 1
+end
+function LowerFrameLevel(frame)
+    frame.frameLevel = (frame.frameLevel or 1) - 1
+end
+
+-- Addon messaging stubs
+function RegisterAddonMessagePrefix(prefix)
+    print("RegisterAddonMessagePrefix:", prefix)
+end
+function SendAddonMessage(prefix, message, channel, target)
+    print("SendAddonMessage:", prefix, message, channel, target)
+end
+
+-- Stub for ToggleDropDownMenu (common in UI)
+function ToggleDropDownMenu(level, value, dropdown, anchor, xOffset, yOffset)
+    print("ToggleDropDownMenu called with level:", level)
+end
+-- Stub for CloseDropDownMenus
+function CloseDropDownMenus(level)
+    print("CloseDropDownMenus called with level:", level)
+end
+
+-- Cursor functions
+function GetCursorPosition()
+    return 100, 100
+end
+function SetCursorPosition(x, y)
+    print("SetCursorPosition called:", x, y)
+end
+
+-- Stub for GameTooltip (basic implementation)
+GameTooltip = GameTooltip or {}
+function GameTooltip:SetOwner(owner, anchor)
+    -- No-op for testing.
+end
+function GameTooltip:SetText(text, ...)
+    print("GameTooltip:", text)
+end
+function GameTooltip:Hide()
+    -- No-op for testing.
+end
+
+-- Debug print stub (for consistency)
 function printDebug(msg)
     print("[Debug]:", msg)
+end
+
+-- Additional stub for IsAddOnLoaded
+function IsAddOnLoaded(addonName)
+    return true
+end
+
+-- Stub for ReloadUI
+function ReloadUI()
+    print("ReloadUI called")
+end
+
+-- Stub for PlayMusic
+function PlayMusic(file)
+    print("PlayMusic:", file)
+end
+-- Stub for StopMusic
+function StopMusic()
+    print("StopMusic called")
+end
+
+-- Stub for GetBindingKey
+function GetBindingKey(command)
+    return "CTRL-SHIFT-" .. command
+end
+
+-- Stub for ShowUIPanel
+function ShowUIPanel(frame)
+    frame:Show()
+end
+-- Stub for HideUIPanel
+function HideUIPanel(frame)
+    frame:Hide()
+end
+-- Stub for CloseMenus
+function CloseMenus()
+    print("CloseMenus called")
 end
 
 -----------------------------------------
