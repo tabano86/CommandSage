@@ -1,6 +1,7 @@
 -- tests/test_helper.lua
 -- Loads common mocks and sets up package.path so that require can find Core/ and Modules/
 require("tests.mocks")
+require("tests.wow_mock")
 
 package.path = package.path .. ";./Core/?.lua;./Modules/?.lua;./tests/?.lua;./?.lua;"
 
@@ -42,3 +43,5 @@ end
 
 
 _G._TEST = true
+
+print("test_helper.lua loaded.")
