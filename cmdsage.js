@@ -6,7 +6,7 @@ const path = require("path");
 const os = require("os");
 const fs = require("fs");
 const {spawnSync, spawn} = require("child_process");
-const clipboardy = require("clipboardy");
+const clipboardy = import("clipboardy");
 const archiver = require("archiver");
 
 function isWindows() {

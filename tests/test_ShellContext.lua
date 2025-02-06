@@ -4,7 +4,7 @@
 require("busted.runner")()
 require("Modules.CommandSage_ShellContext")
 require("Core.CommandSage_Config")
-require("CORE.CommandSage_Discovery")
+require("Core.CommandSage_Discovery")
 
 describe("Module: CommandSage_ShellContext", function()
 

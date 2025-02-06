@@ -3,7 +3,7 @@
 
 require("busted.runner")()
 require("Modules.CommandSage_Performance")
-require("CORE.CommandSage_Discovery")
+require("Core.CommandSage_Discovery")
 require("Modules.CommandSage_Trie")
 
 describe("Module: CommandSage_Performance", function()
