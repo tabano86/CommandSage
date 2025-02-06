@@ -1,11 +1,13 @@
+-------------------------------------------------------------
 -- tests/wow_mock.lua
 -- A comprehensive WoW Classic API stub for testing CommandSage.
--- This stub simulates frame creation, timer functions, chat edit functionality,
--- key binding overrides, macro and friend list functions, as well as various other
+-- This stub simulates frame creation, timer functions, chat edit
+-- functionality, key binding overrides, macro and friend list functions,
+-- zone/time functions, chat message functions, and various other
 -- WoW Classic API functions used by CommandSage.
 --
--- It is designed to be loaded before your tests run.
--- Feel free to extend or modify it as needed.
+-- Extend as needed.
+-------------------------------------------------------------
 
 -- Force our stub to be used by clearing any preexisting CreateFrame.
 _G.CreateFrame = nil
@@ -15,7 +17,6 @@ print("wow_mock.lua loaded (enhanced).")
 -----------------------------------------
 -- Utility Functions
 -----------------------------------------
--- Provide a wipe function if missing.
 if not wipe then
     function wipe(tbl)
         for k in pairs(tbl) do
@@ -62,6 +63,21 @@ if not date then
     date = function(fmt)
         return "12:34:56"
     end
+end
+
+-----------------------------------------
+-- Chat API Stubs
+-----------------------------------------
+-- Simulate ChatEdit_DeactivateChat (e.g. when chat input loses focus).
+function ChatEdit_DeactivateChat()
+    if ChatFrame1EditBox and ChatFrame1EditBox.scripts and ChatFrame1EditBox.scripts["OnDeactivate"] then
+        ChatFrame1EditBox.scripts["OnDeactivate"](ChatFrame1EditBox)
+    end
+end
+
+-- Simulate sending text from the chat edit box.
+function ChatEdit_SendText(editBox, send)
+    print("ChatEdit_SendText:", editBox:GetText())
 end
 
 -----------------------------------------
@@ -134,7 +150,7 @@ function CreateFrame(frameType, name, parent, template)
     end
     function frame:GetParent() return self.parent end
 
-    -- If using a basic frame template, add TitleText and optionally a CloseButton.
+    -- If using a basic frame template, add TitleText and CloseButton.
     if template and template:find("BasicFrameTemplate") then
         frame.TitleText = {
             text = "",
@@ -165,6 +181,7 @@ function CreateFrame(frameType, name, parent, template)
         local tex = {}
         tex.hidden = false
         function tex:SetAllPoints(...) end
+        function tex:SetPoint(...) end
         function tex:SetTexture(texture) self.texture = texture end
         function tex:SetAlpha(a) self.alpha = a end
         function tex:SetRotation(angle) self.rotation = angle end
@@ -172,6 +189,10 @@ function CreateFrame(frameType, name, parent, template)
         function tex:SetColorTexture(r, g, b, a) self.color = {r, g, b, a} end
         function tex:Show() self.hidden = false end
         function tex:Hide() self.hidden = true end
+        function tex:IsShown()
+            return not self.hidden
+        end
+
         return tex
     end
 
@@ -197,12 +218,7 @@ function ChatFrame1EditBox:HookScript(event, func)
     self.scripts[event] = func
 end
 
--- Simulate chat deactivation (for example, when the edit box loses focus).
-function ChatEdit_DeactivateChat()
-    if ChatFrame1EditBox and ChatFrame1EditBox.scripts and ChatFrame1EditBox.scripts["OnDeactivate"] then
-        ChatFrame1EditBox.scripts["OnDeactivate"](ChatFrame1EditBox)
-    end
-end
+NUM_CHAT_WINDOWS = NUM_CHAT_WINDOWS or 1
 
 -----------------------------------------
 -- Binding, Key, and Modifier Stubs
@@ -242,7 +258,7 @@ SlashCmdList["CLEARHISTORY"] = SlashCmdList["CLEARHISTORY"] or function(msg) end
 -----------------------------------------
 C_FriendList = C_FriendList or {
     GetNumFriends = function() return 0 end,
-    GetFriendInfoByIndex = function(i) return nil end
+    GetFriendInfoByIndex = GetFriendInfoByIndex or function(i) return nil end
 }
 
 -----------------------------------------
