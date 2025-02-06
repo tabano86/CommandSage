@@ -5,7 +5,7 @@ require("busted.runner")()
 require("Modules.CommandSage_FuzzyMatch")
 require("Modules.CommandSage_AdaptiveLearning")
 require("Core.CommandSage_Config")
-require("Modules.CommandSage_Discovery")
+require("CORE.CommandSage_Discovery")
 require("Modules.CommandSage_Trie")
 
 describe("Module: CommandSage_FuzzyMatch (Additional)", function()
