@@ -1,11 +1,14 @@
+-- Modules/CommandSage_ShellContext.lua
 CommandSage_ShellContext = {}
 local currentContext = nil
+
 function CommandSage_ShellContext:IsActive()
     if not CommandSage_Config.Get("preferences", "shellContextEnabled") then
         return false
     end
     return currentContext ~= nil
 end
+
 function CommandSage_ShellContext:RewriteInputIfNeeded(typedText)
     if not self:IsActive() then
         return typedText
@@ -13,12 +16,12 @@ function CommandSage_ShellContext:RewriteInputIfNeeded(typedText)
     if typedText:sub(1, 1) == "/" then
         return typedText
     end
-
     if not currentContext or currentContext == "" then
         return typedText
     end
     return "/" .. currentContext .. " " .. typedText
 end
+
 function CommandSage_ShellContext:HandleCd(msg)
     if not CommandSage_Config.Get("preferences", "shellContextEnabled") then
         print("Shell context is disabled by config.")
@@ -33,13 +36,14 @@ function CommandSage_ShellContext:HandleCd(msg)
         local discovered = CommandSage_Discovery:GetDiscoveredCommands()
         if discovered and discovered[fullSlash] then
             currentContext = target
-            print("CommandSage shell context set to '/" .. target .. "'.")
+            print("CommandSage shell context set to '" .. fullSlash .. "'.")
         else
-            print("No known slash command '" .. fullSlash ..
-                    "' found. Context not changed.")
+            -- unify the error message so the test sees exactly:
+            print("No known slash command '" .. fullSlash .. "' found. Context not changed.")
         end
     end
 end
+
 function CommandSage_ShellContext:GetCurrentContext()
     return currentContext
 end

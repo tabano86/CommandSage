@@ -1,3 +1,4 @@
+-- Modules/CommandSage_AutoComplete.lua
 require("Modules.CommandSage_FuzzyMatch")
 require("Modules.CommandSage_AutoType")
 
@@ -49,25 +50,22 @@ local snippetTemplates = {
 }
 
 function CommandSage_AutoComplete:MoveSelection(delta)
-    if not content then
-        return
-    end
+    if not content then return end
     local totalShown = 0
     for _, b in ipairs(content.buttons) do
         if b:IsShown() then
             totalShown = totalShown + 1
         end
     end
-    if totalShown == 0 then
-        return
-    end
+    if totalShown == 0 then return end
+
     selectedIndex = selectedIndex + delta
     if selectedIndex < 1 then
         selectedIndex = totalShown
-    end
-    if selectedIndex > totalShown then
+    elseif selectedIndex > totalShown then
         selectedIndex = 1
     end
+
     for i, b in ipairs(content.buttons) do
         if i == selectedIndex then
             b.bg:Show()
@@ -76,22 +74,23 @@ function CommandSage_AutoComplete:MoveSelection(delta)
         end
     end
 end
+
 function CommandSage_AutoComplete:AcceptOrAdvance()
-    if not content then
-        return
-    end
+    if not content then return end
     if selectedIndex > 0 and content.buttons[selectedIndex]:IsShown() then
         self:AcceptSuggestion(content.buttons[selectedIndex].suggestionData)
     else
         self:MoveSelection(1)
     end
 end
+
 local function ApplyStylingToAutoFrame(frame)
     local prefs = CommandSage_Config.Get("preferences")
     local advancedStyling = prefs.advancedStyling
     local bgColor = prefs.autocompleteBgColor or { 0, 0, 0, 0.85 }
     local scale = prefs.uiScale or 1.0
     local highlightColor = prefs.autocompleteHighlightColor or { 0.6, 0.6, 0.6, 0.3 }
+
     frame:SetScale(scale)
     if advancedStyling then
         frame:SetBackdrop({
@@ -108,6 +107,7 @@ local function ApplyStylingToAutoFrame(frame)
         })
     end
     frame:SetBackdropColor(unpack(bgColor))
+
     if prefs.rainbowBorderEnabled then
         frame.rainbowTex = frame.rainbowTex or frame:CreateTexture(nil, "OVERLAY")
         frame.rainbowTex:SetAllPoints()
@@ -124,6 +124,7 @@ local function ApplyStylingToAutoFrame(frame)
         end
         frame:SetScript("OnUpdate", nil)
     end
+
     if prefs.spinningIconEnabled then
         frame.spinIcon = frame.spinIcon or frame:CreateTexture(nil, "ARTWORK")
         frame.spinIcon:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -5, -5)
@@ -141,6 +142,7 @@ local function ApplyStylingToAutoFrame(frame)
         end
     end
 end
+
 local function CreateAutoCompleteUI()
     if autoFrame then
         return autoFrame
@@ -155,73 +157,78 @@ local function CreateAutoCompleteUI()
     autoFrame:SetSize(400, 250)
     ApplyStylingToAutoFrame(autoFrame)
     autoFrame:Hide()
+
     scrollFrame = CreateFrame("ScrollFrame", "CommandSageAutoScroll", autoFrame, "UIPanelScrollFrameTemplate")
     scrollFrame:SetPoint("TOPLEFT", 5, -5)
     scrollFrame:SetPoint("BOTTOMRIGHT", -28, 5)
+
     content = CreateFrame("Frame", nil, scrollFrame)
     content:SetSize(1, 1)
     scrollFrame:SetScrollChild(content)
     content.buttons = {}
+
     local userMax = CommandSage_Config.Get("preferences", "maxSuggestionsOverride")
     local maxSuggest = userMax or DEFAULT_MAX_SUGGEST
+
     for i = 1, maxSuggest do
         local btn = CreateFrame("Button", nil, content)
         btn:SetHeight(20)
         btn:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -(i - 1) * 20)
         btn:SetPoint("RIGHT", content, "RIGHT", 0, 0)
+
         btn.bg = btn:CreateTexture(nil, "BACKGROUND")
         btn.bg:SetAllPoints()
         btn.bg:SetColorTexture(0.3, 0.3, 0.3, 0.1)
         btn.bg:Hide()
+
         btn.highlight = btn:CreateTexture(nil, "HIGHLIGHT")
         btn.highlight:SetAllPoints()
         btn.highlight:SetColorTexture(0.6, 0.6, 0.6, 0.3)
+
         btn.text = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         btn.text:SetPoint("LEFT", 5, 0)
         btn.text:SetJustifyH("LEFT")
         btn.text:SetWidth(100)
+
         btn.desc = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         btn.desc:SetPoint("LEFT", btn.text, "RIGHT", 10, 0)
         btn.desc:SetJustifyH("LEFT")
         btn.desc:SetWidth(180)
+
         btn.usage = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         btn.usage:SetPoint("LEFT", btn.desc, "RIGHT", 10, 0)
         btn.usage:SetJustifyH("LEFT")
         btn.usage:SetWidth(60)
-        btn:SetScript("OnEnter", function(self)
-            self.bg:Show()
-        end)
-        btn:SetScript("OnLeave", function(self)
-            self.bg:Hide()
-        end)
+
+        btn:SetScript("OnEnter", function(self) self.bg:Show() end)
+        btn:SetScript("OnLeave", function(self) self.bg:Hide() end)
         btn:SetScript("OnClick", function(self)
             CommandSage_AutoComplete:AcceptSuggestion(self.suggestionData)
         end)
+
         btn:Hide()
         content.buttons[i] = btn
     end
     return autoFrame
 end
+
 local function MoveSelection(delta)
-    if not content then
-        return
-    end
+    if not content then return end
     local totalShown = 0
     for _, b in ipairs(content.buttons) do
         if b:IsShown() then
             totalShown = totalShown + 1
         end
     end
-    if totalShown == 0 then
-        return
-    end
+    if totalShown == 0 then return end
+
     selectedIndex = selectedIndex + delta
     if selectedIndex < 1 then
         selectedIndex = totalShown
-    end
-    if selectedIndex > totalShown then
+    elseif selectedIndex > totalShown then
         selectedIndex = 1
     end
+
     for i, b in ipairs(content.buttons) do
         if i == selectedIndex then
             b.bg:Show()
@@ -230,10 +237,9 @@ local function MoveSelection(delta)
         end
     end
 end
+
 function CommandSage_AutoComplete:AcceptSuggestion(sugg)
-    if not sugg then
-        return
-    end
+    if not sugg then return end
     local slashCmd = sugg.slash
     if slashCmd then
         if CommandSage_Config.Get("preferences", "animateAutoType") then
@@ -249,28 +255,35 @@ function CommandSage_AutoComplete:AcceptSuggestion(sugg)
         autoFrame:Hide()
     end
 end
+
 function CommandSage_AutoComplete:ShowSuggestions(suggestions)
     local frame = CreateAutoCompleteUI()
     ApplyStylingToAutoFrame(frame)
+
     if #suggestions == 0 then
         frame:Hide()
         return
     end
+
     local userMax = CommandSage_Config.Get("preferences", "maxSuggestionsOverride")
     local maxSuggest = userMax or DEFAULT_MAX_SUGGEST
     local totalToShow = math.min(#suggestions, maxSuggest)
     local btnHeight = 20
     local totalHeight = totalToShow * btnHeight
     content:SetHeight(totalHeight)
+
     local paramGlowEnabled = CommandSage_Config.Get("preferences", "paramGlowEnabled")
     for i, btn in ipairs(content.buttons) do
         local s = suggestions[i]
         if i <= totalToShow and s then
             btn.suggestionData = s
+
             local usageScore = CommandSage_AdaptiveLearning:GetUsageScore(s.slash)
             local freqDisplay = (usageScore > 0) and ("(" .. usageScore .. ")") or ""
+
             local cat = CommandSage_CommandOrganizer:GetCategory(s.slash)
             local desc = (s.data and s.data.description) or ""
+
             if s.isParamSuggestion and CommandSage_Config.Get("preferences", "showParamSuggestionsInColor") then
                 btn.text:SetTextColor(unpack(CommandSage_Config.Get("preferences", "paramSuggestionsColor")))
                 if paramGlowEnabled then
@@ -280,6 +293,7 @@ function CommandSage_AutoComplete:ShowSuggestions(suggestions)
                 btn.text:SetTextColor(1, 1, 1, 1)
                 btn.highlight:SetColorTexture(0.6, 0.6, 0.6, 0.3)
             end
+
             btn.text:SetText(s.slash)
             if CommandSage_Config.Get("preferences", "showDescriptionsInAutocomplete") then
                 if desc == "" then
@@ -289,6 +303,7 @@ function CommandSage_AutoComplete:ShowSuggestions(suggestions)
             else
                 btn.desc:SetText("")
             end
+
             if usageScore and usageScore > 10 then
                 btn.usage:SetTextColor(0, 1, 0, 1)
             else
@@ -304,11 +319,13 @@ function CommandSage_AutoComplete:ShowSuggestions(suggestions)
     frame:SetHeight(math.min(totalHeight + 10, 250))
     frame:Show()
 end
+
 function CommandSage_AutoComplete:CloseSuggestions()
     if autoFrame then
         autoFrame:Hide()
     end
 end
+
 function CommandSage_AutoComplete:PassesContextFilter(sugg)
     if not CommandSage_Config.Get("preferences", "contextFiltering") then
         return true
@@ -318,6 +335,7 @@ function CommandSage_AutoComplete:PassesContextFilter(sugg)
     end
     return true
 end
+
 local function MergeHistoryWithCommands(typedLower, possible)
     local hist = CommandSage_HistoryPlayback:GetHistory()
     local merged = {}
@@ -325,12 +343,19 @@ local function MergeHistoryWithCommands(typedLower, possible)
     for _, cmdObj in ipairs(possible) do
         existing[cmdObj.slash] = true
     end
+
+    -- copy possible first
     for _, cmdObj in ipairs(possible) do
         table.insert(merged, cmdObj)
     end
+
+    -- if partial is found to produce 0 from the Trie, or partialFuzzyFallback is set,
+    -- we want to add matching history commands even if they fail fuzzy
+    local fallback = CommandSage_Config.Get("preferences", "partialFuzzyFallback")
     for _, hcmd in ipairs(hist) do
         local lower = hcmd:lower()
-        if lower:find(typedLower, 1, true) or (CommandSage_Config.Get("preferences", "partialFuzzyFallback")) then
+        local foundSimple = (lower:find(typedLower, 1, true) ~= nil)
+        if foundSimple or fallback then
             if not existing[lower] then
                 table.insert(merged, { slash = hcmd, data = { description = "History command" }, rank = 0 })
             end
@@ -338,28 +363,32 @@ local function MergeHistoryWithCommands(typedLower, possible)
     end
     return merged
 end
+
 function CommandSage_AutoComplete:GenerateSuggestions(typedText)
     local mode = CommandSage_Config.Get("preferences", "suggestionMode") or "fuzzy"
-    -- Rewrite input if needed (e.g. add a slash for shell context)
     typedText = CommandSage_ShellContext:RewriteInputIfNeeded(typedText)
     local partialLower = typedText:lower()
+
     if partialLower:sub(1, 1) ~= "/" and not CommandSage_ShellContext:IsActive() then
         partialLower = "/" .. partialLower
     end
 
     local possible = CommandSage_Trie:FindPrefix(partialLower)
+    local fallback = CommandSage_Config.Get("preferences", "partialFuzzyFallback")
 
-    -- If partialFuzzyFallback is enabled and no prefix matches, then fallback:
-    if CommandSage_Config.Get("preferences", "partialFuzzyFallback") and #possible == 0 then
+    if fallback and #possible == 0 then
+        -- skip fuzzy, show everything
         possible = CommandSage_Trie:AllCommands()
+        -- also merge history ignoring fuzzy
         possible = MergeHistoryWithCommands(partialLower, possible)
+        -- skip fuzzy entirely
         local final = {}
-        for _, cmdObj in ipairs(possible) do
-            if not CommandSage_Analytics:IsBlacklisted(cmdObj.slash) and self:PassesContextFilter(cmdObj) then
-                table.insert(final, { slash = cmdObj.slash, data = cmdObj.data, rank = 0 })
+        for _, cmd in ipairs(possible) do
+            if not CommandSage_Analytics:IsBlacklisted(cmd.slash) and self:PassesContextFilter(cmd) then
+                table.insert(final, { slash = cmd.slash, data = cmd.data, rank = 0, isParamSuggestion = cmd.isParamSuggestion })
             end
         end
-        -- Add snippet expansions if enabled
+        -- snippet expansions
         if CommandSage_Config.Get("preferences", "snippetEnabled") then
             for _, snip in ipairs(snippetTemplates) do
                 if snip.slash:find(partialLower, 1, true) then
@@ -371,7 +400,7 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
                 end
             end
         end
-        -- Sort final results: favorites come first; snippet entries (rank -1) are pushed to the bottom.
+        -- favorites sorting, snippet last
         if CommandSage_Config.Get("preferences", "favoritesSortingEnabled") then
             table.sort(final, function(a, b)
                 local aFav = CommandSage_Analytics:IsFavorite(a.slash) and 1 or 0
@@ -379,19 +408,20 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
                 if aFav ~= bFav then
                     return aFav > bFav
                 end
-                local aIsSnippet = (a.rank == -1)
-                local bIsSnippet = (b.rank == -1)
-                if aIsSnippet ~= bIsSnippet then
-                    return not aIsSnippet  -- non-snippet come first
+                -- snippet last
+                local aSnip = (a.rank == -1)
+                local bSnip = (b.rank == -1)
+                if aSnip ~= bSnip then
+                    return not aSnip
                 end
                 return (a.rank or 0) > (b.rank or 0)
             end)
         else
             table.sort(final, function(a, b)
-                local aIsSnippet = (a.rank == -1)
-                local bIsSnippet = (b.rank == -1)
-                if aIsSnippet ~= bIsSnippet then
-                    return not aIsSnippet
+                local aSnip = (a.rank == -1)
+                local bSnip = (b.rank == -1)
+                if aSnip ~= bSnip then
+                    return not aSnip
                 end
                 return (a.rank or 0) > (b.rank or 0)
             end)
@@ -399,81 +429,88 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
         return final
     end
 
-    -- Normal (non-fallback) path: merge history into what was found
+    -- Normal path
     possible = MergeHistoryWithCommands(partialLower, possible)
     local matched = {}
+
     if mode == "fuzzy" then
-        matched = CommandSage_FuzzyMatch:GetSuggestions(partialLower, possible)
+        local rawMatches = CommandSage_FuzzyMatch:GetSuggestions(partialLower, possible)
+        -- need snippet expansions after fuzzy
+        for _, m in ipairs(rawMatches) do
+            if not CommandSage_Analytics:IsBlacklisted(m.slash) and self:PassesContextFilter(m) then
+                table.insert(matched, m)
+            end
+        end
     else
+        -- strict prefix sort
         for _, cmd in ipairs(possible) do
-            table.insert(matched, { slash = cmd.slash, data = cmd.data, rank = 0 })
+            if not CommandSage_Analytics:IsBlacklisted(cmd.slash) and self:PassesContextFilter(cmd) then
+                table.insert(matched, { slash = cmd.slash, data = cmd.data, rank = 0 })
+            end
         end
         table.sort(matched, function(a, b)
             return a.slash < b.slash
         end)
     end
 
-    -- Add snippet expansions if enabled
+    -- snippet expansions
     if CommandSage_Config.Get("preferences", "snippetEnabled") then
         for _, snip in ipairs(snippetTemplates) do
             if snip.slash:find(partialLower, 1, true) then
                 table.insert(matched, {
                     slash = snip.snippet,
                     data = { description = snip.desc },
-                    rank = -1  -- lowered rank so real commands come first
+                    rank = -1
                 })
             end
         end
     end
 
-    local final = {}
-    for _, m in ipairs(matched) do
-        if not CommandSage_Analytics:IsBlacklisted(m.slash) and self:PassesContextFilter(m) then
-            table.insert(final, m)
-        end
-    end
-
+    -- final sort with favorites + snippet-later
     if CommandSage_Config.Get("preferences", "favoritesSortingEnabled") then
-        table.sort(final, function(a, b)
+        table.sort(matched, function(a, b)
             local aFav = CommandSage_Analytics:IsFavorite(a.slash) and 1 or 0
             local bFav = CommandSage_Analytics:IsFavorite(b.slash) and 1 or 0
             if aFav ~= bFav then
                 return aFav > bFav
             end
-            local aIsSnippet = (a.rank == -1)
-            local bIsSnippet = (b.rank == -1)
-            if aIsSnippet ~= bIsSnippet then
-                return not aIsSnippet  -- non-snippet come first
+            local aSnip = (a.rank == -1)
+            local bSnip = (b.rank == -1)
+            if aSnip ~= bSnip then
+                return not aSnip
             end
             return (a.rank or 0) > (b.rank or 0)
         end)
     else
-        table.sort(final, function(a, b)
-            local aIsSnippet = (a.rank == -1)
-            local bIsSnippet = (b.rank == -1)
-            if aIsSnippet ~= bIsSnippet then
-                return not aIsSnippet
+        table.sort(matched, function(a, b)
+            local aSnip = (a.rank == -1)
+            local bSnip = (b.rank == -1)
+            if aSnip ~= bSnip then
+                return not aSnip
             end
             return (a.rank or 0) > (b.rank or 0)
         end)
     end
 
-    return final
+    return matched
 end
 
+-- hooking code below unchanged...
 local hookingFrame = CreateFrame("Frame")
 hookingFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+
 local function CloseAutoCompleteOnChatDeactivate()
     if autoFrame and autoFrame:IsShown() then
         autoFrame:Hide()
     end
 end
+
 hookingFrame:SetScript("OnEvent", function()
     local edit = ChatFrame1EditBox
-    if not edit then
-        return
-    end
+    if not edit then return end
+
     hooksecurefunc("ChatEdit_DeactivateChat", CloseAutoCompleteOnChatDeactivate)
+
     edit:HookScript("OnKeyDown", function(self, key)
         local text = self:GetText() or ""
         local isSlash = (text:sub(1, 1) == "/")
@@ -520,6 +557,7 @@ hookingFrame:SetScript("OnEvent", function()
             self:SetPropagateKeyboardInput(true)
         end
     end)
+
     local orig = edit:GetScript("OnTextChanged")
     edit:SetScript("OnTextChanged", function(eBox, userInput)
         if orig then
@@ -565,6 +603,7 @@ hookingFrame:SetScript("OnEvent", function()
         CommandSage_AutoComplete:ShowSuggestions(final)
     end)
 end)
+
 function CommandSage_AutoComplete:CloseSuggestions()
     if autoFrame then
         autoFrame:Hide()

@@ -1,5 +1,7 @@
+-- Modules/CommandSage_PersistentTrie.lua
 CommandSage_PersistentTrie = {}
 local KEY = "cachedTrie"
+
 local function serializeNode(node)
     local data = {
         isTerminal = node.isTerminal,
@@ -12,6 +14,7 @@ local function serializeNode(node)
     end
     return data
 end
+
 local function deserializeNode(data)
     local node = {
         children = {},
@@ -33,6 +36,7 @@ function CommandSage_PersistentTrie:SaveTrie()
     local s = serializeNode(r)
     CommandSageDB[KEY] = s
 end
+
 function CommandSage_PersistentTrie:LoadTrie()
     local s = CommandSageDB[KEY]
     if s then
@@ -45,6 +49,7 @@ function CommandSage_PersistentTrie:LoadTrie()
         r.maxDepth = loaded.maxDepth
     end
 end
+
 function CommandSage_PersistentTrie:ClearCachedTrie()
     CommandSageDB[KEY] = nil
     print("CommandSage: Persistent trie data cleared.")
