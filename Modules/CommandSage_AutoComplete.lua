@@ -107,7 +107,6 @@ local function ApplyStylingToAutoFrame(frame)
     local advancedStyling = prefs.advancedStyling
     local bgColor = prefs.autocompleteBgColor or { 0, 0, 0, 0.85 }
     local scale = prefs.uiScale or 1.0
-    local highlightColor = prefs.autocompleteHighlightColor or { 0.6, 0.6, 0.6, 0.3 }
 
     frame:SetScale(scale)
     if advancedStyling then
@@ -385,21 +384,19 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
         partialLower = "/" .. partialLower
     end
 
-    local possible = CommandSage_Trie:FindPrefix(partialLower)
-    local fallback = CommandSage_Config.Get("preferences", "partialFuzzyFallback")
-
-    if fallback and #possible == 0 then
-        possible = CommandSage_Trie:AllCommands()
-        possible = MergeHistoryWithCommands(partialLower, possible)
+    -- Special case: if the input is very short (e.g. just "/"), then bypass fuzzy matching.
+    if #partialLower <= 1 then
+        local allCommands = CommandSage_Trie:AllCommands()
+        allCommands = MergeHistoryWithCommands(partialLower, allCommands)
         local final = {}
-        for _, cmd in ipairs(possible) do
+        for _, cmd in ipairs(allCommands) do
             if not CommandSage_Analytics:IsBlacklisted(cmd.slash) and self:PassesContextFilter(cmd) then
                 table.insert(final, { slash = cmd.slash, data = cmd.data, rank = 0, isSnippet = false, isParamSuggestion = cmd.isParamSuggestion })
             end
         end
-        if CommandSage_Config.Get("preferences", "snippetEnabled") and #partialLower > 1 then
+        if CommandSage_Config.Get("preferences", "snippetEnabled") then
             for _, snip in ipairs(snippetTemplates) do
-                if snip.slash:find(partialLower, 1, true) then
+                if snip and snip.slash and snip.slash:find(partialLower, 1, true) then
                     table.insert(final, {
                         slash = snip.snippet,
                         data = { description = snip.desc },
@@ -411,21 +408,29 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
         end
         if CommandSage_Config.Get("preferences", "favoritesSortingEnabled") then
             table.sort(final, function(a, b)
-                if a.rank ~= b.rank then
-                    return a.rank > b.rank  -- non-snippet suggestions (rank>=0) come first
+                if a.isSnippet ~= b.isSnippet then
+                    return not a.isSnippet
                 end
                 local aFav = CommandSage_Analytics:IsFavorite(a.slash) and 1 or 0
                 local bFav = CommandSage_Analytics:IsFavorite(b.slash) and 1 or 0
-                return aFav > bFav
+                if aFav ~= bFav then
+                    return aFav > bFav
+                end
+                return (a.rank or 0) > (b.rank or 0)
             end)
         else
             table.sort(final, function(a, b)
-                return a.rank > b.rank
+                if a.isSnippet ~= b.isSnippet then
+                    return not a.isSnippet
+                end
+                return (a.rank or 0) > (b.rank or 0)
             end)
         end
         return final
     end
 
+    -- Normal branch: get possible commands via fuzzy matching.
+    local possible = CommandSage_Trie:FindPrefix(partialLower)
     possible = MergeHistoryWithCommands(partialLower, possible)
     local matched = {}
     if mode == "fuzzy" then
@@ -448,8 +453,8 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
     end
 
     if CommandSage_Config.Get("preferences", "snippetEnabled") and #partialLower > 1 then
-        for _, snip in ipairs(snippetTemplates) do
-            if snip.slash:find(partialLower, 1, true) then
+        for _, snip in ipairs(snippetTemplates or {}) do
+            if snip and snip.slash and snip.slash:find(partialLower, 1, true) then
                 table.insert(matched, {
                     slash = snip.snippet,
                     data = { description = snip.desc },
@@ -460,7 +465,6 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
         end
     end
 
-    -- In the final sort, ensure that non-snippet suggestions always come before snippet suggestions.
     if CommandSage_Config.Get("preferences", "favoritesSortingEnabled") then
         table.sort(matched, function(a, b)
             if a.isSnippet ~= b.isSnippet then
@@ -606,4 +610,5 @@ function CommandSage_AutoComplete:CloseSuggestions()
         autoFrame:Hide()
     end
 end
+
 return CommandSage_AutoComplete
