@@ -55,6 +55,7 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y luarocks lua5.3 lua5.3-dev
           luarocks install busted --local
+          echo "$HOME/.luarocks/bin" >> $GITHUB_PATH
       - name: Run tests
         run: node cmdsage.js test
       - name: Extract Version from Tag
