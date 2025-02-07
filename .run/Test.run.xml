@@ -1,7 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-    <configuration default="false" name="Test" type="NodeJSConfigurationType" application-parameters="test"
-                   path-to-node="wsl://Ubuntu@/home/dirtbikr/.nvm/versions/node/v22.13.1/bin/node"
-                   path-to-js-file="cmdsage.js" working-dir="$PROJECT_DIR$">
-        <method v="2"/>
-    </configuration>
-</component>
