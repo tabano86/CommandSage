@@ -15,11 +15,11 @@ function SecureCallback:ExecuteCommand(slash, args)
     if type(slash) ~= "string" or slash == "" then
         return
     end
-    if self:IsCommandProtected(slash) and InCombatLockdown and InCombatLockdown() then
+    if self:IsCommandProtected(slash) and InCombatLockdown and type(InCombatLockdown) == "function" and InCombatLockdown() then
         print("Can't run protected command in combat: " .. slash)
         return
     end
-    local discovered = CommandSage_Discovery and CommandSage_Discovery:GetDiscoveredCommands() or {}
+    local discovered = (CommandSage_Discovery and CommandSage_Discovery:GetDiscoveredCommands()) or {}
     local cmdObj = discovered[slash]
     if cmdObj and type(cmdObj.callback) == "function" then
         securecall(cmdObj.callback, args or "")
@@ -29,6 +29,7 @@ function SecureCallback:ExecuteCommand(slash, args)
         ChatEdit_SendText(ChatFrame1EditBox, 0)
     end
 end
+
 
 function SecureCallback:IsAnyCommandProtected(commandList)
     if type(commandList) ~= "table" then return false end

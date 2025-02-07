@@ -66,7 +66,7 @@ function CommandSage_FuzzyMatch:GetSuggestions(input, possibleCommands)
     return results
 end
 function CommandSage_FuzzyMatch:SuggestCorrections(input)
-    local discovered = CommandSage_Discovery:GetDiscoveredCommands()
+    local discovered = CommandSage_Discovery:GetDiscoveredCommands() or {}
     local bestDist = math.huge
     local bestCmd = nil
     for slash, _ in pairs(discovered) do
@@ -76,11 +76,15 @@ function CommandSage_FuzzyMatch:SuggestCorrections(input)
             bestCmd = slash
         end
     end
-    if bestDist <= (CommandSage_Config.Get("preferences", "fuzzyMatchTolerance") or 2) + 1 then
+    if bestCmd and type(bestCmd) == "table" then
+        bestCmd = bestCmd.slash  -- extract string if necessary
+    end
+    if bestDist <= ((CommandSage_Config.Get("preferences", "fuzzyMatchTolerance") or 2) + 1) then
         return bestCmd, bestDist
     end
     return nil, bestDist
 end
+
 function CommandSage_FuzzyMatch:GetFuzzyDistance(strA, strB)
     return Levenshtein(strA:lower(), strB:lower())
 end

@@ -10,7 +10,6 @@ function MultiModal:OnVoiceCommand(phrase)
     end
 
     local input = phrase:lower()
-    -- Use all commands from the trie.
     local possible = CommandSage_Trie and CommandSage_Trie:AllCommands() or {}
     local suggestions = CommandSage_FuzzyMatch and CommandSage_FuzzyMatch:GetSuggestions(input, possible) or {}
 
@@ -20,12 +19,14 @@ function MultiModal:OnVoiceCommand(phrase)
     else
         local best, dist = CommandSage_FuzzyMatch and CommandSage_FuzzyMatch:SuggestCorrections(input) or {nil, nil}
         if best then
+            if type(best) == "table" then best = best.slash end
             print("Voice recognized => " .. best)
         else
             print("No match for voice input: " .. phrase)
         end
     end
 end
+
 
 function MultiModal:SimulateVoiceCommand(phrase)
     print("Simulating voice input: " .. phrase)
