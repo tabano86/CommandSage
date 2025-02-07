@@ -1,10 +1,16 @@
+-- File: Modules/CommandSage_HistoryPlayback.lua
 CommandSage_HistoryPlayback = {}
 local maxHist = 200
+
 local function EnsureHistoryDB()
-    if not CommandSageDB.commandHistory then
+    if not CommandSageDB or type(CommandSageDB) ~= "table" then
+        CommandSageDB = {}
+    end
+    if type(CommandSageDB.commandHistory) ~= "table" then
         CommandSageDB.commandHistory = {}
     end
 end
+
 function CommandSage_HistoryPlayback:AddToHistory(cmd)
     if not CommandSage_Config.Get("preferences", "persistHistory") then
         return
@@ -15,10 +21,12 @@ function CommandSage_HistoryPlayback:AddToHistory(cmd)
         table.remove(CommandSageDB.commandHistory, 1)
     end
 end
+
 function CommandSage_HistoryPlayback:GetHistory()
     EnsureHistoryDB()
     return CommandSageDB.commandHistory
 end
+
 SLASH_COMMANDSAGEHISTORY1 = "/cmdsagehistory"
 SlashCmdList["COMMANDSAGEHISTORY"] = function(msg)
     print("|cff00ff00CommandSage History|r:")
@@ -27,6 +35,7 @@ SlashCmdList["COMMANDSAGEHISTORY"] = function(msg)
         print(string.format("%3d) %s", i, c))
     end
 end
+
 SLASH_SEARCHHISTORY1 = "/searchhistory"
 SlashCmdList["SEARCHHISTORY"] = function(msg)
     local query = msg:lower()
@@ -38,9 +47,13 @@ SlashCmdList["SEARCHHISTORY"] = function(msg)
         end
     end
 end
+
 SLASH_CLEARHISTORY1 = "/clearhistory"
 SlashCmdList["CLEARHISTORY"] = function(msg)
-    CommandSageDB.commandHistory = {}
+    if CommandSageDB then
+        CommandSageDB.commandHistory = {}
+    end
     print("CommandSage: Command history cleared.")
 end
+
 return CommandSage_HistoryPlayback

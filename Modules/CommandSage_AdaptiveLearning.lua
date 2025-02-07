@@ -1,23 +1,28 @@
+-- File: Modules/CommandSage_AdaptiveLearning.lua
 CommandSage_AdaptiveLearning = {}
+
 local function EnsureUsageData()
-    if type(CommandSageDB) ~= "table" then
+    if not CommandSageDB or type(CommandSageDB) ~= "table" then
         CommandSageDB = {}
     end
-    if type(CommandSageDB.usageData) ~= "table" then
+    if not CommandSageDB.usageData or type(CommandSageDB.usageData) ~= "table" then
         CommandSageDB.usageData = {}
     end
 end
+
 function CommandSage_AdaptiveLearning:IncrementUsage(slash)
     EnsureUsageData()
     local key = slash:lower()
     CommandSageDB.usageData[key] = (CommandSageDB.usageData[key] or 0) + 1
 end
+
 function CommandSage_AdaptiveLearning:GetUsageScore(slash)
     EnsureUsageData()
     return CommandSageDB.usageData[slash:lower()] or 0
 end
+
 function CommandSage_AdaptiveLearning:ResetUsageData()
-    if type(CommandSageDB) ~= "table" then
+    if not CommandSageDB or type(CommandSageDB) ~= "table" then
         CommandSageDB = {}
     end
     CommandSageDB.usageData = nil
