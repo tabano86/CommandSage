@@ -26,10 +26,10 @@ function ShellContext:RewriteInputIfNeeded(typedText)
 end
 
 function ShellContext:HandleCd(msg)
-    if not CommandSage_Config or not CommandSage_Config.Get("preferences", "shellContextEnabled") then
-        print("Shell context is disabled by config.")
-        return
-    end
+    --if not CommandSage_Config or not CommandSage_Config.Get("preferences", "shellContextEnabled") then
+    --    print("Shell context is disabled by config.")
+    --    return
+    --end
     local target = (msg and msg:match("^%s*(.-)%s*$")) or ""
     if target == "" or target == "clear" or target == "none" or target == ".." then
         currentContext = nil

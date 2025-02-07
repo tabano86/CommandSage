@@ -8,7 +8,8 @@ describe("Module: CommandSage_AutoType", function()
         _G.CommandSageDB = {}
         CommandSage_Config:InitializeDefaults()
 
-        -- Stub for ChatFrame1EditBox.
+        -- REMOVE this local override entirely:
+        --[[
         ChatFrame1EditBox = {
             text = "",
             SetText = function(self, t)
@@ -18,16 +19,16 @@ describe("Module: CommandSage_AutoType", function()
                 return self.text
             end,
         }
+        ]]
 
-        -- Create a fake frame to simulate UI behavior.
+        -- Keep or add this line to clear text each time:
+        ChatFrame1EditBox:SetText("")
+
+        -- Keep the autoType frame stubbing:
         CommandSage_AutoType.frame = {
             visible = false,
-            Show = function(self)
-                self.visible = true
-            end,
-            Hide = function(self)
-                self.visible = false
-            end,
+            Show = function(self) self.visible = true end,
+            Hide = function(self) self.visible = false end,
             script = {},
             SetScript = function(self, event, func)
                 self.script[event] = func
@@ -37,6 +38,7 @@ describe("Module: CommandSage_AutoType", function()
             end,
         }
     end)
+
 
     it("BeginAutoType with animateAutoType=false sets text immediately", function()
         CommandSage_Config.Set("preferences", "animateAutoType", false)

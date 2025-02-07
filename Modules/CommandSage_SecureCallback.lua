@@ -15,10 +15,13 @@ function SecureCallback:ExecuteCommand(slash, args)
     if type(slash) ~= "string" or slash == "" then
         return
     end
-    if self:IsCommandProtected(slash) and InCombatLockdown and type(InCombatLockdown) == "function" and InCombatLockdown() then
+    slash = slash:lower()  -- Force lowercase so "/console" or "/CONSOLE" is consistent
+
+    if self:IsCommandProtected(slash) and InCombatLockdown and InCombatLockdown() then
         print("Can't run protected command in combat: " .. slash)
         return
     end
+
     local discovered = (CommandSage_Discovery and CommandSage_Discovery:GetDiscoveredCommands()) or {}
     local cmdObj = discovered[slash]
     if cmdObj and type(cmdObj.callback) == "function" then
