@@ -1,17 +1,23 @@
 -- File: Modules/CommandSage_MultiModal.lua
-CommandSage_MultiModal = {}
-function CommandSage_MultiModal:OnVoiceCommand(phrase)
-    if not phrase or phrase:match("^%s*$") then
+-- Refactored multi-modal (voice) command handling
+local MultiModal = {}
+
+function MultiModal:OnVoiceCommand(phrase)
+    if type(phrase) ~= "string" or phrase:match("^%s*$") then
         print("No match for empty voice input.")
         return
     end
-    local possible = CommandSage_Trie:AllCommands()  -- use all commands instead of FindPrefix("/")
-    local suggestions = CommandSage_FuzzyMatch:GetSuggestions(phrase:lower(), possible)
+
+    local input = phrase:lower()
+    -- Retrieve all commands from the trie (voice input uses all commands)
+    local possible = CommandSage_Trie:AllCommands() or {}
+    local suggestions = CommandSage_FuzzyMatch:GetSuggestions(input, possible)
+
     if #suggestions > 0 then
         local top = suggestions[1]
         print("Voice recognized => " .. top.slash)
     else
-        local best, dist = CommandSage_FuzzyMatch:SuggestCorrections(phrase:lower())
+        local best, dist = CommandSage_FuzzyMatch:SuggestCorrections(input)
         if best then
             print("Voice recognized => " .. best)
         else
@@ -20,9 +26,9 @@ function CommandSage_MultiModal:OnVoiceCommand(phrase)
     end
 end
 
-function CommandSage_MultiModal:SimulateVoiceCommand(phrase)
+function MultiModal:SimulateVoiceCommand(phrase)
     print("Simulating voice input: " .. phrase)
     self:OnVoiceCommand(phrase)
 end
 
-return CommandSage_MultiModal
+return MultiModal

@@ -1,57 +1,63 @@
 -- File: Modules/CommandSage_ShellContext.lua
-CommandSage_ShellContext = {}
-CommandSage_ShellContext.currentContext = nil
+-- Refactored Shell Context handler
+local ShellContext = {}
 
-function CommandSage_ShellContext:IsActive()
+-- Internal current context stored as a local variable.
+local currentContext = nil
+
+-- Returns whether shell context is active.
+function ShellContext:IsActive()
     if not CommandSage_Config.Get("preferences", "shellContextEnabled") then
         return false
     end
-    return self.currentContext ~= nil and self.currentContext ~= ""
+    return currentContext and currentContext ~= ""
 end
 
-function CommandSage_ShellContext:RewriteInputIfNeeded(typedText)
-    if type(typedText) ~= "string" then
-        typedText = tostring(typedText or "")
+-- Rewrites the user’s typed text by prepending the current context if active.
+function ShellContext:RewriteInputIfNeeded(input)
+    if type(input) ~= "string" then
+        input = tostring(input or "")
     end
     if not self:IsActive() then
-        return typedText
+        return input
     end
-    if typedText:sub(1, 1) == "/" then
-        return typedText
+    -- If the user already typed a slash, do not modify.
+    if input:sub(1, 1) == "/" then
+        return input
     end
-    if not self.currentContext or self.currentContext == "" then
-        return typedText
-    end
-    return "/" .. self.currentContext .. " " .. typedText
+    return "/" .. currentContext .. " " .. input
 end
 
-function CommandSage_ShellContext:HandleCd(msg)
+-- Handles the /cd (change directory) command.
+function ShellContext:HandleCd(msg)
     if not CommandSage_Config.Get("preferences", "shellContextEnabled") then
         print("Shell context is disabled by config.")
         return
     end
-    local target = (msg and msg:match("^%s*(.-)%s*$")) or ""
-    if target == ".." or target == "none" or target == "clear" or target == "" then
-        self.currentContext = nil
+
+    local target = msg and msg:match("^%s*(.-)%s*$") or ""
+    if target == "" or target == "clear" or target == "none" or target == ".." then
+        currentContext = nil
         print("CommandSage shell context cleared.")
+        return
+    end
+
+    local fullSlash = "/" .. target
+    local discovered = CommandSage_Discovery:GetDiscoveredCommands() or {}
+    if discovered[fullSlash] then
+        currentContext = target
+        print("CommandSage shell context set to '" .. fullSlash .. "'.")
     else
-        local fullSlash = "/" .. target
-        local discovered = CommandSage_Discovery:GetDiscoveredCommands() or {}
-        if discovered[fullSlash] then
-            self.currentContext = target
-            print("CommandSage shell context set to '" .. fullSlash .. "'.")
-        else
-            print("No known slash command '" .. fullSlash .. "' found. Context not changed.")
-        end
+        print("No known slash command '" .. fullSlash .. "' found. Context not changed.")
     end
 end
 
-function CommandSage_ShellContext:GetCurrentContext()
-    return self.currentContext
+function ShellContext:GetCurrentContext()
+    return currentContext
 end
 
-function CommandSage_ShellContext:ClearContext()
-    self.currentContext = nil
+function ShellContext:ClearContext()
+    currentContext = nil
 end
 
-return CommandSage_ShellContext
+return ShellContext

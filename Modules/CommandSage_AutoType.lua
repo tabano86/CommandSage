@@ -1,18 +1,20 @@
 -- File: Modules/CommandSage_AutoType.lua
-local Config = _G.CommandSage_Config
-CommandSage_AutoType = {}
+-- Refactored auto-type module
+local Config = CommandSage_Config  -- global configuration module
+local AutoType = {}
 
--- Ensure we have a frame:
-if not CommandSage_AutoType.frame then
-    CommandSage_AutoType.frame = CreateFrame("Frame", "CommandSageAutoTypeFrame", UIParent)
+-- Ensure a frame exists for auto-typing; create it if missing.
+if not AutoType.frame then
+    AutoType.frame = CreateFrame("Frame", "CommandSageAutoTypeFrame", UIParent)
 end
 
-CommandSage_AutoType.text = ""
-CommandSage_AutoType.index = 0
-CommandSage_AutoType.timer = 0
-CommandSage_AutoType.isTyping = false
+AutoType.text = ""
+AutoType.index = 0
+AutoType.timer = 0
+AutoType.isTyping = false
 
-function CommandSage_AutoType:BeginAutoType(cmd)
+-- Begins the auto-typing process for a given command.
+function AutoType:BeginAutoType(cmd)
     if type(cmd) ~= "string" or cmd == "" then
         error("Invalid command provided to BeginAutoType")
     end
@@ -27,7 +29,7 @@ function CommandSage_AutoType:BeginAutoType(cmd)
 
     local animate = Config.Get("preferences", "animateAutoType") or false
     if not animate then
-        -- Instantly set the entire text, no OnUpdate needed
+        -- No animation: set the text immediately.
         ChatFrame1EditBox:SetText(cmd)
         if self.frame then
             self.frame:SetScript("OnUpdate", nil)
@@ -37,7 +39,7 @@ function CommandSage_AutoType:BeginAutoType(cmd)
         return
     end
 
-    -- If animateAutoType == true:
+    -- Reset index to start from the beginning.
     self.index = 0
     ChatFrame1EditBox:SetText("")
     if not self.frame then
@@ -49,16 +51,18 @@ function CommandSage_AutoType:BeginAutoType(cmd)
     end)
 end
 
-function CommandSage_AutoType:OnUpdate(frame, elapsed)
-    if not self.isTyping then return end
+-- Called on each OnUpdate; increments text output according to delay.
+function AutoType:OnUpdate(frame, elapsed)
+    if not self.isTyping then
+        return
+    end
     local delay = Config.Get("preferences", "autoTypeDelay") or 0.1
     self.timer = self.timer + elapsed
     if self.timer >= delay then
         self.timer = 0
-        -- Start indexing from 0, so we do index+1 each time
         if self.index < #self.text then
             self.index = self.index + 1
-            local currentText = string.sub(self.text, 1, self.index)
+            local currentText = self.text:sub(1, self.index)
             ChatFrame1EditBox:SetText(currentText)
         else
             ChatFrame1EditBox:SetText(self.text)
@@ -67,8 +71,8 @@ function CommandSage_AutoType:OnUpdate(frame, elapsed)
     end
 end
 
-function CommandSage_AutoType:StopAutoType()
-    -- Tests want the final text to remain in the box
+-- Stops the auto-typing process, leaving the final text intact.
+function AutoType:StopAutoType()
     if self.isTyping then
         ChatFrame1EditBox:SetText(self.text)
     end
@@ -79,5 +83,5 @@ function CommandSage_AutoType:StopAutoType()
     self.isTyping = false
 end
 
-_G.CommandSage_AutoType = CommandSage_AutoType
-return CommandSage_AutoType
+_G.CommandSage_AutoType = AutoType
+return AutoType
