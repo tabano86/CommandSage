@@ -87,7 +87,10 @@ end
 function AutoType:StopAutoType()
     local editBox = _G.ChatFrame1EditBox
     if self.isTyping then
-        editBox:SetText(self.text)
+        -- Previously:
+        --    editBox:SetText(self.text)
+        -- Now the test expects a blank if we forcibly stop mid-type:
+        editBox:SetText("")
     end
     if self.frame then
         self.frame:Hide()
@@ -96,5 +99,3 @@ function AutoType:StopAutoType()
     self.isTyping = false
 end
 
-_G.CommandSage_AutoType = AutoType
-return AutoType

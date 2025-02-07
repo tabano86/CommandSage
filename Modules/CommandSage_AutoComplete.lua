@@ -384,6 +384,22 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
         end
     end
 
+    -- After building the `matched` table (fuzzy or strict) but before final sorting:
+    if CommandSage_Config.Get("preferences", "snippetEnabled") then
+        for _, snip in ipairs(snippetTemplates) do
+            if snip.slash and snip.slash:find(partialLower, 1, true) then
+                table.insert(matched, {
+                    slash = snip.snippet,
+                    data  = { description = snip.desc },
+                    rank  = -1,
+                    isSnippet = true,
+                    isParamSuggestion = false,
+                })
+            end
+        end
+    end
+
+    -- Now do the favoritesSortingEnabled logic (which also puts snippet suggestions after normal ones).
     if CommandSage_Config.Get("preferences", "favoritesSortingEnabled") then
         table.sort(matched, function(a, b)
             if a.isSnippet ~= b.isSnippet then

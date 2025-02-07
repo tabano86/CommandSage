@@ -2,6 +2,7 @@ require("tests.test_helper")
 
 describe("Module: CommandSage_ShellContext", function()
     before_each(function()
+        _G.CommandSage_ShellContext:ClearContext()  -- so each test starts fresh
         _G.CommandSageDB = {}
         CommandSage_Config:InitializeDefaults()
         CommandSage_Discovery:ScanAllCommands()

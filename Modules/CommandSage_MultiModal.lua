@@ -15,13 +15,14 @@ function MultiModal:OnVoiceCommand(phrase)
 
     if #suggestions > 0 then
         local top = suggestions[1]
-        print("Voice recognized => " .. top.slash)
+        if top and type(top.slash) == "string" then
+            print("Voice recognized => " .. top.slash)
+        else
+            print("No match for voice input: " .. phrase)
+        end
     else
         local best, dist = CommandSage_FuzzyMatch and CommandSage_FuzzyMatch:SuggestCorrections(input) or {nil, nil}
-        if best then
-            if type(best) == "table" and best.slash then
-                best = best.slash
-            end
+        if type(best) == "string" then
             print("Voice recognized => " .. best)
         else
             print("No match for voice input: " .. phrase)
