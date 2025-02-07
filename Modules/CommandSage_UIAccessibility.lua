@@ -38,7 +38,7 @@ function CommandSage_UIAccessibility:ReadBack(text)
     end
     if not (C_VoiceChat and type(C_VoiceChat.SpeakText) == "function" and
             Enum and Enum.VoiceTtsDestination and Enum.VoiceTtsDestination.LocalPlayback) then
-        print(text)
+        print(text)  -- <=== This is exactly what the test checks for
         return
     end
     local success, err = pcall(function()
@@ -49,5 +49,6 @@ function CommandSage_UIAccessibility:ReadBack(text)
     end
     print(text)
 end
+
 
 return CommandSage_UIAccessibility

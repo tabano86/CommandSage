@@ -12,13 +12,14 @@ end
 
 function CommandSage_AdaptiveLearning:IncrementUsage(slash)
     EnsureUsageData()
-    local key = slash:lower()
-    CommandSageDB.usageData[key] = (CommandSageDB.usageData[key] or 0) + 1
+    -- Remove slash:lower(), so we store the exact key the user typed:
+    CommandSageDB.usageData[slash] = (CommandSageDB.usageData[slash] or 0) + 1
 end
 
 function CommandSage_AdaptiveLearning:GetUsageScore(slash)
     EnsureUsageData()
-    return CommandSageDB.usageData[slash:lower()] or 0
+    -- Also remove .lower() here:
+    return CommandSageDB.usageData[slash] or 0
 end
 
 function CommandSage_AdaptiveLearning:ResetUsageData()
