@@ -33,7 +33,6 @@ function SecureCallback:ExecuteCommand(slash, args)
     end
 end
 
-
 function SecureCallback:IsAnyCommandProtected(commandList)
     if type(commandList) ~= "table" then return false end
     for _, slash in ipairs(commandList) do

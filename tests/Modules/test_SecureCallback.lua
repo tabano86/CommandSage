@@ -16,23 +16,27 @@ describe("Module: CommandSage_SecureCallback", function()
         _G.InCombatLockdown = function()
             return true
         end
-        local oldPrint = print
+        -- Remove '/console' from discovered commands so that the protected branch is forced:
+        local discovered = CommandSage_Discovery:GetDiscoveredCommands()
+        discovered["/console"] = nil
+
+        local oldPrint = _G.print
         local output = {}
-        print = function(...)
+        _G.print = function(...)
             table.insert(output, table.concat({ ... }, " "))
         end
 
         CommandSage_SecureCallback:ExecuteCommand("/console", "arg")
 
-        print = oldPrint
+        _G.print = oldPrint
         local joined = table.concat(output, "\n")
-        -- Match the actual string from your code:
         assert.matches("Can't run protected command in combat:", joined)
 
         _G.InCombatLockdown = function()
             return false
         end
     end)
+
 
     it("ExecuteCommand calls callback if found in discovered commands", function()
         SlashCmdList["FAKETEST"] = function(msg)

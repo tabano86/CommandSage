@@ -26,23 +26,19 @@ function ShellContext:RewriteInputIfNeeded(typedText)
 end
 
 function ShellContext:HandleCd(msg)
-    --if not CommandSage_Config or not CommandSage_Config.Get("preferences", "shellContextEnabled") then
-    --    print("Shell context is disabled by config.")
-    --    return
-    --end
     local target = (msg and msg:match("^%s*(.-)%s*$")) or ""
     if target == "" or target == "clear" or target == "none" or target == ".." then
         currentContext = nil
-        print("CommandSage shell context cleared.")
+        _G.print("CommandSage shell context cleared.")
         return
     end
     local fullSlash = "/" .. target
     local discovered = (CommandSage_Discovery and CommandSage_Discovery:GetDiscoveredCommands()) or {}
     if discovered[fullSlash] then
         currentContext = target
-        print("CommandSage shell context set to '" .. fullSlash .. "'.")
+        _G.print("CommandSage shell context set to '" .. fullSlash .. "'.")
     else
-        print("No known slash command '" .. fullSlash .. "' found. Context not changed.")
+        _G.print("No known slash command '" .. fullSlash .. "' found. Context not changed.")
     end
 end
 

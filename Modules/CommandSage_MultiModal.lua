@@ -5,7 +5,7 @@ local MultiModal = {}
 
 function MultiModal:OnVoiceCommand(phrase)
     if type(phrase) ~= "string" or phrase:match("^%s*$") then
-        print("No match for empty voice input.")
+        _G.print("No match for empty voice input.")
         return
     end
 
@@ -19,23 +19,22 @@ function MultiModal:OnVoiceCommand(phrase)
     if #suggestions > 0 then
         local top = suggestions[1]
         if top and type(top.slash) == "string" then
-            print("Voice recognized => " .. top.slash)
+            _G.print("Voice recognized => " .. top.slash)
         else
-            print("No match for voice input: " .. phrase)
+            _G.print("No match for voice input: " .. phrase)
         end
     else
         local best, dist = CommandSage_FuzzyMatch and CommandSage_FuzzyMatch:SuggestCorrections(input) or {nil, nil}
         if type(best) == "string" then
-            print("Voice recognized => " .. best)
+            _G.print("Voice recognized => " .. best)
         else
-            print("No match for voice input: " .. phrase)
+            _G.print("No match for voice input: " .. phrase)
         end
     end
 end
 
-
 function MultiModal:SimulateVoiceCommand(phrase)
-    print("Simulating voice input: " .. phrase)
+    _G.print("Simulating voice input: " .. phrase)
     self:OnVoiceCommand(phrase)
 end
 

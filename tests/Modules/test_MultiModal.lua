@@ -5,7 +5,9 @@ describe("Module: CommandSage_MultiModal", function()
         _G.CommandSageDB = {}
         CommandSage_Config:InitializeDefaults()
         CommandSage_Trie:Clear()
-        CommandSage_FuzzyMatch:ClearCache()
+        if CommandSage_FuzzyMatch.ClearCache then
+            CommandSage_FuzzyMatch:ClearCache()
+        end
         CommandSage_Trie:InsertCommand("/dance", {})
     end)
 
@@ -46,15 +48,15 @@ describe("Module: CommandSage_MultiModal", function()
     end)
 
     it("Voice recognized => /dance if within tolerance", function()
-        local oldPrint = print
+        local oldPrint = _G.print
         local output = {}
-        print = function(...)
+        _G.print = function(...)
             table.insert(output, table.concat({ ... }, " "))
         end
 
         CommandSage_MultiModal:OnVoiceCommand("dance")
 
-        print = oldPrint
+        _G.print = oldPrint
         local joined = table.concat(output, "\n")
         assert.matches("Voice recognized => /dance", joined)
     end)
@@ -73,15 +75,15 @@ describe("Module: CommandSage_MultiModal", function()
     end)
 
     it("SimulateVoiceCommand prints the phrase", function()
-        local oldPrint = print
+        local oldPrint = _G.print
         local output = {}
-        print = function(...)
+        _G.print = function(...)
             table.insert(output, table.concat({ ... }, " "))
         end
 
         CommandSage_MultiModal:SimulateVoiceCommand("hello there")
 
-        print = oldPrint
+        _G.print = oldPrint
         local joined = table.concat(output, "\n")
         assert.matches("Simulating voice input: hello there", joined)
     end)
