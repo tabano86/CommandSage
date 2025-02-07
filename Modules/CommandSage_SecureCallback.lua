@@ -1,34 +1,25 @@
 -- File: Modules/CommandSage_SecureCallback.lua
--- Refactored secure callback module for executing slash commands safely.
+-- Refactored secure callback module
 local SecureCallback = {}
 
--- Define a lookup table for protected commands.
 local protectedCommands = {
     ["/console"] = true,
 }
 
--- Returns true if the given command is protected.
 function SecureCallback:IsCommandProtected(slash)
-    if type(slash) ~= "string" then
-        return false
-    end
+    if type(slash) ~= "string" then return false end
     return protectedCommands[slash] or false
 end
 
--- Executes the slash command if allowed. If the command is protected and the user is in combat,
--- an error message is printed. Otherwise, if a callback exists in the discovered commands, it is
--- invoked securely; if not, the command is sent to the chat edit box.
 function SecureCallback:ExecuteCommand(slash, args)
     if type(slash) ~= "string" or slash == "" then
         return
     end
-
-    if self:IsCommandProtected(slash) and InCombatLockdown() then
+    if self:IsCommandProtected(slash) and InCombatLockdown and InCombatLockdown() then
         print("Can't run protected command in combat: " .. slash)
         return
     end
-
-    local discovered = CommandSage_Discovery:GetDiscoveredCommands() or {}
+    local discovered = CommandSage_Discovery and CommandSage_Discovery:GetDiscoveredCommands() or {}
     local cmdObj = discovered[slash]
     if cmdObj and type(cmdObj.callback) == "function" then
         securecall(cmdObj.callback, args or "")
@@ -39,11 +30,8 @@ function SecureCallback:ExecuteCommand(slash, args)
     end
 end
 
--- Checks a list of commands and returns true if any is protected.
 function SecureCallback:IsAnyCommandProtected(commandList)
-    if type(commandList) ~= "table" then
-        return false
-    end
+    if type(commandList) ~= "table" then return false end
     for _, slash in ipairs(commandList) do
         if self:IsCommandProtected(slash) then
             return true

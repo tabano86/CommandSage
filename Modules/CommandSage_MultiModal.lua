@@ -1,5 +1,6 @@
 -- File: Modules/CommandSage_MultiModal.lua
--- Refactored multi-modal (voice) command handling
+-- Refactored multi-modal (voice) module
+
 local MultiModal = {}
 
 function MultiModal:OnVoiceCommand(phrase)
@@ -9,15 +10,15 @@ function MultiModal:OnVoiceCommand(phrase)
     end
 
     local input = phrase:lower()
-    -- Retrieve all commands from the trie (voice input uses all commands)
-    local possible = CommandSage_Trie:AllCommands() or {}
-    local suggestions = CommandSage_FuzzyMatch:GetSuggestions(input, possible)
+    -- Use all commands from the trie.
+    local possible = CommandSage_Trie and CommandSage_Trie:AllCommands() or {}
+    local suggestions = CommandSage_FuzzyMatch and CommandSage_FuzzyMatch:GetSuggestions(input, possible) or {}
 
     if #suggestions > 0 then
         local top = suggestions[1]
         print("Voice recognized => " .. top.slash)
     else
-        local best, dist = CommandSage_FuzzyMatch:SuggestCorrections(input)
+        local best, dist = CommandSage_FuzzyMatch and CommandSage_FuzzyMatch:SuggestCorrections(input) or {nil, nil}
         if best then
             print("Voice recognized => " .. best)
         else
