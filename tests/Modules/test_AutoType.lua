@@ -89,6 +89,7 @@ describe("Module: CommandSage_AutoType", function()
         for i = 1, 10 do
             updateFunc(f, 0.2)
         end
+        print("ChatFrame1EditBox:GetText()", ChatFrame1EditBox:GetText())
         assert.equals("/hello", ChatFrame1EditBox:GetText())
     end)
 

@@ -5,6 +5,7 @@ describe("Module: CommandSage_MultiModal", function()
         _G.CommandSageDB = {}
         CommandSage_Config:InitializeDefaults()
         CommandSage_Trie:Clear()
+        CommandSage_FuzzyMatch:ClearCache()
         CommandSage_Trie:InsertCommand("/dance", {})
     end)
 

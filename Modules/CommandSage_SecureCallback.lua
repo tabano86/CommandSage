@@ -18,7 +18,7 @@ function SecureCallback:ExecuteCommand(slash, args)
     slash = slash:lower()  -- Force lowercase so "/console" or "/CONSOLE" is consistent
 
     if self:IsCommandProtected(slash) and _G.InCombatLockdown and _G.InCombatLockdown() then
-        _G.print("Can't run protected command in combat:")
+        print("Can't run protected command in combat:")
         return
     end
 

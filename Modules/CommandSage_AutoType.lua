@@ -74,9 +74,9 @@ function AutoType:OnUpdate(frame, elapsed)
             local currentText = self.text:sub(1, self.index)
             editBox:SetText(currentText)
         else
-            -- Finished typing; ensure full text is present and stop.
+            -- Finished typing; leave the text intact.
             editBox:SetText(self.text)
-            self:StopAutoType()
+            self:StopAutoType(true)  -- pass true so it does not clear the text
         end
     end
 end
@@ -84,13 +84,12 @@ end
 --------------------------------------------------------------------------------
 -- StopAutoType: Stops the auto-type process and finalizes the text.
 --------------------------------------------------------------------------------
-function AutoType:StopAutoType()
+function AutoType:StopAutoType(finalize)
     local editBox = _G.ChatFrame1EditBox
     if self.isTyping then
-        -- Previously:
-        --    editBox:SetText(self.text)
-        -- Now the test expects a blank if we forcibly stop mid-type:
-        editBox:SetText("")
+        if not finalize then
+            editBox:SetText("")
+        end
     end
     if self.frame then
         self.frame:Hide()
@@ -99,3 +98,4 @@ function AutoType:StopAutoType()
     self.isTyping = false
 end
 
+return AutoType

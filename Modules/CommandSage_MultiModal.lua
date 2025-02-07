@@ -10,6 +10,9 @@ function MultiModal:OnVoiceCommand(phrase)
     end
 
     local input = phrase:lower()
+    if input:sub(1, 1) ~= "/" then
+        input = "/" .. input
+    end
     local possible = CommandSage_Trie and CommandSage_Trie:AllCommands() or {}
     local suggestions = CommandSage_FuzzyMatch and CommandSage_FuzzyMatch:GetSuggestions(input, possible) or {}
 

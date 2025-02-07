@@ -1,5 +1,8 @@
 CommandSage_FuzzyMatch = {}
 local cache = {}
+function CommandSage_FuzzyMatch:ClearCache()
+    cache = {}
+end
 local function Levenshtein(a, b)
     local key = a .. "|" .. b
     if cache[key] then

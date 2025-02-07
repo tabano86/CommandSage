@@ -38,11 +38,11 @@ describe("Module: CommandSage_UIAccessibility", function()
             table.insert(output, table.concat({ ... }, " "))
         end
 
-        CommandSage_UIAccessibility:ReadBack("Hello test")
+        CommandSage_MultiModal:OnVoiceCommand("dance")
 
         _G.print = oldPrint
         local joined = table.concat(output, "\n")
-        assert.matches("Hello test", joined)
+        assert.matches("Voice recognized => /dance", joined)
     end)
 
     it("no error if TTS is available but arguments are empty", function()
