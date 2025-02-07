@@ -71,7 +71,6 @@ jobs:
       - name: Extract Version from Tag
         id: extract_version
         run: |
-          # Remove the leading "v" (e.g. "v1.2.3" → "1.2.3")
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "addon_version=$VERSION" >> $GITHUB_OUTPUT
       - name: Update TOC Version
@@ -80,43 +79,16 @@ jobs:
           sed -i "s/## Version: .*/## Version: ${{ steps.extract_version.outputs.addon_version }}/" CommandSage.toc
       - name: Build Addon
         run: node cmdsage.js build
-      - name: Package Addon
+      - name: Package Addon (and upload to CurseForge)
+        env:
+          ADDON_VERSION: ${{ steps.extract_version.outputs.addon_version }}
+          CURSEFORGE_PROJECT_ID: ${{ secrets.CURSEFORGE_PROJECT_ID }}
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+          CHANGELOG: ${{ secrets.CHANGELOG }}  # or leave blank to read from CHANGELOG.md
         run: |
-          # Create temporary folder to hold only the addon folder
-          mkdir -p temp-addon
-          # Copy the addon folder (assumed to be named "CommandSage") to temp-addon.
-          # This ensures that the zip file has a single top-level directory.
-          cp -r CommandSage temp-addon/
-          # Remove unwanted files from the addon folder (e.g. git, tests, scripts, dist, etc.)
-          rm -rf temp-addon/CommandSage/.git* temp-addon/CommandSage/.github temp-addon/CommandSage/scripts temp-addon/CommandSage/dist temp-addon/CommandSage/tests
-          # Create the zip archive with the addon folder as the sole top-level directory.
-          mkdir -p dist
-          cd temp-addon
-          zip -r ../dist/CommandSage-${{ steps.extract_version.outputs.addon_version }}.zip CommandSage
-          cd ..
-          rm -rf temp-addon
+          node upload-to-curseforge.js
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: CommandSage-Zip
           path: dist/CommandSage-${{ steps.extract_version.outputs.addon_version }}.zip
-      - name: Publish to CurseForge
-        env:
-          CURSEFORGE_PROJECT_ID: ${{ secrets.CURSEFORGE_PROJECT_ID }}
-          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
-        run: |
-          echo "Publishing to CurseForge..."
-          # Read CHANGELOG.md (assumed to be at the repository root)
-          CHANGELOG=$(cat CHANGELOG.md)
-          # Construct metadata JSON using jq (ensure jq is available)
-          metadata=$(jq -n --arg rt "release" \
-                        --arg cl "$CHANGELOG" \
-                        --arg ctype "markdown" \
-                        --arg dn "CommandSage-${{ steps.extract_version.outputs.addon_version }}" \
-                        --arg gv "1.13.2" \
-                        '{releaseType: $rt, changelog: $cl, changelogType: $ctype, displayName: $dn, gameVersions: [$gv]}')
-          echo "Metadata: $metadata"
-          curl -v -X POST "https://api.curseforge.com/v1/projects/${CURSEFORGE_PROJECT_ID}/upload-file" \
-            -H "x-api-token: ${CURSEFORGE_TOKEN}" \
-            -F "metadata=${metadata}" \
-            -F "file=@dist/CommandSage-${{ steps.extract_version.outputs.addon_version }}.zip"
