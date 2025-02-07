@@ -24,15 +24,15 @@ describe("Module: CommandSage_ShellContext", function()
     end)
 
     it("HandleCd says 'not changed' if unknown slash", function()
-        local oldPrint = print
+        local oldPrint = _G.print  -- override the global print
         local output = {}
-        print = function(...)
+        _G.print = function(...)
             table.insert(output, table.concat({ ... }, " "))
         end
 
         CommandSage_ShellContext:HandleCd("unknowntest")
 
-        print = oldPrint
+        _G.print = oldPrint  -- restore global print
         local joined = table.concat(output, "\n")
         assert.matches("No known slash command '/unknowntest' found. Context not changed.", joined)
         assert.is_nil(CommandSage_ShellContext:GetCurrentContext())

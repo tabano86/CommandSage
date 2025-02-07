@@ -35,7 +35,9 @@ function CommandSage_Licensing:HandleLicenseCommand(msg)
 end
 
 function CommandSage_Licensing:GetLicenseKey()
-    if not CommandSageDB then return nil end
+    if not CommandSageDB then
+        return nil
+    end
     return CommandSageDB[LICENSE_KEY_DB_FIELD]
 end
 

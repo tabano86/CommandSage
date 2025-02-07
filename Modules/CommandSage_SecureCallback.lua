@@ -7,7 +7,9 @@ local protectedCommands = {
 }
 
 function SecureCallback:IsCommandProtected(slash)
-    if type(slash) ~= "string" then return false end
+    if type(slash) ~= "string" then
+        return false
+    end
     return protectedCommands[slash] or false
 end
 
@@ -34,7 +36,9 @@ function SecureCallback:ExecuteCommand(slash, args)
 end
 
 function SecureCallback:IsAnyCommandProtected(commandList)
-    if type(commandList) ~= "table" then return false end
+    if type(commandList) ~= "table" then
+        return false
+    end
     for _, slash in ipairs(commandList) do
         if self:IsCommandProtected(slash) then
             return true

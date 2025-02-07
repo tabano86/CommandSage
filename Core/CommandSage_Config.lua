@@ -11,9 +11,9 @@ function CommandSage_Config:InitializeDefaults()
     if not CommandSageDB.config.preferences or type(CommandSageDB.config.preferences) ~= "table" then
         CommandSageDB.config.preferences = {
             -- Add the fields the tests expect:
-            suggestionMode = "fuzzy",        -- test_Config expects 'fuzzy'
-            fuzzyMatchEnabled = true,        -- test_Config expects true
-            showTutorialOnStartup = true,    -- so tutorial pops on PLAYER_LOGIN
+            suggestionMode = "fuzzy", -- test_Config expects 'fuzzy'
+            fuzzyMatchEnabled = true, -- test_Config expects true
+            showTutorialOnStartup = true, -- so tutorial pops on PLAYER_LOGIN
 
             animateAutoType = false,
             autoTypeDelay = 0.1,
@@ -29,12 +29,12 @@ function CommandSage_Config:InitializeDefaults()
             arRuneRingEnabled = false,
             emoteStickersEnabled = false,
             advancedStyling = true,
-            autocompleteBgColor = {0, 0, 0, 0.85},
-            autocompleteHighlightColor = {0.6, 0.6, 0.6, 0.3},
+            autocompleteBgColor = { 0, 0, 0, 0.85 },
+            autocompleteHighlightColor = { 0.6, 0.6, 0.6, 0.3 },
             maxSuggestionsOverride = nil,
             favoritesSortingEnabled = true,
             showParamSuggestionsInColor = false,
-            paramSuggestionsColor = {1, 1, 0, 1},
+            paramSuggestionsColor = { 1, 1, 0, 1 },
             showDescriptionsInAutocomplete = true,
             uiTheme = "dark",
             uiScale = 1.0,
@@ -95,12 +95,12 @@ function CommandSage_Config:ResetPreferences()
         arRuneRingEnabled = false,
         emoteStickersEnabled = false,
         advancedStyling = true,
-        autocompleteBgColor = {0, 0, 0, 0.85},
-        autocompleteHighlightColor = {0.6, 0.6, 0.6, 0.3},
+        autocompleteBgColor = { 0, 0, 0, 0.85 },
+        autocompleteHighlightColor = { 0.6, 0.6, 0.6, 0.3 },
         maxSuggestionsOverride = nil,
         favoritesSortingEnabled = true,
         showParamSuggestionsInColor = false,
-        paramSuggestionsColor = {1, 1, 0, 1},
+        paramSuggestionsColor = { 1, 1, 0, 1 },
         showDescriptionsInAutocomplete = true,
         uiTheme = "dark",
         uiScale = 1.0,

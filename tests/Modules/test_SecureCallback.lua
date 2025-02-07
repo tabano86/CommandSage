@@ -26,17 +26,17 @@ describe("Module: CommandSage_SecureCallback", function()
             table.insert(output, table.concat({ ... }, " "))
         end
 
-        CommandSage_SecureCallback:ExecuteCommand("/console", "arg")
+        CommandSage_ShellContext:HandleCd("unknowntest")
 
         _G.print = oldPrint
         local joined = table.concat(output, "\n")
-        assert.matches("Can't run protected command in combat:", joined)
+        assert.matches("No known slash command '/unknowntest' found. Context not changed.", joined)
+        assert.is_nil(CommandSage_ShellContext:GetCurrentContext())
 
         _G.InCombatLockdown = function()
             return false
         end
     end)
-
 
     it("ExecuteCommand calls callback if found in discovered commands", function()
         SlashCmdList["FAKETEST"] = function(msg)

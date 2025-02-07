@@ -27,8 +27,12 @@ describe("Module: CommandSage_AutoType", function()
         -- Keep the autoType frame stubbing:
         CommandSage_AutoType.frame = {
             visible = false,
-            Show = function(self) self.visible = true end,
-            Hide = function(self) self.visible = false end,
+            Show = function(self)
+                self.visible = true
+            end,
+            Hide = function(self)
+                self.visible = false
+            end,
             script = {},
             SetScript = function(self, event, func)
                 self.script[event] = func
@@ -38,7 +42,6 @@ describe("Module: CommandSage_AutoType", function()
             end,
         }
     end)
-
 
     it("BeginAutoType with animateAutoType=false sets text immediately", function()
         CommandSage_Config.Set("preferences", "animateAutoType", false)

@@ -24,7 +24,7 @@ function MultiModal:OnVoiceCommand(phrase)
             _G.print("No match for voice input: " .. phrase)
         end
     else
-        local best, dist = CommandSage_FuzzyMatch and CommandSage_FuzzyMatch:SuggestCorrections(input) or {nil, nil}
+        local best, dist = CommandSage_FuzzyMatch and CommandSage_FuzzyMatch:SuggestCorrections(input) or { nil, nil }
         if type(best) == "string" then
             _G.print("Voice recognized => " .. best)
         else

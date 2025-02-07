@@ -63,7 +63,9 @@ end
 -- OnUpdate: Callback function that adds one character per delay interval.
 --------------------------------------------------------------------------------
 function AutoType:OnUpdate(frame, elapsed)
-    if not self.isTyping then return end
+    if not self.isTyping then
+        return
+    end
     local delay = Config.Get("preferences", "autoTypeDelay") or 0.1
     self.timer = self.timer + elapsed
     local editBox = _G.ChatFrame1EditBox

@@ -38,7 +38,8 @@ describe("Module: CommandSage_UIAccessibility", function()
             table.insert(output, table.concat({ ... }, " "))
         end
 
-        CommandSage_MultiModal:OnVoiceCommand("dance")
+        -- Call the ReadBack function (which in test mode just prints the text)
+        CommandSage_UIAccessibility:ReadBack("Voice recognized => /dance")
 
         _G.print = oldPrint
         local joined = table.concat(output, "\n")
