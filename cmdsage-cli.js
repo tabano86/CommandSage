@@ -31,13 +31,9 @@ function toolExists(toolName) {
 
 function runCommand(command, args, options = {}) {
     return new Promise((resolve, reject) => {
-        const proc = spawn(command, args, {
-            stdio: "inherit",
-            shell: true,
-            ...options,
-        });
+        const proc = spawn(command, args, { stdio: "inherit", shell: true, ...options });
         proc.on("error", reject);
-        proc.on("exit", (code) => {
+        proc.on("exit", code => {
             if (code !== 0) {
                 reject(new Error(`${command} exited with code ${code}`));
             } else {
@@ -48,32 +44,20 @@ function runCommand(command, args, options = {}) {
 }
 
 // ----------------------
-// Determine Addon Folder
+// Determine Addon/Modpack Folder
 // ----------------------
 const DEFAULT_ADDON_FOLDER = "CommandSage";
 let addonFolder = fs.existsSync(path.join(process.cwd(), DEFAULT_ADDON_FOLDER))
     ? DEFAULT_ADDON_FOLDER
     : ".";
 if (addonFolder === ".") {
-    console.log(
-        `Folder '${DEFAULT_ADDON_FOLDER}' not found – using current directory as addon folder.`
-    );
+    console.log(`Folder '${DEFAULT_ADDON_FOLDER}' not found – using current directory as addon/modpack folder.`);
 }
 
 // ----------------------
 // Allowed File Extensions
 // ----------------------
-const ALLOWED_EXTENSIONS = [
-    "toc",
-    "lua",
-    "xml",
-    "blp",
-    "tga",
-    "png",
-    "jpg",
-    "jpeg",
-    "gif",
-];
+const ALLOWED_EXTENSIONS = ["toc", "lua", "xml", "blp", "tga", "png", "jpg", "jpeg", "gif", "jar", "zip"];
 
 // ----------------------
 // List Package Files (Dry Run)
@@ -98,9 +82,17 @@ function listPackageFiles(folder) {
 }
 
 // ----------------------
-// Add Files to Archive with Version Updates for .toc Files
+// Add Files to Archive with Version Updates & CurseForge Exclusions
 // ----------------------
 function addFilesToArchive(archive, folder, version) {
+    // Read exclusion list from environment, or use defaults
+    const curseforgeExcludes = process.env.CURSEFORGE_EXCLUDES
+        ? process.env.CURSEFORGE_EXCLUDES.split(",").map(s => s.trim())
+        : [
+            "overrides/resourcepacks/Naturalist Old Models.zip",
+            "overrides/mods/supplementaries-1.19.2-2.3.16.jar"
+        ];
+
     function walk(dir) {
         const entries = fs.readdirSync(dir);
         for (const entry of entries) {
@@ -112,32 +104,29 @@ function addFilesToArchive(archive, folder, version) {
                 const ext = path.extname(entry).slice(1).toLowerCase();
                 if (ALLOWED_EXTENSIONS.includes(ext)) {
                     const relPath = path.relative(folder, fullPath);
+
+                    // Skip any files explicitly excluded from packaging.
+                    if (curseforgeExcludes.includes(relPath)) {
+                        console.log(`➤ Skipping excluded file: ${relPath}`);
+                        continue;
+                    }
+
+                    // For .toc files, update version and optionally interface info.
                     if (ext === "toc") {
                         let content = fs.readFileSync(fullPath, "utf8");
-
-                        // Update the version line
                         const versionRegex = /^(##\s*Version:\s*).*/mi;
                         if (versionRegex.test(content)) {
                             content = content.replace(versionRegex, `$1${version}`);
                         } else {
-                            console.warn(
-                                `Warning: No version line found in ${relPath}. Appending version info.`
-                            );
+                            console.warn(`Warning: No version line found in ${relPath}. Appending version info.`);
                             content += `\n## Version: ${version}\n`;
                         }
-
-                        // Optionally update the interface version if provided
                         if (process.env.INTERFACE_VERSION) {
                             const interfaceRegex = /^(##\s*Interface:\s*).*/mi;
                             if (interfaceRegex.test(content)) {
-                                content = content.replace(
-                                    interfaceRegex,
-                                    `$1${process.env.INTERFACE_VERSION}`
-                                );
+                                content = content.replace(interfaceRegex, `$1${process.env.INTERFACE_VERSION}`);
                             } else {
-                                console.warn(
-                                    `Warning: No interface line found in ${relPath}. Appending interface info.`
-                                );
+                                console.warn(`Warning: No interface line found in ${relPath}. Appending interface info.`);
                                 content += `\n## Interface: ${process.env.INTERFACE_VERSION}\n`;
                             }
                         }
@@ -153,7 +142,7 @@ function addFilesToArchive(archive, folder, version) {
 }
 
 // ----------------------
-// Package Addon Function
+// Package Addon/Modpack Function
 // ----------------------
 function packageAddon(version, dryRun = false) {
     return new Promise((resolve, reject) => {
@@ -172,15 +161,13 @@ function packageAddon(version, dryRun = false) {
         const archive = archiver("zip", { zlib: { level: 9 } });
 
         output.on("close", () => {
-            console.log(
-                `➤ Packaged addon: ${outputZip} (${archive.pointer()} total bytes)`
-            );
+            console.log(`➤ Packaged addon/modpack: ${outputZip} (${archive.pointer()} total bytes)`);
             resolve(outputZip);
         });
-        archive.on("error", (err) => reject(err));
+        archive.on("error", err => reject(err));
         archive.pipe(output);
 
-        // Recursively add allowed files, updating .toc files with correct version info
+        // Recursively add allowed files, updating .toc files and excluding CurseForge-hosted files.
         addFilesToArchive(archive, addonFolder, version);
         archive.finalize();
     });
@@ -191,14 +178,14 @@ function packageAddon(version, dryRun = false) {
 // ----------------------
 function buildMetadata(version, changelog) {
     const gameVersions = process.env.GAME_VERSIONS
-        ? process.env.GAME_VERSIONS.split(",").map((s) => s.trim())
+        ? process.env.GAME_VERSIONS.split(",").map(s => s.trim())
         : ["1.13.2"];
     return {
         releaseType: "release",
         changelog: changelog,
         changelogType: "markdown",
         displayName: `CommandSage-${version}`,
-        gameVersions: gameVersions,
+        gameVersions: gameVersions
     };
 }
 
@@ -210,9 +197,7 @@ async function uploadToCurseForge(zipPath, metadata) {
     const curseforgeProjectId = process.env.CURSEFORGE_PROJECT_ID;
     const curseforgeToken = process.env.CURSEFORGE_TOKEN;
     if (!curseforgeProjectId || !curseforgeToken) {
-        throw new Error(
-            "CURSEFORGE_PROJECT_ID or CURSEFORGE_TOKEN environment variable not set."
-        );
+        throw new Error("CURSEFORGE_PROJECT_ID or CURSEFORGE_TOKEN environment variable not set.");
     }
     const url = `https://api.curseforge.com/v1/projects/${curseforgeProjectId}/upload-file`;
     const fileStream = fs.createReadStream(zipPath);
@@ -223,16 +208,12 @@ async function uploadToCurseForge(zipPath, metadata) {
     console.log("➤ Uploading to CurseForge...");
     const response = await fetch(url, {
         method: "POST",
-        headers: {
-            "x-api-token": curseforgeToken,
-        },
-        body: formData,
+        headers: { "x-api-token": curseforgeToken },
+        body: formData
     });
     if (!response.ok) {
         const errText = await response.text();
-        throw new Error(
-            `Upload failed: ${response.status} ${response.statusText}\n${errText}`
-        );
+        throw new Error(`Upload failed: ${response.status} ${response.statusText}\n${errText}`);
     }
     const data = await response.json();
     console.log("➤ Upload successful. Response:");
@@ -244,7 +225,7 @@ async function uploadToCurseForge(zipPath, metadata) {
 // ----------------------
 async function buildAddon(versionOverride, dryRun) {
     const version = process.env.ADDON_VERSION || versionOverride || "0.0.0";
-    console.log(`➤ Building addon version ${version}`);
+    console.log(`➤ Building addon/modpack version ${version}`);
     const zipPath = await packageAddon(version, dryRun);
     return { zipPath, version };
 }
@@ -256,16 +237,14 @@ const program = new Command();
 
 program
     .name("cmdsage-cli")
-    .description(
-        "CLI for CommandSage: test, lint, build, copy, clean, ci, release, and upload to CurseForge."
-    )
+    .description("CLI for CommandSage: test, lint, build, copy, clean, ci, release, and upload to CurseForge.")
     .version("2.0.0");
 
 program
     .command("test")
     .description("Run Lua tests using busted")
     .option("-g, --grep <pattern>", "Filter tests by pattern")
-    .action(async (options) => {
+    .action(async options => {
         if (!toolExists("busted")) {
             console.error("Error: 'busted' is not installed or not in PATH.");
             process.exit(1);
@@ -298,12 +277,10 @@ program
 
 program
     .command("build")
-    .description(
-        "Build the addon into a zip file in the dist/ directory (updates .toc version)"
-    )
+    .description("Build the addon/modpack into a zip file in the dist/ directory (updates .toc version, excludes CurseForge-hosted files)")
     .option("--dry-run", "List files that would be packaged, without creating a zip")
     .option("-o, --output <version>", "Override version (or use as version)")
-    .action(async (options) => {
+    .action(async options => {
         try {
             const { zipPath } = await buildAddon(options.output, options.dryRun);
             if (!options.dryRun && zipPath) {
@@ -319,18 +296,12 @@ program
     .command("copy")
     .description("Copy contents of .lua and .toc files to the clipboard")
     .option("-e, --exclude <patterns...>", "Exclude files matching these patterns")
-    .option(
-        "-x, --extensions <extensions...>",
-        "File extensions to include (default: lua, toc)"
-    )
-    .action(async (options) => {
+    .option("-x, --extensions <extensions...>", "File extensions to include (default: lua, toc)")
+    .action(async options => {
         const sourceDir = process.cwd();
-        const exts =
-            options.extensions && options.extensions.length
-                ? options.extensions.map((ext) =>
-                    ext.startsWith(".") ? ext.toLowerCase().slice(1) : ext.toLowerCase()
-                )
-                : ["lua", "toc"];
+        const exts = (options.extensions && options.extensions.length)
+            ? options.extensions.map(ext => (ext.startsWith(".") ? ext.toLowerCase().slice(1) : ext.toLowerCase()))
+            : ["lua", "toc"];
         let clipboardContent = "";
         function walk(dir) {
             const entries = fs.readdirSync(dir);
@@ -338,18 +309,13 @@ program
                 const fullPath = path.join(dir, entry);
                 const stat = fs.statSync(fullPath);
                 if (stat.isDirectory()) {
-                    if (
-                        ["node_modules", "dist", ".git", ".github", ".idea", ".run", "tests"].includes(
-                            entry.toLowerCase()
-                        )
-                    )
+                    if (["node_modules", "dist", ".git", ".github", ".idea", ".run", "tests"].includes(entry.toLowerCase()))
                         continue;
                     walk(fullPath);
                 } else {
                     const ext = path.extname(entry).slice(1).toLowerCase();
                     if (exts.includes(ext)) {
-                        if (options.exclude && options.exclude.some((pat) => entry.includes(pat)))
-                            continue;
+                        if (options.exclude && options.exclude.some(pat => entry.includes(pat))) continue;
                         const relPath = path.relative(sourceDir, fullPath);
                         clipboardContent += `File: ${relPath}\n`;
                         try {
@@ -399,7 +365,7 @@ program
             await runCommand("luacheck", ["."]);
             console.log("➤ Running tests...");
             await runCommand("busted", ["--pattern=test_.*\\.lua", "tests"]);
-            console.log("➤ Building addon...");
+            console.log("➤ Building addon/modpack...");
             await buildAddon();
             console.log("➤ CI pipeline complete.");
         } catch (err) {
@@ -410,9 +376,9 @@ program
 
 program
     .command("release")
-    .description("Run CI pipeline, build the addon, and upload to CurseForge")
+    .description("Run CI pipeline, build the addon/modpack, and upload to CurseForge")
     .option("-o, --output <version>", "Override version (or use as version)")
-    .action(async (options) => {
+    .action(async options => {
         try {
             console.log("➤ Running CI pipeline for release...");
             await runCommand("luacheck", ["."]);
@@ -437,7 +403,7 @@ program
 // ----------------------
 // Parse Command Line
 // ----------------------
-program.parseAsync(process.argv).catch((err) => {
+program.parseAsync(process.argv).catch(err => {
     console.error(err);
     process.exit(1);
 });
