@@ -2,7 +2,7 @@
   "name": "commandsage",
   "version": "1.0.0",
   "description": "**CommandSage** is a powerful, next-generation addon for World of Warcraft Classic that revolutionizes your\r slash-command experience with intelligent autocompletion, fuzzy matching, advanced context logic, and visually fun\r features.",
-  "main": "cmdsage.js",
+  "main": "cmdsage-cli.js",
   "directories": {
     "test": "tests"
   },

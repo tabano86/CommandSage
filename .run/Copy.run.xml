@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Copy" type="NodeJSConfigurationType" application-parameters="copy" path-to-node="wsl://Ubuntu@/home/dirtbikr/.nvm/versions/node/v22.13.1/bin/node" path-to-js-file="$PROJECT_DIR$/cmdsage-cli.js" working-dir="$PROJECT_DIR$">
+    <method v="2" />
+  </configuration>
+</component>

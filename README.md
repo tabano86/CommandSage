@@ -148,7 +148,7 @@ A comprehensive GitHub Actions workflow (see `.github/workflows/release.yml`) ha
 
 - Checkout of the full codebase.
 - Installation of Node.js and dependencies.
-- Running tests (e.g., `node cmdsage.js test`).
+- Running tests (e.g., `node cmdsage-cli.js test`).
 - Executing semantic-release on new tags.
 - Updating the version in your TOC file.
 - Building and packaging the addon as a zip file.
