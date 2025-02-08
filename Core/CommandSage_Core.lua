@@ -113,7 +113,7 @@ mainFrame:SetScript("OnEvent", OnEvent)
 function CommandSage:HookChatFrameEditBox(editBox)
     if not editBox or editBox.CommandSageHooked then return end
 
-    -- Ensure arrow keys are delivered to our handler.
+    -- Make sure the default Blizzard behavior for arrow keys is disabled.
     editBox:SetAltArrowKeyMode(false)
     editBox:EnableKeyboard(true)
 
@@ -139,83 +139,71 @@ function CommandSage:HookChatFrameEditBox(editBox)
         safeCall(CommandSage_KeyBlocker, "BlockKeys")
         self:SetPropagateKeyboardInput(false)
         if CommandSage_Config.Get("preferences", "chatInputHaloEnabled") and self.SetBackdropColor then
-            self:SetBackdropColor(1, 1, 0, 0.2)
+            self:SetBackdropColor(1,1,0,0.2)
         end
     end)
+
     editBox:HookScript("OnEditFocusLost", function(self)
         pcall(RestoreAllBindings)
         safeCall(CommandSage_KeyBlocker, "UnblockKeys")
         self:SetPropagateKeyboardInput(true)
         if CommandSage_Config.Get("preferences", "chatInputHaloEnabled") and self.SetBackdropColor then
-            self:SetBackdropColor(0, 0, 0, 0)
+            self:SetBackdropColor(0,0,0,0)
         end
     end)
 
-    hooksecurefunc("ChatEdit_DeactivateChat", function() safeCall(CommandSage_AutoComplete, "CloseSuggestions") end)
+    hooksecurefunc("ChatEdit_DeactivateChat", function()
+        safeCall(CommandSage_AutoComplete, "CloseSuggestions")
+    end)
 
-    -- Add an OnKeyDown hook to intercept arrow keys immediately.
+    -- Use OnKeyDown to catch arrow and Tab keys before they reach the game.
     editBox:HookScript("OnKeyDown", function(self, key)
-        if key == "UP" or key == "DOWN" or key == "LEFT" or key == "RIGHT" then
-            -- Block propagation of arrow keys so character movement does not occur.
-            self:SetPropagateKeyboardInput(false)
-            return
-        end
-    end)
-
-    -- Use OnKeyUp for our custom navigation.
-    editBox:HookScript("OnKeyUp", function(self, key)
-        debugPrint("OnKeyUp: key = " .. key)
-        local advKeybinds = CommandSage_Config.Get("preferences", "advancedKeybinds") or false
-        if not advKeybinds then
-            self:SetPropagateKeyboardInput(true)
-            return
-        end
-
+        -- If the chat box is active (slash or shell context), intercept navigation keys.
         local text = self:GetText() or ""
-        local isSlash = (text:sub(1, 1) == "/")
-        local shellActive = CommandSage_ShellContext and CommandSage_ShellContext:IsActive() or false
-        if isSlash or shellActive then
-            self:SetPropagateKeyboardInput(false)
-            local shift = IsShiftKeyDown()
-            local ctrl  = IsControlKeyDown()
-            if key == "UP" then
-                debugPrint("Key UP pressed")
-                if CommandSage_AutoComplete and CommandSage_AutoComplete:IsVisible() then
-                    safeCall(CommandSage_AutoComplete, "MoveSelection", shift and -5 or -1)
-                else
-                    local prev = CommandSage_HistoryPlayback:GetPreviousHistory()
-                    if prev then
-                        self:SetText(prev)
-                        self:SetCursorPosition(#prev)
-                    end
-                end
-                return
-            elseif key == "DOWN" then
-                debugPrint("Key DOWN pressed")
-                if CommandSage_AutoComplete and CommandSage_AutoComplete:IsVisible() then
-                    safeCall(CommandSage_AutoComplete, "MoveSelection", shift and 5 or 1)
-                else
-                    local nxt = CommandSage_HistoryPlayback:GetNextHistory()
-                    if nxt then
-                        self:SetText(nxt)
-                        self:SetCursorPosition(#nxt)
-                    end
-                end
-                return
-            elseif key:upper() == "TAB" then
-                debugPrint("Key TAB pressed, shift = " .. tostring(shift))
-                if CommandSage_AutoComplete then
+        local isCommand = (text:sub(1,1) == "/") or (CommandSage_ShellContext and CommandSage_ShellContext:IsActive())
+        if isCommand then
+            if key == "UP" or key == "DOWN" or key == "LEFT" or key == "RIGHT" or key:upper() == "TAB" then
+                -- Prevent key propagation so your character doesn't move.
+                self:SetPropagateKeyboardInput(false)
+                -- For arrow keys and Tab, call our auto-complete handlers immediately.
+                if key == "UP" then
+                    debugPrint("OnKeyDown: UP intercepted")
+                    safeCall(CommandSage_AutoComplete, "MoveSelection", -1)
+                elseif key == "DOWN" then
+                    debugPrint("OnKeyDown: DOWN intercepted")
+                    safeCall(CommandSage_AutoComplete, "MoveSelection", 1)
+                elseif key:upper() == "TAB" then
+                    local shift = IsShiftKeyDown()
+                    debugPrint("OnKeyDown: TAB intercepted, shift = " .. tostring(shift))
                     safeCall(CommandSage_AutoComplete, "OnTabPress", shift)
                 end
                 return
-            elseif key == "C" and ctrl then
-                self:SetText("")
-                safeCall(CommandSage_AutoComplete, "CloseSuggestions")
-                return
             end
-        else
-            self:SetPropagateKeyboardInput(true)
         end
+        self:SetPropagateKeyboardInput(true)
+    end)
+
+    -- Use OnKeyUp for additional processing (if needed).
+    editBox:HookScript("OnKeyUp", function(self, key)
+        debugPrint("OnKeyUp: key = " .. key)
+        -- For non-navigation keys, let the default OnKeyUp handler run.
+        local text = self:GetText() or ""
+        local isCommand = (text:sub(1,1) == "/") or (CommandSage_ShellContext and CommandSage_ShellContext:IsActive())
+        if not isCommand then
+            self:SetPropagateKeyboardInput(true)
+            return
+        end
+        -- Also process history navigation when suggestions are not showing.
+        if key == "UP" or key == "DOWN" then
+            -- Already handled in OnKeyDown; do nothing.
+            return
+        end
+        if key == "C" and IsControlKeyDown() then
+            self:SetText("")
+            safeCall(CommandSage_AutoComplete, "CloseSuggestions")
+            return
+        end
+        -- For all other keys, let the OnTextChanged handler update suggestions.
     end)
 
     local origTextChanged = editBox:GetScript("OnTextChanged")
@@ -228,7 +216,7 @@ function CommandSage:HookChatFrameEditBox(editBox)
             safeCall(CommandSage_AutoComplete, "CloseSuggestions")
             return
         end
-        if txt:sub(1, 1) ~= "/" and not (CommandSage_ShellContext and CommandSage_ShellContext:IsActive()) then
+        if txt:sub(1,1) ~= "/" and not (CommandSage_ShellContext and CommandSage_ShellContext:IsActive()) then
             safeCall(CommandSage_AutoComplete, "CloseSuggestions")
             return
         end
