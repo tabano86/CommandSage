@@ -3,12 +3,13 @@ CommandSage_KeyBlocker = {}
 local blockerButton = CreateFrame("Button", "CommandSageKeyBlocker", UIParent, "SecureActionButtonTemplate")
 blockerButton:Hide()
 
--- Default keys list; this list can be replaced via UpdateKeyBindings()
+-- Default keys list.
+-- Removed arrow keys (UP, DOWN, LEFT, RIGHT) so these modifiers pass through.
 local defaultKeys = {
     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
     "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
     "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-    "UP", "DOWN", "LEFT", "RIGHT",
+    -- "UP", "DOWN", "LEFT", "RIGHT",  -- removed so arrow keys are not blocked.
     "BACKSPACE", "TAB", "CAPSLOCK",
     "NUMLOCK", "SCROLLLOCK", "INSERT", "DELETE", "HOME", "END", "PAGEUP", "PAGEDOWN",
     "PRINTSCREEN", "PAUSE", "SPACE",
@@ -24,7 +25,7 @@ CommandSage_KeyBlocker.allKeys = defaultKeys
 -- Internal state variable for block status.
 local isBlocked = false
 
--- Logs a message if CommandSage.debugMode is enabled.
+-- Debug logging utility.
 local function debugLog(msg)
     if CommandSage and CommandSage.debugMode then
         print("|cff999999[KeyBlocker Debug]|r", tostring(msg))
@@ -64,8 +65,7 @@ function CommandSage_KeyBlocker:UnblockKeys()
 end
 
 --------------------------------------------------------------------------------
--- ToggleBlock: Enables or disables key blocking based on the state parameter.
--- If state is true then keys are blocked; if false, keys are unblocked.
+-- ToggleBlock: Enables or disables key blocking.
 --------------------------------------------------------------------------------
 function CommandSage_KeyBlocker:ToggleBlock(state)
     if state == nil then
@@ -80,16 +80,14 @@ function CommandSage_KeyBlocker:ToggleBlock(state)
 end
 
 --------------------------------------------------------------------------------
--- IsBlocked: Returns the current key blocking status.
+-- IsBlocked: Returns current key blocking status.
 --------------------------------------------------------------------------------
 function CommandSage_KeyBlocker:IsBlocked()
     return isBlocked
 end
 
 --------------------------------------------------------------------------------
--- UpdateKeyBindings: Replaces the current keys list with a new one and
--- reapplies the override bindings if currently blocked.
--- newKeys should be a table of key names.
+-- UpdateKeyBindings: Replaces current key list and reapplies bindings.
 --------------------------------------------------------------------------------
 function CommandSage_KeyBlocker:UpdateKeyBindings(newKeys)
     if type(newKeys) == "table" then
@@ -100,13 +98,12 @@ function CommandSage_KeyBlocker:UpdateKeyBindings(newKeys)
             self:BlockKeys()
         end
     else
-        safePrint("UpdateKeyBindings expects a table of key strings.")
+        print("UpdateKeyBindings expects a table of key strings.")
     end
 end
 
 --------------------------------------------------------------------------------
--- RefreshBindings: Re-applies override bindings for all keys.
--- Useful if other addons or events clear these bindings.
+-- RefreshBindings: Re-applies override bindings.
 --------------------------------------------------------------------------------
 function CommandSage_KeyBlocker:RefreshBindings()
     if isBlocked then
@@ -118,24 +115,9 @@ function CommandSage_KeyBlocker:RefreshBindings()
     end
 end
 
---------------------------------------------------------------------------------
--- Example Event Hook: Automatically refresh key blocking on zone change.
--- (Uncomment the following lines if you want to auto-refresh bindings on a zone update.)
---------------------------------------------------------------------------------
--- local zoneFrame = CreateFrame("Frame")
--- zoneFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
--- zoneFrame:SetScript("OnEvent", function(self, event)
---     if CommandSage_KeyBlocker and CommandSage_KeyBlocker:IsBlocked() then
---         CommandSage_KeyBlocker:RefreshBindings()
---     end
+-- Remove the OnClick script to prevent interference.
+-- blockerButton:SetScript("OnClick", function(self)
+--     debugLog("Blocker button clicked.")
 -- end)
-
---------------------------------------------------------------------------------
--- Additional Click Logic (if needed): Currently a placeholder.
---------------------------------------------------------------------------------
-blockerButton:SetScript("OnClick", function(self)
-    -- Placeholder for additional click handling logic.
-    debugLog("Blocker button clicked.")
-end)
 
 return CommandSage_KeyBlocker
