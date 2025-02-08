@@ -106,15 +106,6 @@ local function OnEvent(self, event, param)
                     and CommandSage_Tutorial then
                 safeCall(CommandSage_Tutorial, "ShowTutorialPrompt")
             end
-        --elseif event == "ADDON_UNLOADED" then
-        --    local unloadedAddon = param
-        --    if unloadedAddon and unloadedAddon:lower() == ADDON_NAME:lower() then
-        --        if CommandSage_ShellContext and CommandSage_ShellContext.ClearContext then
-        --            safeCall(CommandSage_ShellContext, "ClearContext")
-        --        end
-        --    end
-        --end
-            -- Removed "ADDON_UNLOADED" branch (not supported in WoW Classic)
         end
     end)
     if not ok then
@@ -254,7 +245,7 @@ function CommandSage:HookChatFrameEditBox(editBox)
         self:SetPropagateKeyboardInput(false)
         safeCall(CommandSage_KeyBlocker, "BlockKeys")
         local chatHalo = CommandSage_Config.Get("preferences", "chatInputHaloEnabled")
-        if chatHalo then
+        if chatHalo and self.SetBackdropColor then
             self:SetBackdropColor(1, 1, 0, 0.2)
         end
     end)
@@ -264,7 +255,7 @@ function CommandSage:HookChatFrameEditBox(editBox)
         self:SetPropagateKeyboardInput(true)
         safeCall(CommandSage_KeyBlocker, "UnblockKeys")
         local chatHalo = CommandSage_Config.Get("preferences", "chatInputHaloEnabled")
-        if chatHalo then
+        if chatHalo and self.SetBackdropColor then
             self:SetBackdropColor(0, 0, 0, 0)
         end
     end)
