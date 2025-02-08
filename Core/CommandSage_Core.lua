@@ -3,15 +3,11 @@ local ADDON_NAME = "CommandSage"
 CommandSage = {}
 _G["CommandSage"] = CommandSage
 
--- Create main frame for event handling.
 local mainFrame = CreateFrame("Frame", "CommandSageMainFrame", UIParent)
 mainFrame:RegisterEvent("ADDON_LOADED")
 mainFrame:RegisterEvent("PLAYER_LOGIN")
 mainFrame:RegisterEvent("PLAYER_LOGOUT")
 
---------------------------------------------------------------------------------
--- Debug & Utility Functions
---------------------------------------------------------------------------------
 CommandSage.debugMode = false
 
 local function debugPrint(msg)
@@ -24,10 +20,9 @@ local function safePrint(msg)
     print("[CommandSage]: " .. tostring(msg))
 end
 
--- Enhanced safeCall that includes traceback when in debug mode.
 local function safeCall(mod, methodName, ...)
     if not mod or type(mod[methodName]) ~= "function" then
-        debugPrint("Method " .. tostring(methodName) .. " not available on module.")
+        debugPrint("Method " .. tostring(methodName) .. " not available.")
         return false
     end
     local ok, err = pcall(mod[methodName], mod, ...)
@@ -42,9 +37,6 @@ local function safeCall(mod, methodName, ...)
     return true
 end
 
---------------------------------------------------------------------------------
--- Polyfills
---------------------------------------------------------------------------------
 if not string.trim then
     function string:trim()
         return self:match("^%s*(.-)%s*$")
@@ -64,16 +56,10 @@ if not strsplit then
     end
 end
 
---------------------------------------------------------------------------------
--- Configuration Initialization Tracker
---------------------------------------------------------------------------------
 CommandSage.coreConfigInitialized = false
 
---------------------------------------------------------------------------------
--- Periodic Debug Timer (logs memory usage every 60 seconds in debug mode)
---------------------------------------------------------------------------------
 local debugTimer = 0
-mainFrame:SetScript("OnUpdate", function(self, elapsed)
+mainFrame:SetScript("OnUpdate", function(_, elapsed)
     if CommandSage.debugMode then
         debugTimer = debugTimer + elapsed
         if debugTimer >= 60 then
@@ -84,18 +70,14 @@ mainFrame:SetScript("OnUpdate", function(self, elapsed)
     end
 end)
 
---------------------------------------------------------------------------------
--- Main Event Handler
---------------------------------------------------------------------------------
-local function OnEvent(self, event, param)
+local function OnEvent(_, event, param)
     local ok, err = pcall(function()
         if event == "ADDON_LOADED" then
-            local loadedAddon = param
-            if loadedAddon and loadedAddon:lower() == ADDON_NAME:lower() then
+            if param and param:lower() == ADDON_NAME:lower() then
                 if CommandSage_Config and CommandSage_Config.InitializeDefaults then
                     CommandSage_Config:InitializeDefaults()
                     CommandSage.coreConfigInitialized = true
-                    debugPrint("Configuration defaults initialized.")
+                    debugPrint("Config defaults initialized.")
                 else
                     safePrint("Error: CommandSage_Config.InitializeDefaults not available.")
                 end
@@ -115,7 +97,8 @@ local function OnEvent(self, event, param)
                     CommandSage:RegisterSlashCommands()
                 end
 
-                if CommandSage_Config and CommandSage_Config.Get("preferences", "configGuiEnabled") and CommandSage_ConfigGUI then
+                if CommandSage_Config and CommandSage_Config.Get("preferences", "configGuiEnabled")
+                        and CommandSage_ConfigGUI then
                     safeCall(CommandSage_ConfigGUI, "InitGUI")
                 end
 
@@ -125,13 +108,13 @@ local function OnEvent(self, event, param)
             end
 
         elseif event == "PLAYER_LOGIN" then
-            if CommandSage_Config and CommandSage_Config.Get("preferences", "showTutorialOnStartup")
+            if CommandSage_Config
+                    and CommandSage_Config.Get("preferences", "showTutorialOnStartup")
                     and CommandSage_Tutorial then
                 safeCall(CommandSage_Tutorial, "ShowTutorialPrompt")
             end
 
         elseif event == "PLAYER_LOGOUT" then
-            -- On logout, force a save of persistent data and log final memory usage.
             safeCall(CommandSage_PersistentTrie, "SaveTrie")
             local memKB = collectgarbage("count")
             safePrint("Logging out. Final memory usage: " .. string.format("%.2f MB", memKB / 1024))
@@ -144,9 +127,6 @@ end
 
 mainFrame:SetScript("OnEvent", OnEvent)
 
---------------------------------------------------------------------------------
--- Slash Command Registration and Extended Business Logic
---------------------------------------------------------------------------------
 function CommandSage:RegisterSlashCommands()
     SLASH_COMMANDSAGE1 = "/cmdsage"
     SlashCmdList["COMMANDSAGE"] = function(msg)
@@ -245,7 +225,7 @@ function CommandSage:RegisterSlashCommands()
             end
         elseif cmd == "clearhistory" then
             if CommandSage_HistoryPlayback and CommandSage_HistoryPlayback.GetHistory then
-                CommandSage_HistoryPlayback:GetHistory() -- just to force initialization
+                CommandSage_HistoryPlayback:GetHistory()
                 if CommandSageDB and CommandSageDB.commandHistory then
                     CommandSageDB.commandHistory = {}
                     safePrint("Command history cleared.")
@@ -268,13 +248,9 @@ function CommandSage:HookChatFrameEditBox(editBox)
         return
     end
 
-    local boxName = "<unnamed>"
-    if type(editBox.GetName) == "function" then
-        local nm = editBox:GetName()
-        if nm then
-            boxName = nm
-        end
-    end
+    -- Ensures arrow keys move selection instead of skipping chat lines
+    editBox:SetAltArrowKeyMode(false)
+    editBox:EnableKeyboard(true)
 
     local bindingManagerFrame = CreateFrame("Frame", nil)
 
@@ -301,8 +277,9 @@ function CommandSage:HookChatFrameEditBox(editBox)
 
     editBox:HookScript("OnEditFocusGained", function(self)
         pcall(DisableAllBindings)
-        self:SetPropagateKeyboardInput(false)
         safeCall(CommandSage_KeyBlocker, "BlockKeys")
+        self:SetPropagateKeyboardInput(false)
+
         local chatHalo = CommandSage_Config.Get("preferences", "chatInputHaloEnabled")
         if chatHalo and self.SetBackdropColor then
             self:SetBackdropColor(1, 1, 0, 0.2)
@@ -311,8 +288,9 @@ function CommandSage:HookChatFrameEditBox(editBox)
 
     editBox:HookScript("OnEditFocusLost", function(self)
         pcall(RestoreAllBindings)
-        self:SetPropagateKeyboardInput(true)
         safeCall(CommandSage_KeyBlocker, "UnblockKeys")
+        self:SetPropagateKeyboardInput(true)
+
         local chatHalo = CommandSage_Config.Get("preferences", "chatInputHaloEnabled")
         if chatHalo and self.SetBackdropColor then
             self:SetBackdropColor(0, 0, 0, 0)
@@ -324,7 +302,10 @@ function CommandSage:HookChatFrameEditBox(editBox)
     end
     hooksecurefunc("ChatEdit_DeactivateChat", CloseAutoCompleteOnChatDeactivate)
 
-    editBox:HookScript("OnKeyDown", function(self, key)
+    --------------------------------------------------------------------------------
+    -- IMPORTANT: Use OnKeyUp so SHIFT+Tab and arrow keys reliably fire in WoW Classic.
+    --------------------------------------------------------------------------------
+    editBox:HookScript("OnKeyUp", function(self, key)
         local advKeybinds = CommandSage_Config.Get("preferences", "advancedKeybinds") or false
         if not advKeybinds then
             self:SetPropagateKeyboardInput(true)
@@ -333,15 +314,20 @@ function CommandSage:HookChatFrameEditBox(editBox)
 
         local text = self:GetText() or ""
         local isSlash = (text:sub(1, 1) == "/")
-        local shellActive = (CommandSage_ShellContext and CommandSage_ShellContext.IsActive and CommandSage_ShellContext:IsActive())
+        local shellActive = (CommandSage_ShellContext
+                and CommandSage_ShellContext.IsActive
+                and CommandSage_ShellContext:IsActive())
 
-        -- If user is typing a slash command or shell is active, handle advanced navigation.
         if isSlash or shellActive then
             self:SetPropagateKeyboardInput(false)
 
+            -- SHIFT states
+            local shift = IsShiftKeyDown()
+            local ctrl  = IsControlKeyDown()
+
             if key == "UP" then
                 if CommandSage_AutoComplete and CommandSage_AutoComplete:IsVisible() then
-                    if IsShiftKeyDown() then
+                    if shift then
                         safeCall(CommandSage_AutoComplete, "MoveSelection", -5)
                     else
                         safeCall(CommandSage_AutoComplete, "MoveSelection", -1)
@@ -357,7 +343,7 @@ function CommandSage:HookChatFrameEditBox(editBox)
 
             elseif key == "DOWN" then
                 if CommandSage_AutoComplete and CommandSage_AutoComplete:IsVisible() then
-                    if IsShiftKeyDown() then
+                    if shift then
                         safeCall(CommandSage_AutoComplete, "MoveSelection", 5)
                     else
                         safeCall(CommandSage_AutoComplete, "MoveSelection", 1)
@@ -371,20 +357,19 @@ function CommandSage:HookChatFrameEditBox(editBox)
                 end
                 return
 
-            elseif key == "TAB" then
-                -- iTerm2/zsh-like Tab logic:
+            elseif key:upper() == "TAB" then
                 if CommandSage_AutoComplete then
-                    safeCall(CommandSage_AutoComplete, "OnTabPress", IsShiftKeyDown())
+                    safeCall(CommandSage_AutoComplete, "OnTabPress", shift)
                 end
                 return
 
-            elseif key == "C" and IsControlKeyDown() then
+            elseif key == "C" and ctrl then
                 self:SetText("")
                 safeCall(CommandSage_AutoComplete, "CloseSuggestions")
                 return
             end
-
         else
+            -- Not a slash or shell, let WoW handle it
             self:SetPropagateKeyboardInput(true)
         end
     end)
@@ -397,7 +382,9 @@ function CommandSage:HookChatFrameEditBox(editBox)
         if not userInput then
             return
         end
-        if CommandSage_Fallback and CommandSage_Fallback.IsFallbackActive and CommandSage_Fallback:IsFallbackActive() then
+        if CommandSage_Fallback
+                and CommandSage_Fallback.IsFallbackActive
+                and CommandSage_Fallback:IsFallbackActive() then
             return
         end
 
@@ -407,14 +394,13 @@ function CommandSage:HookChatFrameEditBox(editBox)
             return
         end
 
-        local firstChar = txt:sub(1, 1)
-        local shellActive = (CommandSage_ShellContext and CommandSage_ShellContext:IsActive())
-        if firstChar ~= "/" and not shellActive then
+        local shellActive = (CommandSage_ShellContext
+                and CommandSage_ShellContext:IsActive())
+        if txt:sub(1, 1) ~= "/" and not shellActive then
             safeCall(CommandSage_AutoComplete, "CloseSuggestions")
             return
         end
 
-        -- Check for parameter suggestions first.
         local firstWord = txt:match("^(%S+)")
         local rest = txt:match("^%S+%s+(.*)") or ""
         local paramHints = CommandSage_ParameterHelper:GetParameterSuggestions(firstWord, rest)
@@ -432,7 +418,6 @@ function CommandSage:HookChatFrameEditBox(editBox)
             return
         end
 
-        -- Otherwise do normal suggestions.
         local final = CommandSage_AutoComplete:GenerateSuggestions(txt)
         CommandSage_AutoComplete:ShowSuggestions(final, txt)
     end)
@@ -440,9 +425,6 @@ function CommandSage:HookChatFrameEditBox(editBox)
     editBox.CommandSageHooked = true
 end
 
---------------------------------------------------------------------------------
--- Hook All Chat Frames
---------------------------------------------------------------------------------
 function CommandSage:HookAllChatFrames()
     for i = 1, NUM_CHAT_WINDOWS do
         local cf = _G["ChatFrame" .. i]

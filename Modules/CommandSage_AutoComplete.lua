@@ -1,17 +1,16 @@
 -- File: Modules/CommandSage_AutoComplete.lua
--- Refactored robust auto‐complete module with iTerm2/zsh-like tab behavior.
+-- Updated to handle Up/Down navigation, partial expansion with Tab, reverse cycle with Shift+Tab, etc.
 
 CommandSage_AutoComplete = {}
 local autoFrame, scrollFrame, content
 local selectedIndex = 0
 local DEFAULT_MAX_SUGGEST = 20
 
--- Keep a reference to the current suggestion list and the user’s typed text
 CommandSage_AutoComplete.suggestions = {}
 CommandSage_AutoComplete.lastTyped = ""
 
 --------------------------------------------------------------------------------
--- Utility: Find the longest common prefix among a set of strings.
+-- Utility: Longest common prefix
 --------------------------------------------------------------------------------
 local function longestCommonPrefix(str1, str2)
     local len = math.min(#str1, #str2)
@@ -24,7 +23,7 @@ end
 
 local function getCommonPrefix(suggestionsList, typedText)
     if #suggestionsList == 0 then
-        return typedText or ""
+        return typedText
     end
     local prefix = suggestionsList[1].slash or ""
     for i = 2, #suggestionsList do
@@ -33,7 +32,6 @@ local function getCommonPrefix(suggestionsList, typedText)
             break
         end
     end
-    -- If the typedText is already longer than prefix, keep typedText.
     if #typedText > #prefix then
         return typedText
     end
@@ -41,14 +39,14 @@ local function getCommonPrefix(suggestionsList, typedText)
 end
 
 --------------------------------------------------------------------------------
--- IsVisible: Returns true if the auto-complete frame is shown.
+-- IsVisible
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:IsVisible()
     return autoFrame and autoFrame:IsShown()
 end
 
 --------------------------------------------------------------------------------
--- MoveSelection: Cycle through the visible suggestion buttons.
+-- MoveSelection
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:MoveSelection(delta)
     if not content or not content.buttons then
@@ -81,7 +79,7 @@ function CommandSage_AutoComplete:MoveSelection(delta)
 end
 
 --------------------------------------------------------------------------------
--- AcceptSuggestion: Accept a suggestion and update history/usage.
+-- AcceptSuggestion
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:AcceptSuggestion(sugg)
     if not sugg or type(sugg.slash) ~= "string" then
@@ -89,12 +87,11 @@ function CommandSage_AutoComplete:AcceptSuggestion(sugg)
     end
     local slashCmd = sugg.slash
     local animate = CommandSage_Config.Get("preferences", "animateAutoType")
-    local editBox = _G.ChatFrame1EditBox
+    local editBox = ChatFrame1EditBox
 
     if animate and CommandSage_AutoType and type(CommandSage_AutoType.BeginAutoType) == "function" then
         CommandSage_AutoType:BeginAutoType(slashCmd)
     else
-        -- Fallback: set text immediately.
         editBox:SetText(slashCmd)
         editBox:SetCursorPosition(#slashCmd)
     end
@@ -107,8 +104,7 @@ function CommandSage_AutoComplete:AcceptSuggestion(sugg)
 end
 
 --------------------------------------------------------------------------------
--- OnTabPress: Called when TAB is pressed (shiftDown indicates shift+tab).
--- Tries to do partial expansion or accept/cycle suggestions, iTerm2/zsh-like.
+-- OnTabPress (shiftDown => shift+tab)
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:OnTabPress(shiftDown)
     if not self.suggestions or #self.suggestions == 0 then
@@ -116,28 +112,25 @@ function CommandSage_AutoComplete:OnTabPress(shiftDown)
     end
 
     if #self.suggestions == 1 then
-        -- Single suggestion => accept immediately.
         self:AcceptSuggestion(self.suggestions[1])
         return
     end
 
-    -- Multiple suggestions => attempt partial prefix expansion:
     local expanded = getCommonPrefix(self.suggestions, self.lastTyped or "")
-    local editBox = _G.ChatFrame1EditBox
+    local editBox = ChatFrame1EditBox
     if not editBox then
         return
     end
 
     if expanded and expanded ~= "" and #expanded > #self.lastTyped then
-        -- We can expand the typed text further without fully disambiguating
+        -- Expand typed text
         editBox:SetText(expanded)
         editBox:SetCursorPosition(#expanded)
         self.lastTyped = expanded
-        -- Rebuild suggestions for the newly expanded text:
         local final = self:GenerateSuggestions(expanded)
         self:ShowSuggestions(final, expanded)
     else
-        -- If we cannot expand further, cycle selection:
+        -- Already at max expansion => cycle selection
         if shiftDown then
             self:MoveSelection(-1)
         else
@@ -147,7 +140,7 @@ function CommandSage_AutoComplete:OnTabPress(shiftDown)
 end
 
 --------------------------------------------------------------------------------
--- GenerateSuggestions: Return sorted suggestions for a given input.
+-- GenerateSuggestions
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:GenerateSuggestions(typedText)
     if type(typedText) ~= "string" then
@@ -196,7 +189,6 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
             end
         end
     else
-        -- strict mode
         for _, cmd in ipairs(possible) do
             if not CommandSage_Analytics:IsBlacklisted(cmd.slash) and self:PassesContextFilter(cmd) then
                 table.insert(matched, { slash = cmd.slash, data = cmd.data, rank = 0, isSnippet = false })
@@ -222,7 +214,7 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
 end
 
 --------------------------------------------------------------------------------
--- MergeHistoryWithCommands: merges typed-lower or fallback with user's history.
+-- MergeHistoryWithCommands
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:MergeHistoryWithCommands(typedLower, possible)
     local hist = CommandSage_HistoryPlayback:GetHistory() or {}
@@ -252,18 +244,19 @@ function CommandSage_AutoComplete:MergeHistoryWithCommands(typedLower, possible)
 end
 
 --------------------------------------------------------------------------------
--- MaybeAddSnippets: If snippetEnabled, check for snippet matches.
+-- MaybeAddSnippets
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:MaybeAddSnippets(partialLower, suggestionsList)
     if not CommandSage_Config.Get("preferences", "snippetEnabled") then
         return
     end
-    -- Very simple snippet templates:
+    -- Example snippet set
     local snippetTemplates = {
         { slash = "/macro", desc = "Create a macro", snippet = "/macro new <macroName>" },
         { slash = "/dance", desc = "Fancy dance", snippet = "/dance fancy" },
+        { slash = "/cheer", desc = "Cheer snippet", snippet = "/cheer loud" },
         { slash = "/hello", desc = "Say hello", snippet = "/hello" },
-        -- ... truncated for brevity; you can re-add your custom snippet data ...
+        -- You can add more snippet patterns here ...
     }
     for _, snip in ipairs(snippetTemplates) do
         if snip.slash and snip.slash:find(partialLower, 1, true) then
@@ -279,7 +272,7 @@ function CommandSage_AutoComplete:MaybeAddSnippets(partialLower, suggestionsList
 end
 
 --------------------------------------------------------------------------------
--- SortSuggestions: Sort logic, including snippet and favorites sorting.
+-- SortSuggestions
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:SortSuggestions(suggestions)
     local function sortFunc(a, b)
@@ -299,15 +292,14 @@ function CommandSage_AutoComplete:SortSuggestions(suggestions)
 end
 
 --------------------------------------------------------------------------------
--- PassesContextFilter: Minimal example that always returns true in this snippet.
+-- PassesContextFilter
 --------------------------------------------------------------------------------
-function CommandSage_AutoComplete:PassesContextFilter(cmdObj)
+function CommandSage_AutoComplete:PassesContextFilter(_)
     return true
 end
 
 --------------------------------------------------------------------------------
--- ShowSuggestions: Renders the suggestion list in a scrollable frame.
--- second argument typedText is stored in self.lastTyped for expansions.
+-- ShowSuggestions
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:ShowSuggestions(suggestions, typedText)
     if not suggestions or #suggestions == 0 then
@@ -315,14 +307,12 @@ function CommandSage_AutoComplete:ShowSuggestions(suggestions, typedText)
         return
     end
 
-    -- Track these for partial expansions (OnTabPress).
     self.suggestions = suggestions
     self.lastTyped = typedText or ""
 
     local frame = self:CreateAutoCompleteUI()
     frame:Show()
 
-    -- Force default selection to first suggestion.
     selectedIndex = 1
 
     for i, btn in ipairs(content.buttons) do
@@ -349,7 +339,7 @@ function CommandSage_AutoComplete:ShowSuggestions(suggestions, typedText)
 end
 
 --------------------------------------------------------------------------------
--- CloseSuggestions: Hides the autocomplete frame.
+-- CloseSuggestions
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:CloseSuggestions()
     if autoFrame then
@@ -358,7 +348,7 @@ function CommandSage_AutoComplete:CloseSuggestions()
 end
 
 --------------------------------------------------------------------------------
--- CreateAutoCompleteUI: Build (or return) the auto-complete frame.
+-- CreateAutoCompleteUI
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:CreateAutoCompleteUI()
     if autoFrame then
@@ -421,7 +411,7 @@ function CommandSage_AutoComplete:CreateAutoCompleteUI()
             self.bg:Show()
         end)
         btn:SetScript("OnLeave", function(self)
-            if i ~= selectedIndex then
+            if self ~= content.buttons[selectedIndex] then
                 self.bg:Hide()
             end
         end)
@@ -437,7 +427,7 @@ function CommandSage_AutoComplete:CreateAutoCompleteUI()
 end
 
 --------------------------------------------------------------------------------
--- ApplyStylingToAutoFrame: Apply some styling to the auto-frame based on prefs.
+-- ApplyStylingToAutoFrame
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:ApplyStylingToAutoFrame(frame)
     local prefs = CommandSage_Config.Get("preferences") or {}
@@ -497,7 +487,4 @@ function CommandSage_AutoComplete:ApplyStylingToAutoFrame(frame)
     end
 end
 
---------------------------------------------------------------------------------
--- Return the module
---------------------------------------------------------------------------------
 return CommandSage_AutoComplete
