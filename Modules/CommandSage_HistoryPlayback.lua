@@ -1,6 +1,7 @@
 -- File: Modules/CommandSage_HistoryPlayback.lua
 CommandSage_HistoryPlayback = {}
 local maxHist = 200
+local currentHistoryIndex = 0
 
 local function EnsureHistoryDB()
     if not CommandSageDB or type(CommandSageDB) ~= "table" then
@@ -20,6 +21,32 @@ function CommandSage_HistoryPlayback:AddToHistory(cmd)
     if #CommandSageDB.commandHistory > maxHist then
         table.remove(CommandSageDB.commandHistory, 1)
     end
+end
+
+function CommandSage_HistoryPlayback:GetPreviousHistory()
+    EnsureHistoryDB()
+    local hist = CommandSageDB.commandHistory or {}
+    local count = #hist
+    if count == 0 then return nil end
+    if currentHistoryIndex <= 1 then
+        currentHistoryIndex = count
+    else
+        currentHistoryIndex = currentHistoryIndex - 1
+    end
+    return hist[currentHistoryIndex]
+end
+
+function CommandSage_HistoryPlayback:GetNextHistory()
+    EnsureHistoryDB()
+    local hist = CommandSageDB.commandHistory or {}
+    local count = #hist
+    if count == 0 then return nil end
+    if currentHistoryIndex >= count then
+        currentHistoryIndex = 1
+    else
+        currentHistoryIndex = currentHistoryIndex + 1
+    end
+    return hist[currentHistoryIndex]
 end
 
 function CommandSage_HistoryPlayback:GetHistory()

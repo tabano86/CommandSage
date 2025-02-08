@@ -48,6 +48,10 @@ local snippetTemplates = {
     { slash = "/applaud", desc = "Applaud", snippet = "/applaud" }
 }
 
+function CommandSage_AutoComplete:IsVisible()
+    return autoFrame and autoFrame:IsShown()
+end
+
 --------------------------------------------------------------------------------
 -- MoveSelection: Cycle through visible suggestion buttons.
 --------------------------------------------------------------------------------
@@ -565,7 +569,9 @@ function CommandSage_AutoComplete:ShowSuggestions(suggestions)
     local frame = CreateAutoCompleteUI()
     frame:Show()
 
-    selectedIndex = 0
+    -- Force default selection to first suggestion.
+    selectedIndex = 1
+
     for i, btn in ipairs(content.buttons) do
         if i <= #suggestions then
             local s = suggestions[i]
@@ -575,12 +581,16 @@ function CommandSage_AutoComplete:ShowSuggestions(suggestions)
             btn.desc:SetText(desc)
             local usage = CommandSage_AdaptiveLearning:GetUsageScore(s.slash)
             btn.usage:SetText(tostring(usage or 0))
+            if i == selectedIndex then
+                btn.bg:Show()
+            else
+                btn.bg:Hide()
+            end
             btn:Show()
         else
             btn:Hide()
         end
     end
-
     content:SetSize(400, #suggestions * 20)
     scrollFrame:SetVerticalScroll(0)
 end

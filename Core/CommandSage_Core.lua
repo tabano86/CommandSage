@@ -7,13 +7,14 @@ _G["CommandSage"] = CommandSage
 local mainFrame = CreateFrame("Frame", "CommandSageMainFrame", UIParent)
 mainFrame:RegisterEvent("ADDON_LOADED")
 mainFrame:RegisterEvent("PLAYER_LOGIN")
--- Removed registration of "ADDON_UNLOADED" as it is not a valid event in WoW Classic.
--- mainFrame:RegisterEvent("ADDON_UNLOADED")
+-- Register PLAYER_LOGOUT so we can perform cleanup (if supported)
+mainFrame:RegisterEvent("PLAYER_LOGOUT")
 
 --------------------------------------------------------------------------------
 -- Debug & Utility Functions
 --------------------------------------------------------------------------------
 CommandSage.debugMode = false
+
 local function debugPrint(msg)
     if CommandSage.debugMode then
         print("|cff999999[CommandSage-Debug]|r", tostring(msg))
@@ -24,15 +25,22 @@ local function safePrint(msg)
     print("[CommandSage]: " .. tostring(msg))
 end
 
+-- Enhanced safeCall that includes traceback when in debug mode.
 local function safeCall(mod, methodName, ...)
     if not mod or type(mod[methodName]) ~= "function" then
         debugPrint("Method " .. tostring(methodName) .. " not available on module.")
-        return
+        return false
     end
     local ok, err = pcall(mod[methodName], mod, ...)
     if not ok then
-        safePrint("Error calling " .. methodName .. ": " .. tostring(err))
+        if CommandSage.debugMode then
+            debugPrint("Error calling " .. methodName .. ": " .. tostring(err) .. "\n" .. debugstack())
+        else
+            safePrint("Error calling " .. methodName .. ": " .. tostring(err))
+        end
+        return false
     end
+    return true
 end
 
 --------------------------------------------------------------------------------
@@ -58,9 +66,24 @@ if not strsplit then
 end
 
 --------------------------------------------------------------------------------
--- Track configuration initialization for testing.
+-- Configuration Initialization Tracker
 --------------------------------------------------------------------------------
 CommandSage.coreConfigInitialized = false
+
+--------------------------------------------------------------------------------
+-- New: Periodic Debug Timer (logs memory usage every 60 seconds in debug mode)
+--------------------------------------------------------------------------------
+local debugTimer = 0
+mainFrame:SetScript("OnUpdate", function(self, elapsed)
+    if CommandSage.debugMode then
+        debugTimer = debugTimer + elapsed
+        if debugTimer >= 60 then
+            local memKB = collectgarbage("count")
+            debugPrint("Memory Usage: " .. string.format("%.2f MB", memKB / 1024))
+            debugTimer = 0
+        end
+    end
+end)
 
 --------------------------------------------------------------------------------
 -- Main Event Handler
@@ -73,6 +96,7 @@ local function OnEvent(self, event, param)
                 if CommandSage_Config and CommandSage_Config.InitializeDefaults then
                     CommandSage_Config:InitializeDefaults()
                     CommandSage.coreConfigInitialized = true
+                    debugPrint("Configuration defaults initialized.")
                 else
                     safePrint("Error: CommandSage_Config.InitializeDefaults not available.")
                 end
@@ -106,6 +130,12 @@ local function OnEvent(self, event, param)
                     and CommandSage_Tutorial then
                 safeCall(CommandSage_Tutorial, "ShowTutorialPrompt")
             end
+
+        elseif event == "PLAYER_LOGOUT" then
+            -- On logout, force a save of persistent data and log final memory usage.
+            safeCall(CommandSage_PersistentTrie, "SaveTrie")
+            local memKB = collectgarbage("count")
+            safePrint("Logging out. Final memory usage: " .. string.format("%.2f MB", memKB / 1024))
         end
     end)
     if not ok then
@@ -116,13 +146,13 @@ end
 mainFrame:SetScript("OnEvent", OnEvent)
 
 --------------------------------------------------------------------------------
--- Slash Command Registration
+-- Slash Command Registration and Extended Business Logic
 --------------------------------------------------------------------------------
 function CommandSage:RegisterSlashCommands()
     SLASH_COMMANDSAGE1 = "/cmdsage"
     SlashCmdList["COMMANDSAGE"] = function(msg)
         local args = { strsplit(" ", msg or "") }
-        local cmd = args[1] or ""
+        local cmd = (args[1] or ""):lower()
         if cmd == "tutorial" then
             safeCall(CommandSage_Tutorial, "ShowTutorialPrompt")
         elseif cmd == "scan" then
@@ -184,19 +214,53 @@ function CommandSage:RegisterSlashCommands()
             safeCall(CommandSage_Config, "ResetPreferences")
         elseif cmd == "perf" then
             safeCall(CommandSage_Performance, "ShowDashboard")
+            -- New subcommand: help - show usage and available commands.
+        elseif cmd == "help" then
+            safePrint("CommandSage Usage:")
+            safePrint(" /cmdsage tutorial - Show tutorial prompt")
+            safePrint(" /cmdsage scan - Force a re-scan of commands")
+            safePrint(" /cmdsage fallback/nofallback/togglefallback - Toggle fallback mode")
+            safePrint(" /cmdsage debug - Dump debug information")
+            safePrint(" /cmdsage config <key> <value> - Change configuration")
+            safePrint(" /cmdsage mode <fuzzy|strict> - Set suggestion mode")
+            safePrint(" /cmdsage theme <dark|light|classic> - Set UI theme")
+            safePrint(" /cmdsage scale <number> - Set UI scale")
+            safePrint(" /cmdsage resetprefs - Reset preferences to default")
+            safePrint(" /cmdsage gui - Open configuration GUI")
+            safePrint(" /cmdsage perf - Show performance dashboard")
+            safePrint(" /cmdsage reload - Reload CommandSage")
+            safePrint(" /cmdsage status - Show detailed performance stats")
+            safePrint(" /cmdsage clearhistory - Clear command history")
+            -- New subcommand: reload - reinitialize key modules and force re-scan.
+        elseif cmd == "reload" then
+            if CommandSage_Config and CommandSage_Config.InitializeDefaults then
+                CommandSage_Config:InitializeDefaults()
+                safePrint("Configuration reloaded.")
+            end
+            safeCall(CommandSage_Discovery, "ScanAllCommands")
+            safeCall(CommandSage_PersistentTrie, "LoadTrie")
+            safePrint("CommandSage reloaded successfully.")
+            -- New subcommand: status - dump detailed stats.
+        elseif cmd == "status" then
+            if CommandSage_Performance and CommandSage_Performance.PrintDetailedStats then
+                safeCall(CommandSage_Performance, "PrintDetailedStats")
+            else
+                safePrint("Performance module unavailable.")
+            end
+            -- New subcommand: clearhistory - clear command history.
+        elseif cmd == "clearhistory" then
+            if CommandSage_HistoryPlayback and CommandSage_HistoryPlayback.GetHistory then
+                CommandSage_HistoryPlayback:GetHistory() -- just to force initialization
+                if CommandSageDB and CommandSageDB.commandHistory then
+                    CommandSageDB.commandHistory = {}
+                    safePrint("Command history cleared.")
+                end
+            else
+                safePrint("History module unavailable.")
+            end
         else
             safePrint("|cff00ff00CommandSage Usage:|r")
-            safePrint(" /cmdsage tutorial")
-            safePrint(" /cmdsage scan")
-            safePrint(" /cmdsage fallback/nofallback/togglefallback")
-            safePrint(" /cmdsage debug")
-            safePrint(" /cmdsage config <key> <value>")
-            safePrint(" /cmdsage mode <fuzzy|strict>")
-            safePrint(" /cmdsage theme <dark|light|classic>")
-            safePrint(" /cmdsage scale <number>")
-            safePrint(" /cmdsage resetprefs")
-            safePrint(" /cmdsage gui")
-            safePrint(" /cmdsage perf")
+            safePrint(" /cmdsage help")
         end
     end
 end
@@ -280,24 +344,49 @@ function CommandSage:HookChatFrameEditBox(editBox)
         if isSlash or isInShell then
             self:SetPropagateKeyboardInput(false)
             if key == "UP" then
-                if IsShiftKeyDown() then
-                    safeCall(CommandSage_AutoComplete, "MoveSelection", -5)
+                if CommandSage_AutoComplete and CommandSage_AutoComplete:IsVisible() then
+                    if IsShiftKeyDown() then
+                        safeCall(CommandSage_AutoComplete, "MoveSelection", -5)
+                    else
+                        safeCall(CommandSage_AutoComplete, "MoveSelection", -1)
+                    end
                 else
-                    safeCall(CommandSage_AutoComplete, "MoveSelection", -1)
+                    local prev = CommandSage_HistoryPlayback:GetPreviousHistory()
+                    if prev then
+                        self:SetText(prev)
+                        self:SetCursorPosition(#prev)
+                    end
                 end
                 return
             elseif key == "DOWN" then
-                if IsShiftKeyDown() then
-                    safeCall(CommandSage_AutoComplete, "MoveSelection", 5)
+                if CommandSage_AutoComplete and CommandSage_AutoComplete:IsVisible() then
+                    if IsShiftKeyDown() then
+                        safeCall(CommandSage_AutoComplete, "MoveSelection", 5)
+                    else
+                        safeCall(CommandSage_AutoComplete, "MoveSelection", 1)
+                    end
                 else
-                    safeCall(CommandSage_AutoComplete, "MoveSelection", 1)
+                    local nextHist = CommandSage_HistoryPlayback:GetNextHistory()
+                    if nextHist then
+                        self:SetText(nextHist)
+                        self:SetCursorPosition(#nextHist)
+                    end
                 end
                 return
             elseif key == "TAB" then
                 if IsShiftKeyDown() then
                     safeCall(CommandSage_AutoComplete, "MoveSelection", -1)
                 else
-                    safeCall(CommandSage_AutoComplete, "AcceptOrAdvance")
+                    local acModule = CommandSage_AutoComplete
+                    if acModule and acModule:IsVisible() then
+                        selectedIndex = 1
+                        local btn = content and content.buttons[selectedIndex]
+                        if btn and btn:IsShown() then
+                            acModule:AcceptSuggestion(btn.suggestionData)
+                        else
+                            acModule:MoveSelection(1)
+                        end
+                    end
                 end
                 return
             elseif key == "C" and IsControlKeyDown() then
@@ -318,9 +407,7 @@ function CommandSage:HookChatFrameEditBox(editBox)
         if not userInput then
             return
         end
-        if CommandSage_Fallback and CommandSage_Fallback.IsFallbackActive
-                and CommandSage_Fallback:IsFallbackActive()
-        then
+        if CommandSage_Fallback and CommandSage_Fallback.IsFallbackActive and CommandSage_Fallback:IsFallbackActive() then
             return
         end
         local txt = eBox:GetText()
