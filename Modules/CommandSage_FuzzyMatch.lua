@@ -1,8 +1,12 @@
+-- File: Modules/CommandSage_FuzzyMatch.lua
 CommandSage_FuzzyMatch = {}
 local cache = {}
+
 function CommandSage_FuzzyMatch:ClearCache()
     cache = {}
 end
+
+-- Levenshtein distance with caching.
 local function Levenshtein(a, b)
     local key = a .. "|" .. b
     if cache[key] then
@@ -39,18 +43,28 @@ local function Levenshtein(a, b)
     cache[key] = dist
     return dist
 end
+
 local function getContextBonus()
     if InCombatLockdown() then
         return -1
     end
     return 0
 end
+
+-- In GetSuggestions, if the candidate command starts with the input,
+-- we treat the distance as 0. This ensures that typing "/re" will match "/reload".
 function CommandSage_FuzzyMatch:GetSuggestions(input, possibleCommands)
     local tolerance = CommandSage_Config.Get("preferences", "fuzzyMatchTolerance") or 2
     local results = {}
+    input = input:lower()
     for _, cmdObj in ipairs(possibleCommands) do
         local slash = cmdObj.slash
-        local dist = Levenshtein(slash, input)
+        local dist = 0
+        if slash:sub(1, #input) == input then
+            dist = 0
+        else
+            dist = Levenshtein(slash, input)
+        end
         if dist <= tolerance then
             local usageScore = CommandSage_AdaptiveLearning:GetUsageScore(slash)
             local cBonus = getContextBonus()
@@ -68,19 +82,26 @@ function CommandSage_FuzzyMatch:GetSuggestions(input, possibleCommands)
     end)
     return results
 end
+
 function CommandSage_FuzzyMatch:SuggestCorrections(input)
     local discovered = CommandSage_Discovery:GetDiscoveredCommands() or {}
     local bestDist = math.huge
     local bestCmd = nil
+    input = input:lower()
     for slash, _ in pairs(discovered) do
-        local d = Levenshtein(slash, input)
+        local d = 0
+        if slash:sub(1, #input) == input then
+            d = 0
+        else
+            d = Levenshtein(slash, input)
+        end
         if d < bestDist then
             bestDist = d
             bestCmd = slash
         end
     end
     if bestCmd and type(bestCmd) == "table" then
-        bestCmd = bestCmd.slash  -- extract string if necessary
+        bestCmd = bestCmd.slash
     end
     if bestDist <= ((CommandSage_Config.Get("preferences", "fuzzyMatchTolerance") or 2) + 1) then
         return bestCmd, bestDist
@@ -91,4 +112,5 @@ end
 function CommandSage_FuzzyMatch:GetFuzzyDistance(strA, strB)
     return Levenshtein(strA:lower(), strB:lower())
 end
+
 return CommandSage_FuzzyMatch

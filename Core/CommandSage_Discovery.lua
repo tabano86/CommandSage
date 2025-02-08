@@ -1,19 +1,26 @@
--- File: Modules/CommandSage_Discovery.lua
--- Enhanced discovery module that finds slash commands not only via built‐in sources
--- (SlashCmdList, macros, AceConsole, emotes, help, extra, global scanning) but also:
---   • Custom commands from CommandSageDB.customCommands
---   • Adaptive usage commands from CommandSageDB.usageData
---   • Known parameters from CommandSage_ParameterHelper
+-- File: Core/CommandSage_Discovery.lua
+-- Enhanced discovery module that scans for slash commands from multiple sources:
+--   - Built-in slash commands (via SlashCmdList and global SLASH_ keys)
+--   - Macros (global and character)
+--   - AceConsole commands (if enabled)
+--   - Emotes and hard-coded commands
+--   - Extra commands (e.g. /gold, /ping, /mem)
+--   - Custom commands from CommandSageDB.customCommands
+--   - Adaptive usage data from CommandSageDB.usageData
+--   - Known parameters from CommandSage_ParameterHelper
+-- Additionally, we now also scan for *help* commands from any addon by iterating over
+-- all globals whose keys begin with "SLASH_" and checking if the key or value contains
+-- "help" (case–insensitive).
 --
--- Each command is normalized (to lowercase with a leading “/”) and then inserted into the
--- CommandSage_Trie. Developer API events are fired after scanning.
+-- After scanning, each normalized command is inserted into CommandSage_Trie,
+-- and a "COMMANDS_UPDATED" event is fired.
 
 CommandSage_Discovery = {}
 local discoveredCommands = {}  -- keys: normalized slash; values: command info
 
 -- CONFIGURATION: forced fallback and extra commands
 local forcedFallback = {
-    "/cmdsage", "/cmdsagehistory", -- help commands purposely removed
+    "/cmdsage", "/cmdsagehistory", -- help commands purposely removed from auto-suggestions
     "/reload", "/console", "/dance", "/macro", "/ghelp"
 }
 
@@ -23,27 +30,20 @@ local extraCommands = {
     { slash = "/mem", source = "Extra", description = "Display memory usage" }
 }
 
--- Utility: normalize a slash command string.
+--------------------------------------------------------------------------------
+-- Utility Functions
+--------------------------------------------------------------------------------
 local function normalizeSlash(slash)
-    if type(slash) ~= "string" then
-        return nil
-    end
+    if type(slash) ~= "string" then return nil end
     local trimmed = slash:match("^%s*(.-)%s*$")
-    if trimmed == "" then
-        return nil
-    end
-    if trimmed:sub(1,1) ~= "/" then
-        trimmed = "/" .. trimmed
-    end
+    if trimmed == "" then return nil end
+    if trimmed:sub(1,1) ~= "/" then trimmed = "/" .. trimmed end
     return trimmed:lower()
 end
 
--- Helper: add a command if not already discovered.
 local function addCommand(slash, data)
     local norm = normalizeSlash(slash)
-    if not norm then
-        return
-    end
+    if not norm then return end
     if not discoveredCommands[norm] then
         discoveredCommands[norm] = {
             slash = norm,
@@ -53,7 +53,6 @@ local function addCommand(slash, data)
             params = data.params  -- optional field
         }
     else
-        -- Optionally, if a command already exists, you can merge extra info.
         local curr = discoveredCommands[norm]
         if data.description and not curr.description:find(data.description, 1, true) then
             curr.description = curr.description .. " | " .. data.description
@@ -61,10 +60,15 @@ local function addCommand(slash, data)
     end
 end
 
----------------------------------------------------------------------
--- Existing Scanning Functions
----------------------------------------------------------------------
+local function debugLog(msg)
+    if CommandSage and CommandSage.debugMode then
+        print("|cff999999[CommandSage-Discovery Debug]|r", msg)
+    end
+end
 
+--------------------------------------------------------------------------------
+-- Scanning Functions (each wrapped in pcall to isolate errors)
+--------------------------------------------------------------------------------
 local function ScanBuiltIn()
     if not SlashCmdList then return end
     for key, func in pairs(SlashCmdList) do
@@ -155,14 +159,6 @@ local function ScanHelp()
     end
 end
 
-local function ScanExtra()
-    for _, cmd in ipairs(extraCommands) do
-        if cmd and type(cmd.slash) == "string" then
-            addCommand(cmd.slash, { callback = cmd.callback, source = cmd.source, description = cmd.description })
-        end
-    end
-end
-
 local function ScanGlobalSlashCommands()
     for k, v in pairs(_G) do
         if type(k) == "string" and k:sub(1, 6) == "SLASH_" and type(v) == "string" then
@@ -171,6 +167,80 @@ local function ScanGlobalSlashCommands()
                 local key = k:match("SLASH_(%w+)%d+")
                 if key and SlashCmdList and type(SlashCmdList[key]) == "function" then
                     addCommand(v, { callback = SlashCmdList[key], source = "GlobalScan", description = "Discovered global slash" })
+                end
+            end
+        end
+    end
+end
+
+local function ScanAddonHelp()
+    for k, v in pairs(_G) do
+        if type(k) == "string" and k:sub(1, 6) == "SLASH_" and type(v) == "string" then
+            if k:lower():find("help") or v:lower():find("help") then
+                local norm = normalizeSlash(v)
+                if norm and not discoveredCommands[norm] then
+                    local key = k:match("SLASH_(%w+)%d+")
+                    local callback = (SlashCmdList and SlashCmdList[key]) or function() end
+                    addCommand(v, { callback = callback, source = "AddonHelp", description = "Addon help command (" .. key .. ")" })
+                    debugLog("Scanned addon help command: " .. norm)
+                end
+            end
+        end
+    end
+end
+
+local function ScanExtra()
+    for _, cmd in ipairs(extraCommands) do
+        if cmd and type(cmd.slash) == "string" then
+            addCommand(cmd.slash, { callback = cmd.callback, source = cmd.source, description = cmd.description })
+        end
+    end
+end
+
+local function ScanCustomCommands()
+    if CommandSageDB and type(CommandSageDB.customCommands) == "table" then
+        for _, cmd in ipairs(CommandSageDB.customCommands) do
+            if type(cmd) == "table" and cmd.slash then
+                addCommand(cmd.slash, {
+                    callback = cmd.callback or function(msg) end,
+                    source = "UserCustom",
+                    description = cmd.description or "<No description>"
+                })
+            end
+        end
+    end
+end
+
+local function ScanAdaptiveUsage()
+    if CommandSageDB and type(CommandSageDB.usageData) == "table" then
+        for slash, usage in pairs(CommandSageDB.usageData) do
+            local norm = normalizeSlash(slash)
+            if norm and not discoveredCommands[norm] then
+                addCommand(norm, {
+                    callback = function(msg) end,
+                    source = "AdaptiveUsage",
+                    description = "Used " .. usage .. " time(s)"
+                })
+            end
+        end
+    end
+end
+
+local function ScanKnownParams()
+    if CommandSage_ParameterHelper and type(CommandSage_ParameterHelper.ExposeKnownParams) == "function" then
+        local kp = CommandSage_ParameterHelper:ExposeKnownParams()
+        for slash, params in pairs(kp) do
+            local norm = normalizeSlash(slash)
+            if norm then
+                if discoveredCommands[norm] then
+                    local curr = discoveredCommands[norm].description
+                    discoveredCommands[norm].description = curr .. " | Known params: " .. table.concat(params, ", ")
+                else
+                    addCommand(norm, {
+                        callback = function(msg) end,
+                        source = "ParameterHelper",
+                        description = "Known parameters: " .. table.concat(params, ", ")
+                    })
                 end
             end
         end
@@ -201,67 +271,9 @@ local function ForceFallbacks()
     end
 end
 
----------------------------------------------------------------------
--- NEW SCANNING FUNCTIONS
----------------------------------------------------------------------
-
--- Scan for custom commands defined in CommandSageDB.customCommands.
-local function ScanCustomCommands()
-    if CommandSageDB and type(CommandSageDB.customCommands) == "table" then
-        for _, cmd in ipairs(CommandSageDB.customCommands) do
-            if type(cmd) == "table" and cmd.slash then
-                addCommand(cmd.slash, {
-                    callback = cmd.callback or function(msg) end,
-                    source = "UserCustom",
-                    description = cmd.description or "<No description>"
-                })
-            end
-        end
-    end
-end
-
--- Scan adaptive usage data and add any command not already discovered.
-local function ScanAdaptiveUsage()
-    if CommandSageDB and type(CommandSageDB.usageData) == "table" then
-        for slash, usage in pairs(CommandSageDB.usageData) do
-            local norm = normalizeSlash(slash)
-            if norm and not discoveredCommands[norm] then
-                addCommand(norm, {
-                    callback = function(msg) end,
-                    source = "AdaptiveUsage",
-                    description = "Used " .. usage .. " time(s)"
-                })
-            end
-        end
-    end
-end
-
--- Scan known parameter suggestions from CommandSage_ParameterHelper and
--- if the command is already discovered, append parameter info; otherwise add it.
-local function ScanKnownParams()
-    if CommandSage_ParameterHelper and type(CommandSage_ParameterHelper.ExposeKnownParams) == "function" then
-        local kp = CommandSage_ParameterHelper:ExposeKnownParams()
-        for slash, params in pairs(kp) do
-            local norm = normalizeSlash(slash)
-            if norm then
-                if discoveredCommands[norm] then
-                    local curr = discoveredCommands[norm].description
-                    discoveredCommands[norm].description = curr .. " | Known params: " .. table.concat(params, ", ")
-                else
-                    addCommand(norm, {
-                        callback = function(msg) end,
-                        source = "ParameterHelper",
-                        description = "Known parameters: " .. table.concat(params, ", ")
-                    })
-                end
-            end
-        end
-    end
-end
-
----------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- Public API
----------------------------------------------------------------------
+--------------------------------------------------------------------------------
 function CommandSage_Discovery:ScanAllCommands()
     -- Clear the previously discovered commands.
     if wipe then
@@ -272,21 +284,27 @@ function CommandSage_Discovery:ScanAllCommands()
         end
     end
 
-    -- Run all scanners in order.
-    ScanBuiltIn()
-    ScanMacros()
-    ScanAce()
-    ScanEmotes()
-    ScanHelp()
-    ScanExtra()
-    ScanGlobalSlashCommands()
+    local scanners = {
+        ScanBuiltIn,
+        ScanMacros,
+        ScanAce,
+        ScanEmotes,
+        ScanHelp,
+        ScanAddonHelp,
+        ScanGlobalSlashCommands,
+        ScanExtra,
+        ScanCustomCommands,
+        ScanAdaptiveUsage,
+        ScanKnownParams,
+        ForceFallbacks
+    }
 
-    -- New scanning functions.
-    ScanCustomCommands()
-    ScanAdaptiveUsage()
-    ScanKnownParams()
-
-    ForceFallbacks()
+    for _, scanner in ipairs(scanners) do
+        local ok, err = pcall(scanner)
+        if not ok then
+            debugLog("Error in scanner: " .. tostring(err))
+        end
+    end
 
     -- Insert each discovered command into the trie.
     if CommandSage_Trie and type(CommandSage_Trie.InsertCommand) == "function" then
@@ -295,7 +313,7 @@ function CommandSage_Discovery:ScanAllCommands()
                 CommandSage_Trie:InsertCommand(slash, data)
             end)
             if not ok then
-                print("[CommandSage-Debug] Error inserting", slash, ":", err)
+                print("[CommandSage-Discovery Debug] Error inserting", slash, ":", err)
             end
         end
     end
@@ -304,13 +322,19 @@ function CommandSage_Discovery:ScanAllCommands()
     if CommandSage_DeveloperAPI and type(CommandSage_DeveloperAPI.FireEvent) == "function" then
         CommandSage_DeveloperAPI:FireEvent("COMMANDS_UPDATED")
     end
+
+    -- Calculate total count without using the length operator on a number.
+    local count = 0
+    for _ in pairs(discoveredCommands) do
+        count = count + 1
+    end
+    debugLog("ScanAllCommands completed. Total commands discovered: " .. tostring(count))
 end
 
 function CommandSage_Discovery:GetDiscoveredCommands()
     return discoveredCommands
 end
 
--- ForceAllFallbacks adds additional fallback commands.
 function CommandSage_Discovery:ForceAllFallbacks(newFallbacks)
     if type(newFallbacks) == "table" then
         for _, slash in ipairs(newFallbacks) do
