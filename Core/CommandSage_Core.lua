@@ -7,7 +7,6 @@ _G["CommandSage"] = CommandSage
 local mainFrame = CreateFrame("Frame", "CommandSageMainFrame", UIParent)
 mainFrame:RegisterEvent("ADDON_LOADED")
 mainFrame:RegisterEvent("PLAYER_LOGIN")
--- Register PLAYER_LOGOUT so we can perform cleanup (if supported)
 mainFrame:RegisterEvent("PLAYER_LOGOUT")
 
 --------------------------------------------------------------------------------
@@ -71,7 +70,7 @@ end
 CommandSage.coreConfigInitialized = false
 
 --------------------------------------------------------------------------------
--- New: Periodic Debug Timer (logs memory usage every 60 seconds in debug mode)
+-- Periodic Debug Timer (logs memory usage every 60 seconds in debug mode)
 --------------------------------------------------------------------------------
 local debugTimer = 0
 mainFrame:SetScript("OnUpdate", function(self, elapsed)
@@ -214,7 +213,6 @@ function CommandSage:RegisterSlashCommands()
             safeCall(CommandSage_Config, "ResetPreferences")
         elseif cmd == "perf" then
             safeCall(CommandSage_Performance, "ShowDashboard")
-            -- New subcommand: help - show usage and available commands.
         elseif cmd == "help" then
             safePrint("CommandSage Usage:")
             safePrint(" /cmdsage tutorial - Show tutorial prompt")
@@ -231,7 +229,6 @@ function CommandSage:RegisterSlashCommands()
             safePrint(" /cmdsage reload - Reload CommandSage")
             safePrint(" /cmdsage status - Show detailed performance stats")
             safePrint(" /cmdsage clearhistory - Clear command history")
-            -- New subcommand: reload - reinitialize key modules and force re-scan.
         elseif cmd == "reload" then
             if CommandSage_Config and CommandSage_Config.InitializeDefaults then
                 CommandSage_Config:InitializeDefaults()
@@ -240,14 +237,12 @@ function CommandSage:RegisterSlashCommands()
             safeCall(CommandSage_Discovery, "ScanAllCommands")
             safeCall(CommandSage_PersistentTrie, "LoadTrie")
             safePrint("CommandSage reloaded successfully.")
-            -- New subcommand: status - dump detailed stats.
         elseif cmd == "status" then
             if CommandSage_Performance and CommandSage_Performance.PrintDetailedStats then
                 safeCall(CommandSage_Performance, "PrintDetailedStats")
             else
                 safePrint("Performance module unavailable.")
             end
-            -- New subcommand: clearhistory - clear command history.
         elseif cmd == "clearhistory" then
             if CommandSage_HistoryPlayback and CommandSage_HistoryPlayback.GetHistory then
                 CommandSage_HistoryPlayback:GetHistory() -- just to force initialization
@@ -266,7 +261,7 @@ function CommandSage:RegisterSlashCommands()
 end
 
 --------------------------------------------------------------------------------
--- Hook Chat Frame EditBox (if needed)
+-- Hook Chat Frame EditBox
 --------------------------------------------------------------------------------
 function CommandSage:HookChatFrameEditBox(editBox)
     if not editBox or editBox.CommandSageHooked then
@@ -335,14 +330,15 @@ function CommandSage:HookChatFrameEditBox(editBox)
             self:SetPropagateKeyboardInput(true)
             return
         end
+
         local text = self:GetText() or ""
         local isSlash = (text:sub(1, 1) == "/")
-        local isInShell = false
-        if CommandSage_ShellContext and CommandSage_ShellContext.IsActive then
-            isInShell = CommandSage_ShellContext:IsActive()
-        end
-        if isSlash or isInShell then
+        local shellActive = (CommandSage_ShellContext and CommandSage_ShellContext.IsActive and CommandSage_ShellContext:IsActive())
+
+        -- If user is typing a slash command or shell is active, handle advanced navigation.
+        if isSlash or shellActive then
             self:SetPropagateKeyboardInput(false)
+
             if key == "UP" then
                 if CommandSage_AutoComplete and CommandSage_AutoComplete:IsVisible() then
                     if IsShiftKeyDown() then
@@ -358,6 +354,7 @@ function CommandSage:HookChatFrameEditBox(editBox)
                     end
                 end
                 return
+
             elseif key == "DOWN" then
                 if CommandSage_AutoComplete and CommandSage_AutoComplete:IsVisible() then
                     if IsShiftKeyDown() then
@@ -366,34 +363,27 @@ function CommandSage:HookChatFrameEditBox(editBox)
                         safeCall(CommandSage_AutoComplete, "MoveSelection", 1)
                     end
                 else
-                    local nextHist = CommandSage_HistoryPlayback:GetNextHistory()
-                    if nextHist then
-                        self:SetText(nextHist)
-                        self:SetCursorPosition(#nextHist)
+                    local nxt = CommandSage_HistoryPlayback:GetNextHistory()
+                    if nxt then
+                        self:SetText(nxt)
+                        self:SetCursorPosition(#nxt)
                     end
                 end
                 return
+
             elseif key == "TAB" then
-                if IsShiftKeyDown() then
-                    safeCall(CommandSage_AutoComplete, "MoveSelection", -1)
-                else
-                    local acModule = CommandSage_AutoComplete
-                    if acModule and acModule:IsVisible() then
-                        selectedIndex = 1
-                        local btn = content and content.buttons[selectedIndex]
-                        if btn and btn:IsShown() then
-                            acModule:AcceptSuggestion(btn.suggestionData)
-                        else
-                            acModule:MoveSelection(1)
-                        end
-                    end
+                -- iTerm2/zsh-like Tab logic:
+                if CommandSage_AutoComplete then
+                    safeCall(CommandSage_AutoComplete, "OnTabPress", IsShiftKeyDown())
                 end
                 return
+
             elseif key == "C" and IsControlKeyDown() then
                 self:SetText("")
                 safeCall(CommandSage_AutoComplete, "CloseSuggestions")
                 return
             end
+
         else
             self:SetPropagateKeyboardInput(true)
         end
@@ -410,20 +400,21 @@ function CommandSage:HookChatFrameEditBox(editBox)
         if CommandSage_Fallback and CommandSage_Fallback.IsFallbackActive and CommandSage_Fallback:IsFallbackActive() then
             return
         end
+
         local txt = eBox:GetText()
         if txt == "" then
             safeCall(CommandSage_AutoComplete, "CloseSuggestions")
             return
         end
+
         local firstChar = txt:sub(1, 1)
-        local shellActive = false
-        if CommandSage_ShellContext and CommandSage_ShellContext.IsActive then
-            shellActive = CommandSage_ShellContext:IsActive()
-        end
+        local shellActive = (CommandSage_ShellContext and CommandSage_ShellContext:IsActive())
         if firstChar ~= "/" and not shellActive then
             safeCall(CommandSage_AutoComplete, "CloseSuggestions")
             return
         end
+
+        -- Check for parameter suggestions first.
         local firstWord = txt:match("^(%S+)")
         local rest = txt:match("^%S+%s+(.*)") or ""
         local paramHints = CommandSage_ParameterHelper:GetParameterSuggestions(firstWord, rest)
@@ -437,11 +428,13 @@ function CommandSage:HookChatFrameEditBox(editBox)
                     isParamSuggestion = true
                 })
             end
-            CommandSage_AutoComplete:ShowSuggestions(paramSugg)
+            CommandSage_AutoComplete:ShowSuggestions(paramSugg, txt)
             return
         end
+
+        -- Otherwise do normal suggestions.
         local final = CommandSage_AutoComplete:GenerateSuggestions(txt)
-        CommandSage_AutoComplete:ShowSuggestions(final)
+        CommandSage_AutoComplete:ShowSuggestions(final, txt)
     end)
 
     editBox.CommandSageHooked = true
@@ -462,5 +455,4 @@ end
 
 CommandSage.frame = mainFrame
 debugPrint("Core/CommandSage_Core has finished loading.")
-
-return CommandSage  -- Return the global table we defined
+return CommandSage
