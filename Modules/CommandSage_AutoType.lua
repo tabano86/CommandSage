@@ -2,10 +2,6 @@
 -- Enhanced auto-type module with advanced controls, event firing, cancellation support,
 -- optional finish callback, and detailed debug logging.
 --
--- Dependencies:
---   • CommandSage_Config (for preferences)
---   • Optionally, CommandSage_DeveloperAPI for event notifications
---
 -- Usage:
 --   AutoType:BeginAutoType("/dance", function(finalText)
 --       print("Finished auto-typing:", finalText)
@@ -13,10 +9,9 @@
 --   -- To cancel in progress:
 --   AutoType:CancelAutoType()
 
-local Config = CommandSage_Config  -- assumed to be available globally
+local Config = CommandSage_Config  -- assumed global
 local AutoType = {}
 
--- Debug logging utility (only prints if CommandSage.debugMode is true)
 local function debugLog(msg)
     if CommandSage and CommandSage.debugMode then
         print("|cff999999[AutoType Debug]|r", msg)
@@ -29,14 +24,14 @@ if not AutoType.frame then
     AutoType.frame:Hide()
 end
 
--- Internal state variables.
+-- Internal state.
 AutoType.text = ""
 AutoType.index = 0
 AutoType.timer = 0
 AutoType.isTyping = false
-AutoType.finishCallback = nil   -- Optional callback to invoke when typing is finished
+AutoType.finishCallback = nil  -- optional finish callback
 
--- Helper function to retrieve the chat edit box safely.
+-- Helper: get ChatFrame1EditBox (error if not found)
 local function getEditBox()
     local editBox = _G.ChatFrame1EditBox
     if not editBox then
@@ -46,21 +41,23 @@ local function getEditBox()
 end
 
 --------------------------------------------------------------------------------
--- BeginAutoType: Starts auto-typing the provided command.
--- If animation is disabled then the command is immediately set.
---
--- @param cmd (string): The command to type.
--- @param onFinish (function, optional): A callback function called upon finish.
+-- BeginAutoType: starts auto-typing the provided command.
+-- If animation is off then the command is immediately inserted.
 --------------------------------------------------------------------------------
 function AutoType:BeginAutoType(cmd, onFinish)
     if type(cmd) ~= "string" or cmd == "" then
         error("Invalid command provided to BeginAutoType")
     end
 
-    -- If already typing, cancel the previous auto-type.
+    -- If already typing, cancel previous process.
     if self.isTyping then
         debugLog("AutoType already in progress; cancelling previous auto-type.")
-        self:StopAutoType(false)  -- cancel without finalizing
+        self:StopAutoType(false)
+    end
+
+    -- Close any active auto-complete suggestions.
+    if CommandSage_AutoComplete and CommandSage_AutoComplete.CloseSuggestions then
+        CommandSage_AutoComplete:CloseSuggestions()
     end
 
     self.text = cmd
@@ -89,8 +86,8 @@ function AutoType:BeginAutoType(cmd, onFinish)
         return
     end
 
-    -- Animated mode: clear the edit box and start auto-typing.
     debugLog("Starting animated auto-type for: " .. cmd)
+    -- Clear the edit box and start animation.
     editBox:SetText("")
     self.frame:Show()
     self.frame:SetScript("OnUpdate", function(frame, elapsed)
@@ -102,15 +99,10 @@ function AutoType:BeginAutoType(cmd, onFinish)
 end
 
 --------------------------------------------------------------------------------
--- OnUpdate: Called repeatedly (by the auto-type frame) to add one character at a time.
---
--- @param frame: The auto-type frame.
--- @param elapsed: Time elapsed since the last update.
+-- OnUpdate: Called repeatedly (by the auto-type frame) to add one character.
 --------------------------------------------------------------------------------
 function AutoType:OnUpdate(frame, elapsed)
-    if not self.isTyping then
-        return
-    end
+    if not self.isTyping then return end
     local delay = Config.Get("preferences", "autoTypeDelay") or 0.1
     self.timer = self.timer + elapsed
     local editBox = getEditBox()
@@ -122,17 +114,14 @@ function AutoType:OnUpdate(frame, elapsed)
             editBox:SetText(currentText)
             debugLog("AutoType progress: " .. currentText)
         else
-            -- Finished typing; finalize text.
             editBox:SetText(self.text)
-            self:StopAutoType(true)  -- finalize = true
+            self:StopAutoType(true)  -- finalize
         end
     end
 end
 
 --------------------------------------------------------------------------------
--- StopAutoType: Stops the auto-type process.
---
--- @param finalize (boolean): If true, leave the text intact; if false, clear it.
+-- StopAutoType: stops the auto-type process.
 --------------------------------------------------------------------------------
 function AutoType:StopAutoType(finalize)
     local editBox = getEditBox()
@@ -156,7 +145,7 @@ function AutoType:StopAutoType(finalize)
 end
 
 --------------------------------------------------------------------------------
--- CancelAutoType: Cancels the ongoing auto-type process without finalizing the text.
+-- CancelAutoType: Cancels the current auto-type process.
 --------------------------------------------------------------------------------
 function AutoType:CancelAutoType()
     if self.isTyping then
@@ -169,7 +158,7 @@ function AutoType:CancelAutoType()
 end
 
 --------------------------------------------------------------------------------
--- IsTyping: Returns whether an auto-type process is currently active.
+-- IsTyping: Returns whether auto-type is in progress.
 --------------------------------------------------------------------------------
 function AutoType:IsTyping()
     return self.isTyping

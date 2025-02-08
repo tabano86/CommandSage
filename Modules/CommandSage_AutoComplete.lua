@@ -1,16 +1,24 @@
 -- File: Modules/CommandSage_AutoComplete.lua
--- Updated to handle Up/Down navigation, partial expansion with Tab, reverse cycle with Shift+Tab, etc.
+-- Refactored robust auto-complete module with modern terminal-like behavior:
+-- • Up/Down arrows cycle through suggestions.
+-- • Tab performs partial expansion; if no further expansion, it cycles forward.
+-- • Shift+Tab cycles backward.
+-- This module assumes the core chat edit box hook (via OnKeyUp) calls OnTabPress appropriately.
+--
+-- (Note: In your Core hooking code, ensure that if AutoType:IsTyping() is true then
+-- you do not run auto-complete logic.)
 
 CommandSage_AutoComplete = {}
 local autoFrame, scrollFrame, content
 local selectedIndex = 0
 local DEFAULT_MAX_SUGGEST = 20
 
+-- Stored suggestions and last typed text.
 CommandSage_AutoComplete.suggestions = {}
 CommandSage_AutoComplete.lastTyped = ""
 
 --------------------------------------------------------------------------------
--- Utility: Longest common prefix
+-- Utility: Compute longest common prefix of two strings.
 --------------------------------------------------------------------------------
 local function longestCommonPrefix(str1, str2)
     local len = math.min(#str1, #str2)
@@ -22,45 +30,33 @@ local function longestCommonPrefix(str1, str2)
 end
 
 local function getCommonPrefix(suggestionsList, typedText)
-    if #suggestionsList == 0 then
-        return typedText
-    end
+    if #suggestionsList == 0 then return typedText end
     local prefix = suggestionsList[1].slash or ""
     for i = 2, #suggestionsList do
         prefix = longestCommonPrefix(prefix, suggestionsList[i].slash or "")
-        if prefix == "" then
-            break
-        end
+        if prefix == "" then break end
     end
-    if #typedText > #prefix then
-        return typedText
-    end
+    if #typedText > #prefix then return typedText end
     return prefix
 end
 
 --------------------------------------------------------------------------------
--- IsVisible
+-- IsVisible: Returns true if the auto-complete frame is shown.
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:IsVisible()
     return autoFrame and autoFrame:IsShown()
 end
 
 --------------------------------------------------------------------------------
--- MoveSelection
+-- MoveSelection: Cycle through suggestion buttons.
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:MoveSelection(delta)
-    if not content or not content.buttons then
-        return
-    end
+    if not content or not content.buttons then return end
     local totalShown = 0
     for _, btn in ipairs(content.buttons) do
-        if btn:IsShown() then
-            totalShown = totalShown + 1
-        end
+        if btn:IsShown() then totalShown = totalShown + 1 end
     end
-    if totalShown == 0 then
-        return
-    end
+    if totalShown == 0 then return end
 
     selectedIndex = selectedIndex + delta
     if selectedIndex < 1 then
@@ -79,12 +75,10 @@ function CommandSage_AutoComplete:MoveSelection(delta)
 end
 
 --------------------------------------------------------------------------------
--- AcceptSuggestion
+-- AcceptSuggestion: Accept the highlighted suggestion.
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:AcceptSuggestion(sugg)
-    if not sugg or type(sugg.slash) ~= "string" then
-        return
-    end
+    if not sugg or type(sugg.slash) ~= "string" then return end
     local slashCmd = sugg.slash
     local animate = CommandSage_Config.Get("preferences", "animateAutoType")
     local editBox = ChatFrame1EditBox
@@ -98,18 +92,14 @@ function CommandSage_AutoComplete:AcceptSuggestion(sugg)
 
     CommandSage_AdaptiveLearning:IncrementUsage(slashCmd)
     CommandSage_HistoryPlayback:AddToHistory(slashCmd)
-    if autoFrame then
-        autoFrame:Hide()
-    end
+    if autoFrame then autoFrame:Hide() end
 end
 
 --------------------------------------------------------------------------------
--- OnTabPress (shiftDown => shift+tab)
+-- OnTabPress: Called on Tab (with shift flag for Shift+Tab).
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:OnTabPress(shiftDown)
-    if not self.suggestions or #self.suggestions == 0 then
-        return
-    end
+    if not self.suggestions or #self.suggestions == 0 then return end
 
     if #self.suggestions == 1 then
         self:AcceptSuggestion(self.suggestions[1])
@@ -118,19 +108,17 @@ function CommandSage_AutoComplete:OnTabPress(shiftDown)
 
     local expanded = getCommonPrefix(self.suggestions, self.lastTyped or "")
     local editBox = ChatFrame1EditBox
-    if not editBox then
-        return
-    end
+    if not editBox then return end
 
     if expanded and expanded ~= "" and #expanded > #self.lastTyped then
-        -- Expand typed text
+        -- Expand the text further.
         editBox:SetText(expanded)
         editBox:SetCursorPosition(#expanded)
         self.lastTyped = expanded
         local final = self:GenerateSuggestions(expanded)
         self:ShowSuggestions(final, expanded)
     else
-        -- Already at max expansion => cycle selection
+        -- If fully expanded, cycle selection.
         if shiftDown then
             self:MoveSelection(-1)
         else
@@ -140,7 +128,7 @@ function CommandSage_AutoComplete:OnTabPress(shiftDown)
 end
 
 --------------------------------------------------------------------------------
--- GenerateSuggestions
+-- GenerateSuggestions: Returns sorted suggestions for the given text.
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:GenerateSuggestions(typedText)
     if type(typedText) ~= "string" then
@@ -149,7 +137,7 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
     local mode = CommandSage_Config.Get("preferences", "suggestionMode") or "fuzzy"
     typedText = CommandSage_ShellContext:RewriteInputIfNeeded(typedText)
     local partialLower = typedText:lower()
-    if partialLower:sub(1, 1) ~= "/" and not CommandSage_ShellContext:IsActive() then
+    if partialLower:sub(1,1) ~= "/" and not CommandSage_ShellContext:IsActive() then
         partialLower = "/" .. partialLower
     end
 
@@ -194,9 +182,7 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
                 table.insert(matched, { slash = cmd.slash, data = cmd.data, rank = 0, isSnippet = false })
             end
         end
-        table.sort(matched, function(a, b)
-            return a.slash < b.slash
-        end)
+        table.sort(matched, function(a, b) return a.slash < b.slash end)
     end
 
     if #matched == 0 and CommandSage_Config.Get("preferences", "partialFuzzyFallback") then
@@ -214,7 +200,7 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
 end
 
 --------------------------------------------------------------------------------
--- MergeHistoryWithCommands
+-- MergeHistoryWithCommands: merge history commands with discovered commands.
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:MergeHistoryWithCommands(typedLower, possible)
     local hist = CommandSage_HistoryPlayback:GetHistory() or {}
@@ -244,19 +230,16 @@ function CommandSage_AutoComplete:MergeHistoryWithCommands(typedLower, possible)
 end
 
 --------------------------------------------------------------------------------
--- MaybeAddSnippets
+-- MaybeAddSnippets: Add snippet suggestions if enabled.
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:MaybeAddSnippets(partialLower, suggestionsList)
-    if not CommandSage_Config.Get("preferences", "snippetEnabled") then
-        return
-    end
-    -- Example snippet set
+    if not CommandSage_Config.Get("preferences", "snippetEnabled") then return end
     local snippetTemplates = {
         { slash = "/macro", desc = "Create a macro", snippet = "/macro new <macroName>" },
         { slash = "/dance", desc = "Fancy dance", snippet = "/dance fancy" },
         { slash = "/cheer", desc = "Cheer snippet", snippet = "/cheer loud" },
         { slash = "/hello", desc = "Say hello", snippet = "/hello" },
-        -- You can add more snippet patterns here ...
+        -- add additional snippets as desired
     }
     for _, snip in ipairs(snippetTemplates) do
         if snip.slash and snip.slash:find(partialLower, 1, true) then
@@ -272,7 +255,7 @@ function CommandSage_AutoComplete:MaybeAddSnippets(partialLower, suggestionsList
 end
 
 --------------------------------------------------------------------------------
--- SortSuggestions
+-- SortSuggestions: Sort suggestions by favorites and rank.
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:SortSuggestions(suggestions)
     local function sortFunc(a, b)
@@ -292,14 +275,14 @@ function CommandSage_AutoComplete:SortSuggestions(suggestions)
 end
 
 --------------------------------------------------------------------------------
--- PassesContextFilter
+-- PassesContextFilter: Always returns true (adjust if needed).
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:PassesContextFilter(_)
     return true
 end
 
 --------------------------------------------------------------------------------
--- ShowSuggestions
+-- ShowSuggestions: Render the suggestion list.
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:ShowSuggestions(suggestions, typedText)
     if not suggestions or #suggestions == 0 then
@@ -314,7 +297,6 @@ function CommandSage_AutoComplete:ShowSuggestions(suggestions, typedText)
     frame:Show()
 
     selectedIndex = 1
-
     for i, btn in ipairs(content.buttons) do
         local s = suggestions[i]
         if s then
@@ -339,7 +321,7 @@ function CommandSage_AutoComplete:ShowSuggestions(suggestions, typedText)
 end
 
 --------------------------------------------------------------------------------
--- CloseSuggestions
+-- CloseSuggestions: Hide the auto-complete frame.
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:CloseSuggestions()
     if autoFrame then
@@ -348,12 +330,10 @@ function CommandSage_AutoComplete:CloseSuggestions()
 end
 
 --------------------------------------------------------------------------------
--- CreateAutoCompleteUI
+-- CreateAutoCompleteUI: Build (or return) the auto-complete frame.
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:CreateAutoCompleteUI()
-    if autoFrame then
-        return autoFrame
-    end
+    if autoFrame then return autoFrame end
 
     autoFrame = CreateFrame("Frame", "CommandSageAutoCompleteFrame", UIParent, "BackdropTemplate")
     local direction = CommandSage_Config.Get("preferences", "autocompleteOpenDirection") or "down"
@@ -427,7 +407,7 @@ function CommandSage_AutoComplete:CreateAutoCompleteUI()
 end
 
 --------------------------------------------------------------------------------
--- ApplyStylingToAutoFrame
+-- ApplyStylingToAutoFrame: Style the auto-complete frame per preferences.
 --------------------------------------------------------------------------------
 function CommandSage_AutoComplete:ApplyStylingToAutoFrame(frame)
     local prefs = CommandSage_Config.Get("preferences") or {}
