@@ -1,4 +1,4 @@
-## Interface: 11400
+## Interface: 11506
 ## Title: CommandSage
 ## Notes: Next-Gen slash command auto-completion for WoW Classic
 ## Author: Anthony Tabano
