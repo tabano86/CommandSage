@@ -1,6 +1,6 @@
 -- File: Modules/CommandSage_AutoComplete.lua
 -- Refactored robust auto‐complete module.
--- Dependencies: CommandSage_FuzzyMatch, CommandSage_AutoType
+-- Dependencies: CommandSage_FuzzyMatch, CommandSage_AutoType (if available)
 
 CommandSage_AutoComplete = {}
 local autoFrame, scrollFrame, content
@@ -242,12 +242,17 @@ function CommandSage_AutoComplete:AcceptSuggestion(sugg)
         return
     end
     local slashCmd = sugg.slash
-    if CommandSage_Config.Get("preferences", "animateAutoType") then
+    local animate = CommandSage_Config.Get("preferences", "animateAutoType")
+    local editBox = _G.ChatFrame1EditBox
+
+    if animate and CommandSage_AutoType and type(CommandSage_AutoType.BeginAutoType) == "function" then
         CommandSage_AutoType:BeginAutoType(slashCmd)
     else
-        ChatFrame1EditBox:SetText(slashCmd)
-        ChatFrame1EditBox:SetCursorPosition(#slashCmd)
+        -- Fallback: set text immediately.
+        editBox:SetText(slashCmd)
+        editBox:SetCursorPosition(#slashCmd)
     end
+
     CommandSage_AdaptiveLearning:IncrementUsage(slashCmd)
     CommandSage_HistoryPlayback:AddToHistory(slashCmd)
     if autoFrame then
@@ -328,7 +333,6 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
                 end
             end
         end
-        -- Return favorites-sorted list.
         if CommandSage_Config.Get("preferences", "favoritesSortingEnabled") then
             table.sort(final, function(a, b)
                 if a.isSnippet ~= b.isSnippet then
@@ -377,8 +381,6 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
         end)
     end
 
-    -- If fuzzy matching returned no results and fallback is enabled,
-    -- fall back to the merged (unsorted) full list.
     if #matched == 0 and CommandSage_Config.Get("preferences", "partialFuzzyFallback") then
         matched = {}
         for _, cmd in ipairs(possible) do
@@ -394,14 +396,13 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
                         data = { description = snip.desc },
                         rank = -1,
                         isSnippet = true,
-                        isParamSuggestion = false
+                        isParamSuggestion = false,
                     })
                 end
             end
         end
     end
 
-    -- After building the `matched` table (fuzzy or strict) but before final sorting:
     if CommandSage_Config.Get("preferences", "snippetEnabled") then
         for _, snip in ipairs(snippetTemplates) do
             if snip.slash and snip.slash:find(partialLower, 1, true) then
@@ -416,7 +417,6 @@ function CommandSage_AutoComplete:GenerateSuggestions(typedText)
         end
     end
 
-    -- Now do the favoritesSortingEnabled logic (which also puts snippet suggestions after normal ones).
     if CommandSage_Config.Get("preferences", "favoritesSortingEnabled") then
         table.sort(matched, function(a, b)
             if a.isSnippet ~= b.isSnippet then
@@ -455,9 +455,7 @@ end
 
 hookingFrame:SetScript("OnEvent", function(self, event)
     local edit = ChatFrame1EditBox
-    if not edit then
-        return
-    end
+    if not edit then return end
 
     hooksecurefunc("ChatEdit_DeactivateChat", CloseAutoCompleteOnChatDeactivate)
     local acModule = CommandSage_AutoComplete
@@ -523,17 +521,13 @@ hookingFrame:SetScript("OnEvent", function(self, event)
         end
         local text = eBox:GetText()
         if text == "" then
-            if autoFrame then
-                autoFrame:Hide()
-            end
+            if autoFrame then autoFrame:Hide() end
             return
         end
         local firstChar = text:sub(1, 1)
         local shellActive = CommandSage_ShellContext and CommandSage_ShellContext:IsActive()
         if firstChar ~= "/" and not shellActive then
-            if autoFrame then
-                autoFrame:Hide()
-            end
+            if autoFrame then autoFrame:Hide() end
             return
         end
         local firstWord = text:match("^(%S+)")
@@ -556,27 +550,22 @@ hookingFrame:SetScript("OnEvent", function(self, event)
         CommandSage_AutoComplete:ShowSuggestions(final)
     end)
 end)
--- Add this function so tests won't fail:
+
+-- A minimal PassesContextFilter implementation so that suggestions always pass.
 function CommandSage_AutoComplete:PassesContextFilter(cmdObj)
-    -- For now, always pass:
     return true
 end
 
 function CommandSage_AutoComplete:ShowSuggestions(suggestions)
-    -- Minimal stub so the test suite won't error.
-    -- The real version can create UI elements, etc.
     if not suggestions or #suggestions == 0 then
-        if autoFrame then
-            autoFrame:Hide()
-        end
+        if autoFrame then autoFrame:Hide() end
         return
     end
 
-    local frame = CreateAutoCompleteUI()  -- existing local from above
+    local frame = CreateAutoCompleteUI()
     frame:Show()
 
     selectedIndex = 0
-    -- Fill in your content.buttons:
     for i, btn in ipairs(content.buttons) do
         if i <= #suggestions then
             local s = suggestions[i]
