@@ -49,5 +49,5 @@ end
 function ShellContext:ClearContext()
     currentContext = nil
 end
-
+_G.CommandSage_ShellContext = ShellContext
 return ShellContext

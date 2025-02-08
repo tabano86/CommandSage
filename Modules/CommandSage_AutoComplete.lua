@@ -2,9 +2,6 @@
 -- Refactored robust auto‐complete module.
 -- Dependencies: CommandSage_FuzzyMatch, CommandSage_AutoType
 
-require("Modules.CommandSage_FuzzyMatch")
-require("Modules.CommandSage_AutoType")
-
 CommandSage_AutoComplete = {}
 local autoFrame, scrollFrame, content
 local selectedIndex = 0

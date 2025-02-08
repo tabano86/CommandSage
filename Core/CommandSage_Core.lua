@@ -7,7 +7,8 @@ _G["CommandSage"] = CommandSage
 local mainFrame = CreateFrame("Frame", "CommandSageMainFrame", UIParent)
 mainFrame:RegisterEvent("ADDON_LOADED")
 mainFrame:RegisterEvent("PLAYER_LOGIN")
-mainFrame:RegisterEvent("ADDON_UNLOADED")
+-- Removed registration of "ADDON_UNLOADED" as it is not a valid event in WoW Classic.
+-- mainFrame:RegisterEvent("ADDON_UNLOADED")
 
 --------------------------------------------------------------------------------
 -- Debug & Utility Functions
@@ -105,14 +106,15 @@ local function OnEvent(self, event, param)
                     and CommandSage_Tutorial then
                 safeCall(CommandSage_Tutorial, "ShowTutorialPrompt")
             end
-
-        elseif event == "ADDON_UNLOADED" then
-            local unloadedAddon = param
-            if unloadedAddon and unloadedAddon:lower() == ADDON_NAME:lower() then
-                if CommandSage_ShellContext and CommandSage_ShellContext.ClearContext then
-                    safeCall(CommandSage_ShellContext, "ClearContext")
-                end
-            end
+        --elseif event == "ADDON_UNLOADED" then
+        --    local unloadedAddon = param
+        --    if unloadedAddon and unloadedAddon:lower() == ADDON_NAME:lower() then
+        --        if CommandSage_ShellContext and CommandSage_ShellContext.ClearContext then
+        --            safeCall(CommandSage_ShellContext, "ClearContext")
+        --        end
+        --    end
+        --end
+            -- Removed "ADDON_UNLOADED" branch (not supported in WoW Classic)
         end
     end)
     if not ok then
@@ -383,4 +385,4 @@ end
 CommandSage.frame = mainFrame
 debugPrint("Core/CommandSage_Core has finished loading.")
 
-return CommandSage_Core
+return CommandSage  -- Return the global table we defined
