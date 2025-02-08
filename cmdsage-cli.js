@@ -12,7 +12,7 @@ const { spawnSync, spawn } = require("child_process");
 const archiver = require("archiver");
 const FormData = require("form-data");
 
-// Use dynamic import for node‑fetch (ESM module)
+// Dynamic import for node‑fetch (ESM module)
 const fetch = (...args) =>
     import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
@@ -44,20 +44,45 @@ function runCommand(command, args, options = {}) {
 }
 
 // ----------------------
-// Determine Addon/Modpack Folder
+// Determine Project Folder
 // ----------------------
-const DEFAULT_ADDON_FOLDER = "CommandSage";
-let addonFolder = fs.existsSync(path.join(process.cwd(), DEFAULT_ADDON_FOLDER))
-    ? DEFAULT_ADDON_FOLDER
+const DEFAULT_FOLDER = "CommandSage";
+let projectFolder = fs.existsSync(path.join(process.cwd(), DEFAULT_FOLDER))
+    ? DEFAULT_FOLDER
     : ".";
-if (addonFolder === ".") {
-    console.log(`Folder '${DEFAULT_ADDON_FOLDER}' not found – using current directory as addon/modpack folder.`);
+if (projectFolder === ".") {
+    console.log(`Folder '${DEFAULT_FOLDER}' not found – using current directory as project folder.`);
 }
 
 // ----------------------
 // Allowed File Extensions
 // ----------------------
-const ALLOWED_EXTENSIONS = ["toc", "lua", "xml", "blp", "tga", "png", "jpg", "jpeg", "gif", "jar", "zip"];
+const ALLOWED_EXTENSIONS = [
+    "toc", "lua", "xml", "blp", "tga", "png", "jpg", "jpeg", "gif", "jar", "zip"
+];
+
+// ----------------------
+// Load Manifest Template
+// ----------------------
+function loadManifestTemplate(version) {
+    const templatePath = path.join(projectFolder, "manifest.template.json");
+    if (!fs.existsSync(templatePath)) {
+        return null;
+    }
+    try {
+        const raw = fs.readFileSync(templatePath, "utf8");
+        let manifest = JSON.parse(raw);
+        // Update the version to match the build version.
+        manifest.version = version;
+        const manifestContent = JSON.stringify(manifest, null, 2);
+        // Use excludeFiles from the manifest template if provided.
+        const excludes = Array.isArray(manifest.excludeFiles) ? manifest.excludeFiles : [];
+        return { manifestContent, excludes };
+    } catch (e) {
+        console.error("Error reading manifest.template.json:", e);
+        return null;
+    }
+}
 
 // ----------------------
 // List Package Files (Dry Run)
@@ -82,16 +107,18 @@ function listPackageFiles(folder) {
 }
 
 // ----------------------
-// Add Files to Archive with Version Updates & CurseForge Exclusions
+// Add Files to Archive with Version & Manifest Sync
 // ----------------------
-function addFilesToArchive(archive, folder, version) {
-    // Read exclusion list from environment, or use defaults
-    const curseforgeExcludes = process.env.CURSEFORGE_EXCLUDES
-        ? process.env.CURSEFORGE_EXCLUDES.split(",").map(s => s.trim())
-        : [
-            "overrides/resourcepacks/Naturalist Old Models.zip",
-            "overrides/mods/supplementaries-1.19.2-2.3.16.jar"
-        ];
+function addFilesToArchive(archive, folder, version, extraExcludes = []) {
+    // Build the exclusion list.
+    // First, always exclude the manifest template itself.
+    let excludes = ["manifest.template.json", ...extraExcludes];
+    // Also allow overrides via env var if needed.
+    if (process.env.CURSEFORGE_EXCLUDES) {
+        excludes = excludes.concat(
+            process.env.CURSEFORGE_EXCLUDES.split(",").map(s => s.trim())
+        );
+    }
 
     function walk(dir) {
         const entries = fs.readdirSync(dir);
@@ -101,39 +128,35 @@ function addFilesToArchive(archive, folder, version) {
             if (stat.isDirectory()) {
                 walk(fullPath);
             } else {
+                const relPath = path.relative(folder, fullPath).replace(/\\/g, "/");
+                // Skip excluded files.
+                if (excludes.includes(relPath)) {
+                    console.log(`➤ Skipping excluded file: ${relPath}`);
+                    continue;
+                }
                 const ext = path.extname(entry).slice(1).toLowerCase();
-                if (ALLOWED_EXTENSIONS.includes(ext)) {
-                    const relPath = path.relative(folder, fullPath);
-
-                    // Skip any files explicitly excluded from packaging.
-                    if (curseforgeExcludes.includes(relPath)) {
-                        console.log(`➤ Skipping excluded file: ${relPath}`);
-                        continue;
-                    }
-
-                    // For .toc files, update version and optionally interface info.
-                    if (ext === "toc") {
-                        let content = fs.readFileSync(fullPath, "utf8");
-                        const versionRegex = /^(##\s*Version:\s*).*/mi;
-                        if (versionRegex.test(content)) {
-                            content = content.replace(versionRegex, `$1${version}`);
-                        } else {
-                            console.warn(`Warning: No version line found in ${relPath}. Appending version info.`);
-                            content += `\n## Version: ${version}\n`;
-                        }
-                        if (process.env.INTERFACE_VERSION) {
-                            const interfaceRegex = /^(##\s*Interface:\s*).*/mi;
-                            if (interfaceRegex.test(content)) {
-                                content = content.replace(interfaceRegex, `$1${process.env.INTERFACE_VERSION}`);
-                            } else {
-                                console.warn(`Warning: No interface line found in ${relPath}. Appending interface info.`);
-                                content += `\n## Interface: ${process.env.INTERFACE_VERSION}\n`;
-                            }
-                        }
-                        archive.append(content, { name: relPath });
+                // For .toc files, update version (if applicable)
+                if (ext === "toc") {
+                    let content = fs.readFileSync(fullPath, "utf8");
+                    const versionRegex = /^(##\s*Version:\s*).*/mi;
+                    if (versionRegex.test(content)) {
+                        content = content.replace(versionRegex, `$1${version}`);
                     } else {
-                        archive.file(fullPath, { name: relPath });
+                        console.warn(`Warning: No version line found in ${relPath}. Appending version info.`);
+                        content += `\n## Version: ${version}\n`;
                     }
+                    if (process.env.INTERFACE_VERSION) {
+                        const interfaceRegex = /^(##\s*Interface:\s*).*/mi;
+                        if (interfaceRegex.test(content)) {
+                            content = content.replace(interfaceRegex, `$1${process.env.INTERFACE_VERSION}`);
+                        } else {
+                            console.warn(`Warning: No interface line found in ${relPath}. Appending interface info.`);
+                            content += `\n## Interface: ${process.env.INTERFACE_VERSION}\n`;
+                        }
+                    }
+                    archive.append(content, { name: relPath });
+                } else {
+                    archive.file(fullPath, { name: relPath });
                 }
             }
         }
@@ -142,9 +165,9 @@ function addFilesToArchive(archive, folder, version) {
 }
 
 // ----------------------
-// Package Addon/Modpack Function
+// Package Project Function (Addon/Modpack)
 // ----------------------
-function packageAddon(version, dryRun = false) {
+function packageProject(version, dryRun = false) {
     return new Promise((resolve, reject) => {
         const distDir = path.join(process.cwd(), "dist");
         if (!fs.existsSync(distDir)) {
@@ -153,22 +176,32 @@ function packageAddon(version, dryRun = false) {
         const outputZip = path.join(distDir, `CommandSage-${version}.zip`);
         if (dryRun) {
             console.log("➤ [Dry Run] Listing package files:");
-            listPackageFiles(addonFolder);
+            listPackageFiles(projectFolder);
             resolve(null);
             return;
         }
         const output = fs.createWriteStream(outputZip);
         const archive = archiver("zip", { zlib: { level: 9 } });
-
         output.on("close", () => {
-            console.log(`➤ Packaged addon/modpack: ${outputZip} (${archive.pointer()} total bytes)`);
+            console.log(`➤ Packaged project: ${outputZip} (${archive.pointer()} total bytes)`);
             resolve(outputZip);
         });
         archive.on("error", err => reject(err));
         archive.pipe(output);
 
-        // Recursively add allowed files, updating .toc files and excluding CurseForge-hosted files.
-        addFilesToArchive(archive, addonFolder, version);
+        // Load manifest template (if present) to update version and get list of files to exclude.
+        const manifestData = loadManifestTemplate(version);
+        let manifestExcludes = [];
+        if (manifestData) {
+            manifestExcludes = manifestData.excludes;
+            // Add the generated manifest.json file to the archive.
+            archive.append(manifestData.manifestContent, { name: "manifest.json" });
+            console.log("➤ Included generated manifest.json in the package.");
+        }
+
+        // Add remaining files, excluding files per manifest and any other excludes.
+        addFilesToArchive(archive, projectFolder, version, manifestExcludes);
+
         archive.finalize();
     });
 }
@@ -179,7 +212,7 @@ function packageAddon(version, dryRun = false) {
 function buildMetadata(version, changelog) {
     const gameVersions = process.env.GAME_VERSIONS
         ? process.env.GAME_VERSIONS.split(",").map(s => s.trim())
-        : ["1.13.2"];
+        : ["1.19.2"];
     return {
         releaseType: "release",
         changelog: changelog,
@@ -223,10 +256,10 @@ async function uploadToCurseForge(zipPath, metadata) {
 // ----------------------
 // Build Command Wrapper
 // ----------------------
-async function buildAddon(versionOverride, dryRun) {
+async function buildProject(versionOverride, dryRun) {
     const version = process.env.ADDON_VERSION || versionOverride || "0.0.0";
-    console.log(`➤ Building addon/modpack version ${version}`);
-    const zipPath = await packageAddon(version, dryRun);
+    console.log(`➤ Building project version ${version}`);
+    const zipPath = await packageProject(version, dryRun);
     return { zipPath, version };
 }
 
@@ -277,12 +310,12 @@ program
 
 program
     .command("build")
-    .description("Build the addon/modpack into a zip file in the dist/ directory (updates .toc version, excludes CurseForge-hosted files)")
+    .description("Build the project into a zip file in the dist/ directory (syncs manifest and version)")
     .option("--dry-run", "List files that would be packaged, without creating a zip")
     .option("-o, --output <version>", "Override version (or use as version)")
     .action(async options => {
         try {
-            const { zipPath } = await buildAddon(options.output, options.dryRun);
+            const { zipPath } = await buildProject(options.output, options.dryRun);
             if (!options.dryRun && zipPath) {
                 console.log(`➤ Build complete: ${zipPath}`);
             }
@@ -365,8 +398,8 @@ program
             await runCommand("luacheck", ["."]);
             console.log("➤ Running tests...");
             await runCommand("busted", ["--pattern=test_.*\\.lua", "tests"]);
-            console.log("➤ Building addon/modpack...");
-            await buildAddon();
+            console.log("➤ Building project...");
+            await buildProject();
             console.log("➤ CI pipeline complete.");
         } catch (err) {
             console.error("CI pipeline failed:", err);
@@ -376,14 +409,14 @@ program
 
 program
     .command("release")
-    .description("Run CI pipeline, build the addon/modpack, and upload to CurseForge")
+    .description("Run CI pipeline, build the project, and upload to CurseForge")
     .option("-o, --output <version>", "Override version (or use as version)")
     .action(async options => {
         try {
             console.log("➤ Running CI pipeline for release...");
             await runCommand("luacheck", ["."]);
             await runCommand("busted", ["--pattern=test_.*\\.lua", "tests"]);
-            const { zipPath, version } = await buildAddon(options.output, false);
+            const { zipPath, version } = await buildProject(options.output, false);
             const ver = process.env.ADDON_VERSION || options.output || version || "0.0.0";
             let changelog = "";
             if (fs.existsSync("CHANGELOG.md")) {
